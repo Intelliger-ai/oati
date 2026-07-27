@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: OATI Public Lookup API
-  version: 1.0.0-draft
+  version: 1.1.0-draft
   description: Rate-limited public resolution and verification of OATI records.
 servers:
   - url: https://api.intelliger.ai/oati/v1
@@ -30,13 +30,31 @@ paths:
               schema: { type: integer }
             X-RateLimit-Remaining:
               schema: { type: integer }
+            X-RateLimit-Reset:
+              description: Unix timestamp or HTTP date for the current window reset.
+              schema: { oneOf: [{ type: integer }, { type: string }] }
+            Cache-Control:
+              schema: { type: string }
+            ETag:
+              schema: { type: string }
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/PublicRecord"
         "400": { description: Invalid lookup request }
-        "404": { description: No public record found }
-        "429": { description: Rate limit exceeded }
+        "404": { description: No public record found; clients may cache briefly according to their negative-cache policy. }
+        "429":
+          description: Rate limit exceeded.
+          headers:
+            Retry-After:
+              schema: { oneOf: [{ type: integer }, { type: string }] }
+            X-RateLimit-Limit:
+              schema: { type: integer }
+            X-RateLimit-Remaining:
+              schema: { type: integer }
+        "502": { description: Upstream resolver unavailable }
+        "503": { description: Resolver temporarily unavailable }
+        "504": { description: Resolver timeout }
 components:
   schemas:
     PublicRecord:

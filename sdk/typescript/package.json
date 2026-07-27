@@ -1,6 +1,6 @@
 {
   "name": "@intelliger/oati",
-  "version": "0.4.0-dev.0",
+  "version": "0.5.0-dev.0",
   "description": "TypeScript SDK for OATI objects, trust verification, deterministic authority evaluation, Commerce, RWA, and lookup",
   "type": "module",
   "license": "Apache-2.0",
@@ -32,6 +32,7 @@
     "build": "pnpm generate:schemas && tsc -p tsconfig.json",
     "docs": "pnpm build && typedoc --options typedoc.json",
     "test": "pnpm build && node --test test/*.test.mjs && node scripts/smoke.mjs && node scripts/validate-schemas.mjs",
+    "test:lookup-integration": "pnpm build && node scripts/lookup-integration.mjs",
     "conformance": "pnpm build && node ../../conformance/run.mjs",
     "validate:schemas": "node scripts/validate-schemas.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"

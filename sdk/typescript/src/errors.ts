@@ -8,12 +8,15 @@ export type OatiErrorCode =
   | "LOOKUP_UNAVAILABLE"
   | "LOOKUP_INVALID_RESPONSE"
   | "LOOKUP_TIMEOUT"
+  | "LOOKUP_CANCELLED"
 
 export interface OatiErrorOptions {
   cause?: unknown
   details?: unknown
   status?: number
   retryAfter?: number
+  rateLimit?: { limit?: number; remaining?: number; resetAt?: string; retryAfter?: number }
+  cache?: "hit" | "miss" | "revalidated"
 }
 
 /** Base error for failures produced by the OATI SDK. */
@@ -22,6 +25,8 @@ export class OatiError extends Error {
   readonly details?: unknown
   readonly status?: number
   readonly retryAfter?: number
+  readonly rateLimit?: { limit?: number; remaining?: number; resetAt?: string; retryAfter?: number }
+  readonly cache?: "hit" | "miss" | "revalidated"
 
   constructor(code: OatiErrorCode, message: string, options: OatiErrorOptions = {}) {
     super(message, options.cause === undefined ? undefined : { cause: options.cause })
@@ -30,6 +35,8 @@ export class OatiError extends Error {
     if (options.details !== undefined) this.details = options.details
     if (options.status !== undefined) this.status = options.status
     if (options.retryAfter !== undefined) this.retryAfter = options.retryAfter
+    if (options.rateLimit !== undefined) this.rateLimit = options.rateLimit
+    if (options.cache !== undefined) this.cache = options.cache
   }
 }
 

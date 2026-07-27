@@ -4,9 +4,31 @@
 
 [@intelliger/oati](../README.md) / PublicOatiRecord
 
-# Interface: PublicOatiRecord
+# Interface: PublicOatiRecord\<T, A\>
 
-Defined in: [src/lookup.ts:9](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L9)
+Defined in: [src/lookup.ts:9](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L9)
+
+## Extended by
+
+- [`OrganisationRecord`](OrganisationRecord.md)
+- [`AgentRecord`](AgentRecord.md)
+- [`PassportRecord`](PassportRecord.md)
+- [`MandateRecord`](MandateRecord.md)
+- [`ReceiptRecord`](ReceiptRecord.md)
+- [`IssuerRecord`](IssuerRecord.md)
+- [`KeyRecord`](KeyRecord.md)
+- [`RevocationRecord`](RevocationRecord.md)
+- [`RegistryProjectionSource`](RegistryProjectionSource.md)
+
+## Type Parameters
+
+### T
+
+`T` *extends* [`OatiRecordType`](../type-aliases/OatiRecordType.md) = [`OatiRecordType`](../type-aliases/OatiRecordType.md)
+
+### A
+
+`A` *extends* `Record`\<`string`, `string`\> = `Record`\<`string`, `string`\>
 
 ## Properties
 
@@ -14,7 +36,7 @@ Defined in: [src/lookup.ts:9](https://github.com/Intelliger-ai/oati/blob/c5e5048
 
 > `optional` **assurance\_level?**: `string`
 
-Defined in: [src/lookup.ts:18](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L18)
+Defined in: [src/lookup.ts:18](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L18)
 
 ***
 
@@ -22,7 +44,7 @@ Defined in: [src/lookup.ts:18](https://github.com/Intelliger-ai/oati/blob/c5e504
 
 > `optional` **display\_name?**: `string`
 
-Defined in: [src/lookup.ts:12](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L12)
+Defined in: [src/lookup.ts:12](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L12)
 
 ***
 
@@ -30,7 +52,7 @@ Defined in: [src/lookup.ts:12](https://github.com/Intelliger-ai/oati/blob/c5e504
 
 > `optional` **expires\_at?**: `string`
 
-Defined in: [src/lookup.ts:17](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L17)
+Defined in: [src/lookup.ts:17](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L17)
 
 ***
 
@@ -38,7 +60,7 @@ Defined in: [src/lookup.ts:17](https://github.com/Intelliger-ai/oati/blob/c5e504
 
 > **id**: `string`
 
-Defined in: [src/lookup.ts:11](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L11)
+Defined in: [src/lookup.ts:11](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L11)
 
 ***
 
@@ -46,7 +68,7 @@ Defined in: [src/lookup.ts:11](https://github.com/Intelliger-ai/oati/blob/c5e504
 
 > `optional` **issued\_at?**: `string`
 
-Defined in: [src/lookup.ts:16](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L16)
+Defined in: [src/lookup.ts:16](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L16)
 
 ***
 
@@ -54,7 +76,7 @@ Defined in: [src/lookup.ts:16](https://github.com/Intelliger-ai/oati/blob/c5e504
 
 > **issuer**: `string`
 
-Defined in: [src/lookup.ts:14](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L14)
+Defined in: [src/lookup.ts:14](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L14)
 
 ***
 
@@ -62,23 +84,23 @@ Defined in: [src/lookup.ts:14](https://github.com/Intelliger-ai/oati/blob/c5e504
 
 > `optional` **organisation\_id?**: `string`
 
-Defined in: [src/lookup.ts:15](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L15)
+Defined in: [src/lookup.ts:15](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L15)
 
 ***
 
 ### proof\_status
 
-> **proof\_status**: `"verified"` \| `"invalid"` \| `"unavailable"` \| `"unknown"`
+> **proof\_status**: [`ProofStatus`](../type-aliases/ProofStatus.md)
 
-Defined in: [src/lookup.ts:19](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L19)
+Defined in: [src/lookup.ts:19](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L19)
 
 ***
 
 ### public\_attributes
 
-> **public\_attributes**: `Record`\<`string`, `string`\>
+> **public\_attributes**: `A`
 
-Defined in: [src/lookup.ts:20](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L20)
+Defined in: [src/lookup.ts:20](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L20)
 
 ***
 
@@ -86,12 +108,12 @@ Defined in: [src/lookup.ts:20](https://github.com/Intelliger-ai/oati/blob/c5e504
 
 > **status**: `string`
 
-Defined in: [src/lookup.ts:13](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L13)
+Defined in: [src/lookup.ts:13](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L13)
 
 ***
 
 ### type
 
-> **type**: `"organisation"` \| `"agent"` \| `"passport"` \| `"mandate"` \| `"receipt"` \| `"issuer"` \| `"key"` \| `"revocation"`
+> **type**: `T`
 
-Defined in: [src/lookup.ts:10](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L10)
+Defined in: [src/lookup.ts:10](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L10)

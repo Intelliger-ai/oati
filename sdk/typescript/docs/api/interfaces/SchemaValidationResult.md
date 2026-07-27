@@ -6,7 +6,7 @@
 
 # Interface: SchemaValidationResult
 
-Defined in: [src/validation.ts:21](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/validation.ts#L21)
+Defined in: [src/validation.ts:25](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/validation.ts#L25)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/validation.ts:21](https://github.com/Intelliger-ai/oati/blob/c5
 
 > **issues**: [`SchemaIssue`](SchemaIssue.md)[]
 
-Defined in: [src/validation.ts:23](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/validation.ts#L23)
+Defined in: [src/validation.ts:27](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/validation.ts#L27)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [src/validation.ts:23](https://github.com/Intelliger-ai/oati/blob/c5
 
 > **valid**: `boolean`
 
-Defined in: [src/validation.ts:22](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/validation.ts#L22)
+Defined in: [src/validation.ts:26](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/validation.ts#L26)

@@ -6,15 +6,27 @@
 
 # Interface: LookupClientOptions
 
-Defined in: [src/lookup.ts:23](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L23)
+Defined in: [src/lookup.ts:58](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L58)
 
 ## Properties
 
-### baseUrl?
+### ~~baseUrl?~~
 
 > `optional` **baseUrl?**: `string`
 
-Defined in: [src/lookup.ts:24](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L24)
+Defined in: [src/lookup.ts:62](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L62)
+
+#### Deprecated
+
+Use resolverUrls.
+
+***
+
+### cache?
+
+> `optional` **cache?**: `false` \| [`LookupCacheOptions`](LookupCacheOptions.md)
+
+Defined in: [src/lookup.ts:67](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L67)
 
 ***
 
@@ -22,7 +34,7 @@ Defined in: [src/lookup.ts:24](https://github.com/Intelliger-ai/oati/blob/c5e504
 
 > `optional` **fetch?**: (`input`, `init?`) => `Promise`\<`Response`\>
 
-Defined in: [src/lookup.ts:25](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L25)
+Defined in: [src/lookup.ts:63](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L63)
 
 [MDN Reference](https://developer.mozilla.org/docs/Web/API/Window/fetch)
 
@@ -46,7 +58,25 @@ Defined in: [src/lookup.ts:25](https://github.com/Intelliger-ai/oati/blob/c5e504
 
 > `optional` **headers?**: `HeadersInit`
 
-Defined in: [src/lookup.ts:27](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L27)
+Defined in: [src/lookup.ts:65](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L65)
+
+***
+
+### resolverUrls?
+
+> `optional` **resolverUrls?**: readonly `string`[]
+
+Defined in: [src/lookup.ts:60](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L60)
+
+Resolver base URLs. Calls fail over in order; each URL must expose `/lookup`.
+
+***
+
+### retry?
+
+> `optional` **retry?**: [`LookupRetryOptions`](LookupRetryOptions.md)
+
+Defined in: [src/lookup.ts:66](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L66)
 
 ***
 
@@ -54,4 +84,4 @@ Defined in: [src/lookup.ts:27](https://github.com/Intelliger-ai/oati/blob/c5e504
 
 > `optional` **timeoutMs?**: `number`
 
-Defined in: [src/lookup.ts:26](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L26)
+Defined in: [src/lookup.ts:64](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L64)

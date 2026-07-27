@@ -16,6 +16,7 @@ import {
   createTransactionEnvelope,
   evaluateAuthority,
   MemoryReplayCache,
+  LookupTrustResolver,
   projectPublicRecord,
   signDocument,
   StaticTrustResolver,
@@ -142,10 +143,10 @@ test("lookup client encodes input and returns a typed public record", async () =
 })
 
 test("lookup client maps resolver failures to stable error codes", async () => {
-  const notFound = new OatiLookupClient({ fetch: async () => Response.json({ error: "record_not_found" }, { status: 404 }) })
+  const notFound = new OatiLookupClient({ retry: { maxRetries: 0 }, fetch: async () => Response.json({ error: "record_not_found" }, { status: 404 }) })
   await assert.rejects(() => notFound.lookup("agent", "missing"), (error) => error instanceof OatiLookupError && error.code === "LOOKUP_NOT_FOUND" && error.status === 404)
 
-  const limited = new OatiLookupClient({ fetch: async () => Response.json({ error: "rate_limited" }, { status: 429, headers: { "Retry-After": "12" } }) })
+  const limited = new OatiLookupClient({ retry: { maxRetries: 0 }, fetch: async () => Response.json({ error: "rate_limited" }, { status: 429, headers: { "Retry-After": "12", "X-RateLimit-Limit": "100", "X-RateLimit-Remaining": "0" } }) })
   await assert.rejects(() => limited.lookup("agent", "limited"), (error) => error instanceof OatiLookupError && error.code === "LOOKUP_RATE_LIMITED" && error.retryAfter === 12)
 })
 
@@ -155,10 +156,93 @@ test("lookup client rejects malformed successful responses", async () => {
 })
 
 test("lookup client enforces its timeout", async () => {
-  const client = new OatiLookupClient({ timeoutMs: 5, fetch: (_url, init) => new Promise((_resolve, reject) => {
+  const client = new OatiLookupClient({ timeoutMs: 5, retry: { maxRetries: 0 }, fetch: (_url, init) => new Promise((_resolve, reject) => {
     init.signal.addEventListener("abort", () => reject(init.signal.reason), { once: true })
   }) })
   await assert.rejects(() => client.lookup("agent", "slow"), (error) => error instanceof OatiLookupError && error.code === "LOOKUP_TIMEOUT")
+})
+
+test("lookup supports cancellation separately from timeout", async () => {
+  const controller = new AbortController()
+  const client = new OatiLookupClient({ retry: { maxRetries: 0 }, fetch: (_url, init) => new Promise((_resolve, reject) => {
+    init.signal.addEventListener("abort", () => reject(init.signal.reason), { once: true })
+  }) })
+  const pending = client.lookup("agent", "cancelled", { signal: controller.signal })
+  controller.abort("caller stopped")
+  await assert.rejects(() => pending, (error) => error instanceof OatiLookupError && error.code === "LOOKUP_CANCELLED")
+})
+
+test("lookup retries transient failures, fails over resolvers, and reports rate limits", async () => {
+  const calls = []
+  const client = new OatiLookupClient({
+    resolverUrls: ["https://primary.example/oati", "https://secondary.example/oati"],
+    retry: { maxRetries: 1, baseDelayMs: 1, maxDelayMs: 1 },
+    fetch: async (url) => {
+      calls.push(String(url))
+      if (String(url).startsWith("https://primary.example")) return Response.json({}, { status: 503 })
+      return Response.json({ type: "agent", id: "oati:agent:test:failover", status: "active", issuer: "oati:issuer:test", proof_status: "verified", public_attributes: {} }, {
+        headers: { "X-RateLimit-Limit": "100", "X-RateLimit-Remaining": "73" },
+      })
+    },
+  })
+  const response = await client.lookupDetailed("agent", "oati:agent:test:failover")
+  assert.equal(calls.length, 3)
+  assert.equal(response.resolverUrl, "https://secondary.example/oati")
+  assert.deepEqual(response.rateLimit, { limit: 100, remaining: 73 })
+})
+
+test("lookup implements fresh cache hits, ETag revalidation, and cache bypass", async () => {
+  let calls = 0
+  const client = new OatiLookupClient({ fetch: async (_url, init) => {
+    calls++
+    if (init.headers["If-None-Match"] === '"v1"') return new Response(null, { status: 304, headers: { "Cache-Control": "max-age=60" } })
+    return Response.json({ type: "agent", id: "oati:agent:test:cached", status: "active", issuer: "oati:issuer:test", proof_status: "verified", public_attributes: {} }, {
+      headers: { "Cache-Control": "max-age=60", ETag: '"v1"' },
+    })
+  } })
+  assert.equal((await client.lookupDetailed("agent", "oati:agent:test:cached")).cache, "miss")
+  assert.equal((await client.lookupDetailed("agent", "oati:agent:test:cached")).cache, "hit")
+  assert.equal((await client.lookupDetailed("agent", "oati:agent:test:cached", { cache: "reload" })).cache, "revalidated")
+  assert.equal(calls, 2)
+  await client.lookup("agent", "oati:agent:test:cached", { cache: "no-store" })
+  assert.equal(calls, 3)
+})
+
+test("lookup exposes not-found, invalid-proof, unknown, and unavailable states", async () => {
+  let calls = 0
+  const record = (id, proof_status) => ({ type: "key", id, status: "active", issuer: "oati:issuer:test", proof_status,
+    public_attributes: { controller: "oati:org:test", issuer: "oati:issuer:test", algorithm: "EdDSA", public_key_jwk: "{}", valid_from: "2026-01-01T00:00:00Z" } })
+  const client = new OatiLookupClient({ retry: { maxRetries: 0 }, fetch: async (url) => {
+    calls++
+    const id = new URL(url).searchParams.get("id")
+    if (id === "missing") return Response.json({}, { status: 404 })
+    if (id === "down") return Response.json({}, { status: 503 })
+    return Response.json(record(id, id.endsWith("invalid") ? "invalid" : id.endsWith("proof-down") ? "unavailable" : "unknown"))
+  } })
+  assert.equal((await client.lookupState("key", "missing")).state, "not_found")
+  const cachedMissing = await client.lookupState("key", "missing")
+  assert.equal(cachedMissing.state, "not_found")
+  assert.equal(cachedMissing.error.cache, "hit")
+  assert.equal((await client.lookupState("key", "down")).state, "unavailable")
+  assert.equal((await client.lookupState("key", "oati:key:test:invalid")).state, "invalid_proof")
+  assert.equal((await client.lookupState("key", "oati:key:test:proof-down")).state, "unavailable")
+  assert.equal((await client.lookupState("key", "oati:key:test:unknown")).state, "unknown")
+  assert.equal(calls, 5)
+})
+
+test("lookup trust resolver maps typed key, issuer, and revocation records", async () => {
+  const records = {
+    key: { type: "key", id: "oati:key:test:1", status: "active", issuer: "oati:issuer:test", proof_status: "verified", public_attributes: {
+      controller: "oati:org:test", issuer: "oati:issuer:test", algorithm: "EdDSA", public_key_jwk: '{"kty":"OKP","crv":"Ed25519","x":"abc"}', valid_from: "2026-01-01T00:00:00Z",
+    } },
+    issuer: { type: "issuer", id: "oati:issuer:test", status: "active", issuer: "oati:issuer:root", issued_at: "2026-01-01T00:00:00Z", proof_status: "verified", public_attributes: {} },
+    revocation: { type: "revocation", id: "oati:target:test", status: "good", issuer: "oati:issuer:test", proof_status: "verified", public_attributes: { effective_at: "2026-01-01T00:00:00Z" } },
+  }
+  const client = new OatiLookupClient({ fetch: async (url) => Response.json(records[new URL(url).searchParams.get("type")]) })
+  const resolver = new LookupTrustResolver(client)
+  assert.equal((await resolver.resolveKey("oati:key:test:1")).algorithm, "EdDSA")
+  assert.equal((await resolver.resolveIssuer("oati:issuer:test")).status, "active")
+  assert.equal((await resolver.resolveRevocation("oati:target:test")).status, "good")
 })
 
 const cryptoFixture = async (algorithm = "EdDSA", overrides = {}) => {

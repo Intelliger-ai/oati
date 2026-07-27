@@ -6,7 +6,7 @@
 
 # Interface: RwaEvaluationContext
 
-Defined in: src/evaluator.ts:34
+Defined in: [src/evaluator.ts:34](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L34)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: src/evaluator.ts:34
 
 > **approval\_count**: `number`
 
-Defined in: src/evaluator.ts:43
+Defined in: [src/evaluator.ts:43](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L43)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: src/evaluator.ts:43
 
 > **approval\_roles**: `string`[]
 
-Defined in: src/evaluator.ts:44
+Defined in: [src/evaluator.ts:44](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L44)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: src/evaluator.ts:44
 
 > **asset\_id**: `string`
 
-Defined in: src/evaluator.ts:35
+Defined in: [src/evaluator.ts:35](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L35)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: src/evaluator.ts:35
 
 > **claim\_valid\_until**: `string`
 
-Defined in: src/evaluator.ts:47
+Defined in: [src/evaluator.ts:47](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L47)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: src/evaluator.ts:47
 
 > **current\_supply**: `string`
 
-Defined in: src/evaluator.ts:45
+Defined in: [src/evaluator.ts:45](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L45)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: src/evaluator.ts:45
 
 > `optional` **maximum\_supply?**: `string`
 
-Defined in: src/evaluator.ts:46
+Defined in: [src/evaluator.ts:46](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L46)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: src/evaluator.ts:46
 
 > **network**: `string`
 
-Defined in: src/evaluator.ts:37
+Defined in: [src/evaluator.ts:37](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L37)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: src/evaluator.ts:37
 
 > **operation**: `"mint"` \| `"burn"` \| `"transfer"` \| `"redeem"` \| `"publish_state"`
 
-Defined in: src/evaluator.ts:39
+Defined in: [src/evaluator.ts:39](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L39)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: src/evaluator.ts:39
 
 > **quantity**: `string`
 
-Defined in: src/evaluator.ts:41
+Defined in: [src/evaluator.ts:41](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L41)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: src/evaluator.ts:41
 
 > **reserve**: `string`
 
-Defined in: src/evaluator.ts:42
+Defined in: [src/evaluator.ts:42](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L42)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: src/evaluator.ts:42
 
 > **state\_claim\_id**: `string`
 
-Defined in: src/evaluator.ts:36
+Defined in: [src/evaluator.ts:36](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L36)
 
 ***
 
@@ -102,7 +102,7 @@ Defined in: src/evaluator.ts:36
 
 > **token\_contract**: `string`
 
-Defined in: src/evaluator.ts:38
+Defined in: [src/evaluator.ts:38](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L38)
 
 ***
 
@@ -110,4 +110,4 @@ Defined in: src/evaluator.ts:38
 
 > **unit**: `string`
 
-Defined in: src/evaluator.ts:40
+Defined in: [src/evaluator.ts:40](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L40)

@@ -75,12 +75,18 @@ Use `getSchema(name)` when an integration needs the underlying schema document. 
 import { OatiLookupClient, OatiLookupError } from "@intelliger/oati"
 
 const lookup = new OatiLookupClient({
-  baseUrl: "https://api.intelliger.ai/oati/v1",
+  resolverUrls: [
+    "https://api.intelliger.ai/oati/v1",
+    "https://backup-resolver.example/oati",
+  ],
   timeoutMs: 5_000,
+  retry: { maxRetries: 2, baseDelayMs: 200, maxDelayMs: 5_000 },
+  cache: { ttlMs: 60_000, negativeTtlMs: 10_000, maxEntries: 500 },
 })
 
 try {
-  const agent = await lookup.lookup("agent", "oati:agent:intelliger:commerce-demo")
+  // The type argument selects AgentRecord here. All eight record types are discriminated.
+  const agent = await lookup.lookup("agent", "oati:agent:intelliger:commerce-demo", { signal })
   console.log(agent.proof_status, agent.public_attributes)
 } catch (error) {
   if (error instanceof OatiLookupError) {
@@ -89,7 +95,21 @@ try {
 }
 ```
 
-Lookup failures use stable codes: `LOOKUP_BAD_REQUEST`, `LOOKUP_NOT_FOUND`, `LOOKUP_RATE_LIMITED`, `LOOKUP_UNAVAILABLE`, `LOOKUP_INVALID_RESPONSE`, and `LOOKUP_TIMEOUT`.
+`lookupDetailed()` additionally returns the resolver URL, cache disposition, and parsed rate-limit metadata. `lookupState()` provides a non-throwing union for `found`, `not_found`, `unavailable`, `invalid_proof`, and `unknown` states. Use `cache: "reload"` to revalidate with an ETag, `cache: "no-store"` to bypass storage, or `clearCache()` after an administrative state change.
+
+Successful responses follow `Cache-Control`, `Expires`, and `ETag`; otherwise the configured TTL applies. HTTP 404 responses use the shorter negative TTL. Retries are bounded, use exponential backoff, honor `Retry-After`, and only apply to timeouts, rate limits, transport failures, and unavailable responses. Multiple `resolverUrls` fail over in order. Caller cancellation is distinct from timeout.
+
+Lookup failures use stable codes: `LOOKUP_BAD_REQUEST`, `LOOKUP_NOT_FOUND`, `LOOKUP_RATE_LIMITED`, `LOOKUP_UNAVAILABLE`, `LOOKUP_INVALID_RESPONSE`, `LOOKUP_TIMEOUT`, and `LOOKUP_CANCELLED`.
+
+`LookupTrustResolver` adapts typed `key`, `issuer`, and `revocation` records directly to `verifyDocument()`:
+
+```ts
+import { LookupTrustResolver } from "@intelliger/oati/crypto"
+
+const resolver = new LookupTrustResolver(lookup)
+```
+
+To test the SDK against the platform service, start `oati-platform/services/lookup-api` and run `pnpm test:lookup-integration`. Override `OATI_LOOKUP_URL`, `OATI_LOOKUP_TYPE`, and `OATI_LOOKUP_ID` for a deployed resolver.
 
 ## Signing and verification
 

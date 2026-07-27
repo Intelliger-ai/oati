@@ -6,7 +6,7 @@
 
 # Interface: VerificationIssue
 
-Defined in: [src/crypto.ts:94](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L94)
+Defined in: [src/crypto.ts:94](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L94)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/crypto.ts:94](https://github.com/Intelliger-ai/oati/blob/c5e504
 
 > **code**: [`VerificationCode`](../type-aliases/VerificationCode.md)
 
-Defined in: [src/crypto.ts:95](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L95)
+Defined in: [src/crypto.ts:95](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L95)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [src/crypto.ts:95](https://github.com/Intelliger-ai/oati/blob/c5e504
 
 > **message**: `string`
 
-Defined in: [src/crypto.ts:96](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L96)
+Defined in: [src/crypto.ts:96](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L96)

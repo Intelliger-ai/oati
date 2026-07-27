@@ -8,7 +8,7 @@
 
 > **canonicalJson**(`value`): `string`
 
-Defined in: [src/canonical.ts:12](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/canonical.ts#L12)
+Defined in: [src/canonical.ts:12](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/canonical.ts#L12)
 
 Serialize JSON deterministically with recursively sorted object keys.
 
