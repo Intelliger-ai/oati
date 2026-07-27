@@ -20,6 +20,8 @@
     "request_digest": { "type": "string" },
     "issued_at": { "type": "string", "format": "date-time" },
     "nonce": { "type": "string", "minLength": 16 },
+    "profile": { "type": "string", "format": "uri" },
+    "extensions": { "type": "object", "additionalProperties": true },
     "proof": { "type": "object" }
   }
 }

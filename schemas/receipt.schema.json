@@ -20,6 +20,8 @@
     "commercial_profile": { "type": "string" },
     "occurred_at": { "type": "string", "format": "date-time" },
     "issuer": { "type": "string" },
+    "profile": { "type": "string", "format": "uri" },
+    "extensions": { "type": "object", "additionalProperties": true },
     "proof": { "type": "object" }
   }
 }

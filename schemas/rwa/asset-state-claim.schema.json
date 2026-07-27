@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/profiles/rwa/v0.1/asset-state-claim.schema.json",
+  "title": "OATI RWA Asset State Claim",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["oati_version", "profile", "id", "asset_id", "claim_type", "value", "unit", "observed_at", "valid_until", "issuer", "issuer_role", "evidence", "proof"],
+  "properties": {
+    "oati_version": { "const": "1.0" },
+    "profile": { "const": "https://specs.intelliger.ai/oati/profiles/rwa/v0.1" },
+    "id": { "type": "string", "pattern": "^oati:claim:[A-Za-z0-9._:-]+$" },
+    "asset_id": { "type": "string", "pattern": "^oati:asset:[A-Za-z0-9._:-]+$" },
+    "claim_type": { "enum": ["reserve_balance", "nav", "eligibility", "covenant", "custody", "collateral"] },
+    "value": { "type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$" },
+    "unit": { "type": "string" },
+    "observed_at": { "type": "string", "format": "date-time" },
+    "valid_until": { "type": "string", "format": "date-time" },
+    "issuer": { "type": "string" },
+    "issuer_role": { "enum": ["custodian", "administrator", "oracle", "auditor"] },
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["digest", "media_type"],
+      "properties": {
+        "uri": { "type": "string", "format": "uri" },
+        "digest": { "type": "string", "minLength": 8 },
+        "media_type": { "type": "string" }
+      }
+    },
+    "proof": { "type": "object" }
+  }
+}

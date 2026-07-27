@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/profiles/commerce/v0.1/merchant-service-profile.schema.json",
+  "title": "OATI Commerce Merchant Service Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["oati_version", "profile", "id", "merchant_organisation_id", "name", "endpoint", "protocol", "actions", "offers", "status", "issued_at", "expires_at", "issuer", "proof"],
+  "properties": {
+    "oati_version": { "const": "1.0" },
+    "profile": { "const": "https://specs.intelliger.ai/oati/profiles/commerce/v0.1" },
+    "id": { "type": "string", "pattern": "^oati:service:[A-Za-z0-9._:-]+$" },
+    "merchant_organisation_id": { "type": "string", "pattern": "^oati:org:[A-Za-z0-9._:-]+$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "endpoint": { "type": "string", "format": "uri" },
+    "protocol": { "enum": ["http", "grpc", "mcp", "a2a"] },
+    "actions": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string" } },
+    "offers": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "currency", "unit", "unit_price", "billing_model", "terms_uri", "terms_digest"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+          "unit": { "type": "string", "minLength": 1 },
+          "unit_price": { "type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$" },
+          "billing_model": { "enum": ["per_request", "per_unit", "subscription", "fixed"] },
+          "terms_uri": { "type": "string", "format": "uri" },
+          "terms_digest": { "type": "string", "minLength": 8 }
+        }
+      }
+    },
+    "data_use": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "purposes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+        "redistribution": { "enum": ["prohibited", "restricted", "allowed"] },
+        "retention_seconds": { "type": "integer", "minimum": 0 },
+        "destinations": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    },
+    "status": { "enum": ["active", "suspended", "retired"] },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "issuer": { "type": "string" },
+    "proof": { "type": "object" }
+  }
+}

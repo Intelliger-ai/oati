@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/profiles/commerce/v0.1/commerce-receipt.schema.json",
+  "title": "OATI Commerce Action Receipt",
+  "allOf": [
+    { "$ref": "https://schemas.intelliger.ai/oati/v1/receipt.schema.json" },
+    {
+      "type": "object",
+      "required": ["profile", "extensions"],
+      "properties": {
+        "profile": { "const": "https://specs.intelliger.ai/oati/profiles/commerce/v0.1" },
+        "extensions": {
+          "type": "object",
+          "required": ["commerce"],
+          "properties": {
+            "commerce": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["merchant_organisation_id", "service_id", "offer_id", "currency", "quantity", "unit_price", "total_amount", "fulfilment_status", "terms_digest"],
+              "properties": {
+                "merchant_organisation_id": { "type": "string" },
+                "service_id": { "type": "string" },
+                "offer_id": { "type": "string" },
+                "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+                "quantity": { "type": "integer", "minimum": 1 },
+                "unit_price": { "type": "string" },
+                "total_amount": { "type": "string" },
+                "billing_reference": { "type": "string" },
+                "fulfilment_status": { "enum": ["fulfilled", "partial", "failed", "refunded"] },
+                "terms_digest": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

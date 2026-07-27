@@ -11,3 +11,8 @@ The conformance suite will contain language-neutral fixtures for:
 - MCP, A2A, OAuth, DPoP, and AuthZEN profiles.
 
 An implementation may claim OATI compatibility only against a published conformance-suite version.
+
+Initial profile suites:
+
+- [`commerce/`](commerce/) — paid-API price, currency, quantity, merchant, service, and offer constraints;
+- [`rwa/`](rwa/) — controlled-mint reserve, State Claim, token target, quantity, and approval constraints.

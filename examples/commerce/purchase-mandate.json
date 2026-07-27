@@ -1,0 +1,33 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:mandate:intelliger:weather-purchase-001",
+  "issuer": "oati:org:intelliger",
+  "subject": "oati:agent:intelliger:commerce-demo",
+  "sponsor": "oati:principal:intelliger:travel-operations",
+  "purpose": "travel_planning",
+  "actions": ["forecast.read", "service.purchase"],
+  "resources": ["oati:service:acme-weather:forecast"],
+  "counterparties": ["oati:org:acme-weather"],
+  "destinations": ["buyer_application"],
+  "limits": { "max_total": "1.00", "currency": "EUR" },
+  "data_use": { "redistribution": "prohibited", "retention_seconds": 86400 },
+  "delegation": { "allowed": false, "max_depth": 0 },
+  "not_before": "2026-07-27T09:00:00Z",
+  "expires_at": "2026-07-27T09:15:00Z",
+  "status": "active",
+  "profile": "https://specs.intelliger.ai/oati/profiles/commerce/v0.1",
+  "extensions": {
+    "commerce": {
+      "merchant_organisation_id": "oati:org:acme-weather",
+      "service_id": "oati:service:acme-weather:forecast",
+      "offer_id": "forecast-eu-per-request-v1",
+      "currency": "EUR",
+      "max_unit_price": "0.25",
+      "max_total": "1.00",
+      "max_quantity": 1,
+      "billing_model": "per_request",
+      "terms_digest": "sha256:terms-example-001"
+    }
+  },
+  "proof": { "type": "DataIntegrityProof", "signature": "example" }
+}

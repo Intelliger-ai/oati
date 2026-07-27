@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/profiles/rwa/v0.1/asset-mandate.schema.json",
+  "title": "OATI RWA Asset Mandate",
+  "allOf": [
+    { "$ref": "https://schemas.intelliger.ai/oati/v1/mandate.schema.json" },
+    {
+      "type": "object",
+      "required": ["profile", "extensions"],
+      "properties": {
+        "profile": { "const": "https://specs.intelliger.ai/oati/profiles/rwa/v0.1" },
+        "extensions": {
+          "type": "object",
+          "required": ["rwa"],
+          "properties": {
+            "rwa": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["asset_id", "state_claim_id", "network", "token_contract", "operation", "unit", "max_quantity", "one_time", "minimum_approvals"],
+              "properties": {
+                "asset_id": { "type": "string" },
+                "state_claim_id": { "type": "string" },
+                "network": { "type": "string" },
+                "token_contract": { "type": "string" },
+                "operation": { "enum": ["mint", "burn", "transfer", "redeem", "publish_state"] },
+                "unit": { "type": "string" },
+                "max_quantity": { "type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$" },
+                "one_time": { "type": "boolean" },
+                "minimum_approvals": { "type": "integer", "minimum": 1 },
+                "required_roles": { "type": "array", "uniqueItems": true, "items": { "type": "string" } }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

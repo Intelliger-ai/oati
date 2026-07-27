@@ -1,0 +1,29 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:tx:intelliger:weather-001",
+  "agent_id": "oati:agent:intelliger:commerce-demo",
+  "organisation_id": "oati:org:intelliger",
+  "mandate_id": "oati:mandate:intelliger:weather-purchase-001",
+  "action": "forecast.read",
+  "resource": "oati:service:acme-weather:forecast",
+  "purpose": "travel_planning",
+  "destination": "buyer_application",
+  "protocol": "http",
+  "commercial_profile": "forecast-eu-per-request-v1",
+  "request_digest": "sha256:request-example-001",
+  "issued_at": "2026-07-27T09:02:00Z",
+  "nonce": "01J3WEATHEREXAMPLENONCE",
+  "profile": "https://specs.intelliger.ai/oati/profiles/commerce/v0.1",
+  "extensions": {
+    "commerce": {
+      "offer_id": "forecast-eu-per-request-v1",
+      "currency": "EUR",
+      "quantity": 1,
+      "quoted_unit_price": "0.20",
+      "quoted_total": "0.20",
+      "idempotency_key": "weather-purchase-001",
+      "terms_digest": "sha256:terms-example-001"
+    }
+  },
+  "proof": { "type": "DataIntegrityProof", "signature": "example" }
+}

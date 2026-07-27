@@ -1,0 +1,26 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:mandate:example:mint-too-much",
+  "issuer": "oati:org:example-issuer",
+  "subject": "oati:agent:example-issuer:mint-operator",
+  "purpose": "reserve_backed_issuance",
+  "actions": ["token.mint"],
+  "not_before": "2026-07-27T09:05:00Z",
+  "expires_at": "2026-07-27T09:20:00Z",
+  "status": "active",
+  "profile": "https://specs.intelliger.ai/oati/profiles/rwa/v0.1",
+  "extensions": {
+    "rwa": {
+      "asset_id": "oati:asset:example:eur-reserve-token",
+      "state_claim_id": "oati:claim:example:reserve-20260727-0900",
+      "network": "eip155:1",
+      "token_contract": "0x1111111111111111111111111111111111111111",
+      "operation": "mint",
+      "unit": "EUR",
+      "max_quantity": "1250.00",
+      "one_time": true,
+      "minimum_approvals": 2
+    }
+  },
+  "proof": { "type": "DataIntegrityProof", "signature": "example" }
+}

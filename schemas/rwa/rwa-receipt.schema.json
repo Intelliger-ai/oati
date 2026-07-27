@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/profiles/rwa/v0.1/rwa-receipt.schema.json",
+  "title": "OATI RWA Action Receipt",
+  "allOf": [
+    { "$ref": "https://schemas.intelliger.ai/oati/v1/receipt.schema.json" },
+    {
+      "type": "object",
+      "required": ["profile", "extensions"],
+      "properties": {
+        "profile": { "const": "https://specs.intelliger.ai/oati/profiles/rwa/v0.1" },
+        "extensions": {
+          "type": "object",
+          "required": ["rwa"],
+          "properties": {
+            "rwa": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["asset_id", "state_claim_id", "operation", "network", "token_contract", "quantity", "unit", "chain_transaction_hash", "approval_count"],
+              "properties": {
+                "asset_id": { "type": "string" },
+                "state_claim_id": { "type": "string" },
+                "operation": { "enum": ["mint", "burn", "transfer", "redeem", "publish_state"] },
+                "network": { "type": "string" },
+                "token_contract": { "type": "string" },
+                "quantity": { "type": "string" },
+                "unit": { "type": "string" },
+                "chain_transaction_hash": { "type": "string" },
+                "approval_count": { "type": "integer", "minimum": 0 },
+                "resulting_supply": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

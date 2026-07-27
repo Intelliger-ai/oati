@@ -7,9 +7,11 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"math/big"
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -50,6 +52,8 @@ func run(args []string, stdout, stderr io.Writer) error {
 		return runCanonicalize(args[1:], stdout, stderr)
 	case "lookup":
 		return runLookup(args[1:], stdout, stderr)
+	case "commerce", "rwa":
+		return runProfileCommand(args[0], args[1:], stdout, stderr)
 	default:
 		return fmt.Errorf("unknown command %q; run 'oati help'", args[0])
 	}
@@ -62,14 +66,373 @@ Usage:
   oati validate <passport|mandate|envelope|receipt> <file|->
   oati canonicalize <file|->
   oati lookup --type <type> --id <identifier> [--api <base-url>]
+  oati commerce <validate-offer|validate-mandate|validate-receipt> [options] <file|->
+  oati rwa <validate-asset|validate-state-claim|validate-mint-mandate|validate-receipt> [options] <file|->
   oati version
 
 Commands:
   validate      Check the structure and core semantics of an OATI object
   canonicalize  Emit compact JSON with recursively sorted object keys
   lookup        Query an OATI-compatible public resolver
+  commerce      Validate Commerce Profile objects and constraints
+  rwa           Validate RWA Profile objects and controlled-mint constraints
   version       Print the CLI version
 `)
+}
+
+func runProfileCommand(profile string, args []string, stdout, stderr io.Writer) error {
+	if len(args) == 0 {
+		return fmt.Errorf("usage: oati %s <validation-command> [options] <file|->", profile)
+	}
+	command := args[0]
+	flags := flag.NewFlagSet(profile+" "+command, flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	mandatePath := flags.String("mandate", "", "related Mandate for constraint validation")
+	claimPath := flags.String("claim", "", "related Asset State Claim for constraint validation")
+	if err := flags.Parse(args[1:]); err != nil {
+		return err
+	}
+	if flags.NArg() != 1 {
+		return fmt.Errorf("usage: oati %s %s [options] <file|->", profile, command)
+	}
+	value, err := readObject(flags.Arg(0))
+	if err != nil {
+		return err
+	}
+
+	var violations []string
+	switch profile + "/" + command {
+	case "commerce/validate-offer":
+		violations = validateCommerceOffer(value)
+	case "commerce/validate-mandate":
+		violations = append(validateObject("mandate", "oati:mandate:", value), validateCommerceMandate(value)...)
+	case "commerce/validate-receipt":
+		violations = append(validateObject("receipt", "oati:receipt:", value), validateCommerceReceipt(value)...)
+		if *mandatePath != "" {
+			mandate, readErr := readObject(*mandatePath)
+			if readErr != nil {
+				return fmt.Errorf("read Mandate: %w", readErr)
+			}
+			violations = append(violations, compareCommerceReceipt(value, mandate)...)
+		}
+	case "rwa/validate-asset":
+		violations = validateAssetProfile(value)
+	case "rwa/validate-state-claim":
+		violations = validateAssetStateClaim(value)
+	case "rwa/validate-mint-mandate":
+		violations = append(validateObject("mandate", "oati:mandate:", value), validateMintMandate(value)...)
+		if *claimPath != "" {
+			claim, readErr := readObject(*claimPath)
+			if readErr != nil {
+				return fmt.Errorf("read State Claim: %w", readErr)
+			}
+			violations = append(violations, compareMintMandate(value, claim)...)
+		}
+	case "rwa/validate-receipt":
+		violations = append(validateObject("receipt", "oati:receipt:", value), validateRwaReceipt(value)...)
+		if *mandatePath != "" {
+			mandate, readErr := readObject(*mandatePath)
+			if readErr != nil {
+				return fmt.Errorf("read Mandate: %w", readErr)
+			}
+			violations = append(violations, compareRwaReceipt(value, mandate)...)
+		}
+	default:
+		return fmt.Errorf("unsupported %s command %q", profile, command)
+	}
+
+	violations = uniqueStrings(violations)
+	if len(violations) > 0 {
+		for _, violation := range violations {
+			fmt.Fprintf(stderr, "- %s\n", violation)
+		}
+		return fmt.Errorf("%s %s failed (%d violation(s))", profile, command, len(violations))
+	}
+	fmt.Fprintf(stdout, "valid %s object: %s\n", profile, stringValue(value, "id"))
+	return nil
+}
+
+const commerceProfile = "https://specs.intelliger.ai/oati/profiles/commerce/v0.1"
+const rwaProfile = "https://specs.intelliger.ai/oati/profiles/rwa/v0.1"
+
+func validateCommerceOffer(value map[string]any) []string {
+	violations := requireFields(value, "oati_version", "profile", "id", "merchant_organisation_id", "name", "endpoint", "protocol", "actions", "offers", "status", "issued_at", "expires_at", "issuer", "proof")
+	if stringValue(value, "profile") != commerceProfile {
+		violations = append(violations, "unexpected Commerce profile URI")
+	}
+	if id := stringValue(value, "id"); id != "" && !strings.HasPrefix(id, "oati:service:") {
+		violations = append(violations, `id must start with "oati:service:"`)
+	}
+	offers, ok := value["offers"].([]any)
+	if !ok || len(offers) == 0 {
+		violations = append(violations, "offers must contain at least one offer")
+		return violations
+	}
+	for index, raw := range offers {
+		offer, ok := raw.(map[string]any)
+		if !ok {
+			violations = append(violations, fmt.Sprintf("offers[%d] must be an object", index))
+			continue
+		}
+		for _, issue := range requireFields(offer, "id", "currency", "unit", "unit_price", "billing_model", "terms_uri", "terms_digest") {
+			violations = append(violations, fmt.Sprintf("offers[%d]: %s", index, issue))
+		}
+		if currency := stringValue(offer, "currency"); currency != "" && !validCurrency(currency) {
+			violations = append(violations, fmt.Sprintf("offers[%d]: invalid currency", index))
+		}
+		if price := stringValue(offer, "unit_price"); price != "" && !validDecimal(price) {
+			violations = append(violations, fmt.Sprintf("offers[%d]: invalid unit_price", index))
+		}
+	}
+	return violations
+}
+
+func validateCommerceMandate(value map[string]any) []string {
+	if stringValue(value, "profile") != commerceProfile {
+		return []string{"unexpected Commerce profile URI"}
+	}
+	commerce, ok := extension(value, "commerce")
+	if !ok {
+		return []string{"missing extensions.commerce"}
+	}
+	violations := requireFields(commerce, "merchant_organisation_id", "service_id", "offer_id", "currency", "max_unit_price", "max_total", "max_quantity")
+	if !validCurrency(stringValue(commerce, "currency")) {
+		violations = append(violations, "invalid Commerce currency")
+	}
+	for _, field := range []string{"max_unit_price", "max_total"} {
+		if !validDecimal(stringValue(commerce, field)) {
+			violations = append(violations, field+" must be a non-negative decimal string")
+		}
+	}
+	if quantity, ok := numberValue(commerce["max_quantity"]); !ok || quantity < 1 {
+		violations = append(violations, "max_quantity must be at least 1")
+	}
+	return violations
+}
+
+func validateCommerceReceipt(value map[string]any) []string {
+	if stringValue(value, "profile") != commerceProfile {
+		return []string{"unexpected Commerce profile URI"}
+	}
+	commerce, ok := extension(value, "commerce")
+	if !ok {
+		return []string{"missing extensions.commerce"}
+	}
+	violations := requireFields(commerce, "merchant_organisation_id", "service_id", "offer_id", "currency", "quantity", "unit_price", "total_amount", "fulfilment_status", "terms_digest")
+	if !validCurrency(stringValue(commerce, "currency")) {
+		violations = append(violations, "invalid Commerce currency")
+	}
+	return violations
+}
+
+func compareCommerceReceipt(receipt, mandate map[string]any) []string {
+	var violations []string
+	r, rok := extension(receipt, "commerce")
+	m, mok := extension(mandate, "commerce")
+	if !rok || !mok {
+		return []string{"Receipt and Mandate need Commerce extensions"}
+	}
+	for _, field := range []string{"merchant_organisation_id", "service_id", "offer_id", "currency"} {
+		if stringValue(r, field) != stringValue(m, field) {
+			violations = append(violations, field+" differs from Mandate")
+		}
+	}
+	if exceeds(stringValue(r, "unit_price"), stringValue(m, "max_unit_price")) {
+		violations = append(violations, "unit price exceeds Mandate")
+	}
+	if exceeds(stringValue(r, "total_amount"), stringValue(m, "max_total")) {
+		violations = append(violations, "total amount exceeds Mandate")
+	}
+	rq, _ := numberValue(r["quantity"])
+	mq, _ := numberValue(m["max_quantity"])
+	if rq > mq {
+		violations = append(violations, "quantity exceeds Mandate")
+	}
+	return violations
+}
+
+func validateAssetProfile(value map[string]any) []string {
+	violations := requireFields(value, "oati_version", "profile", "id", "issuer_organisation_id", "name", "asset_class", "jurisdiction", "unit", "token", "authorised_roles", "status", "issued_at", "expires_at", "issuer", "proof")
+	if stringValue(value, "profile") != rwaProfile {
+		violations = append(violations, "unexpected RWA profile URI")
+	}
+	if id := stringValue(value, "id"); id != "" && !strings.HasPrefix(id, "oati:asset:") {
+		violations = append(violations, `id must start with "oati:asset:"`)
+	}
+	token, ok := value["token"].(map[string]any)
+	if !ok {
+		violations = append(violations, "token must be an object")
+	} else {
+		violations = append(violations, requireFields(token, "network", "contract", "standard")...)
+	}
+	return violations
+}
+
+func validateAssetStateClaim(value map[string]any) []string {
+	violations := requireFields(value, "oati_version", "profile", "id", "asset_id", "claim_type", "value", "unit", "observed_at", "valid_until", "issuer", "issuer_role", "evidence", "proof")
+	if stringValue(value, "profile") != rwaProfile {
+		violations = append(violations, "unexpected RWA profile URI")
+	}
+	if !validDecimal(stringValue(value, "value")) {
+		violations = append(violations, "claim value must be a non-negative decimal string")
+	}
+	observed := parseTime(stringValue(value, "observed_at"))
+	validUntil := parseTime(stringValue(value, "valid_until"))
+	if observed.IsZero() || validUntil.IsZero() || !validUntil.After(observed) {
+		violations = append(violations, "valid_until must be after observed_at")
+	}
+	return violations
+}
+
+func validateMintMandate(value map[string]any) []string {
+	if stringValue(value, "profile") != rwaProfile {
+		return []string{"unexpected RWA profile URI"}
+	}
+	rwa, ok := extension(value, "rwa")
+	if !ok {
+		return []string{"missing extensions.rwa"}
+	}
+	violations := requireFields(rwa, "asset_id", "state_claim_id", "network", "token_contract", "operation", "unit", "max_quantity", "one_time", "minimum_approvals")
+	if stringValue(rwa, "operation") != "mint" {
+		violations = append(violations, "controlled-mint operation must be mint")
+	}
+	if oneTime, ok := rwa["one_time"].(bool); !ok || !oneTime {
+		violations = append(violations, "controlled-mint Mandate must be one-time")
+	}
+	if quantity := stringValue(rwa, "max_quantity"); !validDecimal(quantity) || !exceeds(quantity, "0") {
+		violations = append(violations, "max_quantity must be greater than zero")
+	}
+	approvals, ok := numberValue(rwa["minimum_approvals"])
+	if !ok || approvals < 1 {
+		violations = append(violations, "minimum_approvals must be at least 1")
+	}
+	return violations
+}
+
+func compareMintMandate(mandate, claim map[string]any) []string {
+	var violations []string
+	rwa, ok := extension(mandate, "rwa")
+	if !ok {
+		return []string{"Mandate needs extensions.rwa"}
+	}
+	if stringValue(rwa, "asset_id") != stringValue(claim, "asset_id") {
+		violations = append(violations, "State Claim asset differs from Mandate")
+	}
+	if stringValue(rwa, "state_claim_id") != stringValue(claim, "id") {
+		violations = append(violations, "State Claim id differs from Mandate")
+	}
+	if stringValue(rwa, "unit") != stringValue(claim, "unit") {
+		violations = append(violations, "State Claim unit differs from Mandate")
+	}
+	if exceeds(stringValue(rwa, "max_quantity"), stringValue(claim, "value")) {
+		violations = append(violations, "mint authority exceeds claimed reserve")
+	}
+	return violations
+}
+
+func validateRwaReceipt(value map[string]any) []string {
+	if stringValue(value, "profile") != rwaProfile {
+		return []string{"unexpected RWA profile URI"}
+	}
+	rwa, ok := extension(value, "rwa")
+	if !ok {
+		return []string{"missing extensions.rwa"}
+	}
+	return requireFields(rwa, "asset_id", "state_claim_id", "operation", "network", "token_contract", "quantity", "unit", "chain_transaction_hash", "approval_count")
+}
+
+func compareRwaReceipt(receipt, mandate map[string]any) []string {
+	var violations []string
+	r, rok := extension(receipt, "rwa")
+	m, mok := extension(mandate, "rwa")
+	if !rok || !mok {
+		return []string{"Receipt and Mandate need RWA extensions"}
+	}
+	for _, field := range []string{"asset_id", "state_claim_id", "operation", "network", "token_contract", "unit"} {
+		if stringValue(r, field) != stringValue(m, field) {
+			violations = append(violations, field+" differs from Mandate")
+		}
+	}
+	if exceeds(stringValue(r, "quantity"), stringValue(m, "max_quantity")) {
+		violations = append(violations, "receipt quantity exceeds Mandate")
+	}
+	ra, _ := numberValue(r["approval_count"])
+	ma, _ := numberValue(m["minimum_approvals"])
+	if ra < ma {
+		violations = append(violations, "receipt has insufficient approvals")
+	}
+	return violations
+}
+
+func extension(value map[string]any, name string) (map[string]any, bool) {
+	extensions, ok := value["extensions"].(map[string]any)
+	if !ok {
+		return nil, false
+	}
+	extension, ok := extensions[name].(map[string]any)
+	return extension, ok
+}
+
+func requireFields(value map[string]any, fields ...string) []string {
+	var violations []string
+	for _, field := range fields {
+		if missing(value[field]) {
+			violations = append(violations, fmt.Sprintf("missing required field %q", field))
+		}
+	}
+	return violations
+}
+
+func validCurrency(value string) bool {
+	if len(value) != 3 {
+		return false
+	}
+	for _, character := range value {
+		if character < 'A' || character > 'Z' {
+			return false
+		}
+	}
+	return true
+}
+
+func validDecimal(value string) bool {
+	return decimalPattern.MatchString(value)
+}
+
+func exceeds(left, right string) bool {
+	if !validDecimal(left) || !validDecimal(right) {
+		return false
+	}
+	a, okA := new(big.Rat).SetString(left)
+	b, okB := new(big.Rat).SetString(right)
+	return okA && okB && a.Cmp(b) > 0
+}
+
+var decimalPattern = regexp.MustCompile(`^(0|[1-9][0-9]*)(\.[0-9]+)?$`)
+
+func numberValue(value any) (float64, bool) {
+	switch typed := value.(type) {
+	case json.Number:
+		number, err := typed.Float64()
+		return number, err == nil
+	case float64:
+		return typed, true
+	default:
+		return 0, false
+	}
+}
+
+func uniqueStrings(values []string) []string {
+	seen := make(map[string]bool, len(values))
+	result := make([]string, 0, len(values))
+	for _, value := range values {
+		if value != "" && !seen[value] {
+			seen[value] = true
+			result = append(result, value)
+		}
+	}
+	sort.Strings(result)
+	return result
 }
 
 func runValidate(args []string, stdout, stderr io.Writer) error {

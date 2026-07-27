@@ -10,3 +10,5 @@ This directory will contain the normative, versioned specification. Normative ex
 - the standard is implementable without the commercial Intelliger platform.
 
 The first normative object set is Agent Passport, Agent Mandate, Agent Transaction Envelope, Authorisation Decision, and Action Receipt.
+
+Domain behaviour is defined through [`profiles/`](profiles/). The first developer-preview profiles cover Commerce paid-API transactions and RWA controlled minting.

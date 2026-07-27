@@ -1,0 +1,32 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:receipt:acme-weather:weather-001",
+  "transaction_id": "oati:tx:intelliger:weather-001",
+  "agent_id": "oati:agent:intelliger:commerce-demo",
+  "organisation_id": "oati:org:intelliger",
+  "mandate_id": "oati:mandate:intelliger:weather-purchase-001",
+  "decision": "allow",
+  "outcome": "succeeded",
+  "policy_digest": "sha256:policy-example-001",
+  "request_digest": "sha256:request-example-001",
+  "response_digest": "sha256:response-example-001",
+  "commercial_profile": "forecast-eu-per-request-v1",
+  "occurred_at": "2026-07-27T09:02:01Z",
+  "issuer": "oati:org:acme-weather",
+  "profile": "https://specs.intelliger.ai/oati/profiles/commerce/v0.1",
+  "extensions": {
+    "commerce": {
+      "merchant_organisation_id": "oati:org:acme-weather",
+      "service_id": "oati:service:acme-weather:forecast",
+      "offer_id": "forecast-eu-per-request-v1",
+      "currency": "EUR",
+      "quantity": 1,
+      "unit_price": "0.20",
+      "total_amount": "0.20",
+      "billing_reference": "usage:acme-weather:2026-07:001",
+      "fulfilment_status": "fulfilled",
+      "terms_digest": "sha256:terms-example-001"
+    }
+  },
+  "proof": { "type": "DataIntegrityProof", "signature": "example" }
+}

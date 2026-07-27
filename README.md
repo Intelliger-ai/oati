@@ -38,6 +38,28 @@ OATI complements OAuth, OIDC, SPIFFE, AuthZEN, Cedar, OPA, MCP, and A2A. It does
 
 The central invariant is **non-amplification**: a delegated Mandate may preserve or reduce authority, but it must never silently expand it.
 
+## Domain profiles
+
+OATI profiles add strict domain semantics while preserving the same core identity, authority, policy, and evidence model.
+
+### Commerce 0.1 — paid APIs and digital services
+
+The first Commerce workflow lets an enterprise agent purchase one API request under a seller-published offer and a buyer-issued Purchase Mandate. It constrains merchant, service, offer, currency, price, budget, quantity, purpose, destination, and data use.
+
+- [Profile specification](specification/profiles/commerce/)
+- [Paid-API quickstart](guides/commerce/quickstart.md)
+- [Runnable objects](examples/commerce/)
+- [Conformance vectors](conformance/commerce/)
+
+### RWA 0.1 — controlled token minting
+
+The first RWA workflow permits bounded, one-time minting only against a current Asset State Claim, authorised roles, matching asset and token details, and the required approval threshold.
+
+- [Profile specification](specification/profiles/rwa/)
+- [Controlled-mint quickstart](guides/rwa/quickstart.md)
+- [Runnable objects](examples/rwa/)
+- [Conformance vectors](conformance/rwa/)
+
 ## Start in five minutes
 
 Requirement: Go 1.24+.
@@ -64,6 +86,15 @@ Then validate, canonicalize, or resolve an OATI record:
 oati validate passport ./examples/passport.json
 oati canonicalize ./examples/passport.json
 oati lookup --type agent --id oati:agent:intelliger:commerce-demo
+
+oati commerce validate-offer ./examples/commerce/merchant-service-profile.json
+oati commerce validate-receipt \
+  --mandate ./examples/commerce/purchase-mandate.json \
+  ./examples/commerce/commerce-receipt.json
+
+oati rwa validate-mint-mandate \
+  --claim ./examples/rwa/asset-state-claim.json \
+  ./examples/rwa/mint-mandate.json
 ```
 
 The current CLI is ready for object validation, fixtures, deterministic JSON processing, and lookup integration. Signature-suite verification, issuer trust-chain evaluation, and delegation subset proofs are not yet claimed. See [CLI documentation](cli/README.md).
@@ -76,7 +107,7 @@ The current CLI is ready for object validation, fixtures, deterministic JSON pro
 | [`schemas/`](schemas/) | versioned JSON Schemas |
 | [`examples/`](examples/) | valid example objects and transactions |
 | [`cli/`](cli/) | developer CLI |
-| [`sdk/`](sdk/) | TypeScript, Python, Go, Java, and .NET SDKs |
+| [`sdk/typescript/`](sdk/typescript/) | typed builders and Commerce/RWA semantic validators |
 | [`conformance/`](conformance/) | shared fixtures, test vectors, and compatibility tests |
 | [`api/lookup.openapi.yaml`](api/lookup.openapi.yaml) | public lookup API contract for client generation |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | system boundaries and deployment model |
@@ -112,7 +143,7 @@ Do not report security vulnerabilities in a public issue. Until a dedicated secu
 
 ## Project status
 
-The repository is an early developer preview. Initial schemas and a functional CLI are available. The normative specification, cryptographic profiles, SDKs, and full conformance suite are still under active development. Production lookup operations are deliberately outside this repository.
+The repository is an early developer preview. Core and profile schemas, complete Commerce and RWA example flows, a functional CLI, an initial TypeScript SDK, and first conformance vectors are available. The normative specification, cryptographic profiles, additional SDK languages, and full conformance suite remain under active development. Production lookup operations are deliberately outside this repository.
 
 Compatibility claims must reference a published OATI version and conformance-suite version.
 

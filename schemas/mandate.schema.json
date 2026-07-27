@@ -29,6 +29,8 @@
     "not_before": { "type": "string", "format": "date-time" },
     "expires_at": { "type": "string", "format": "date-time" },
     "status": { "enum": ["active", "suspended", "revoked", "expired", "consumed"] },
+    "profile": { "type": "string", "format": "uri" },
+    "extensions": { "type": "object", "additionalProperties": true },
     "proof": { "type": "object" }
   }
 }

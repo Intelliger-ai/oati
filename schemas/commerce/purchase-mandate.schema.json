@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/profiles/commerce/v0.1/purchase-mandate.schema.json",
+  "title": "OATI Commerce Purchase Mandate",
+  "allOf": [
+    { "$ref": "https://schemas.intelliger.ai/oati/v1/mandate.schema.json" },
+    {
+      "type": "object",
+      "required": ["profile", "extensions"],
+      "properties": {
+        "profile": { "const": "https://specs.intelliger.ai/oati/profiles/commerce/v0.1" },
+        "extensions": {
+          "type": "object",
+          "required": ["commerce"],
+          "properties": {
+            "commerce": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["merchant_organisation_id", "service_id", "offer_id", "currency", "max_unit_price", "max_total", "max_quantity"],
+              "properties": {
+                "merchant_organisation_id": { "type": "string" },
+                "service_id": { "type": "string" },
+                "offer_id": { "type": "string" },
+                "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+                "max_unit_price": { "type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$" },
+                "max_total": { "type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$" },
+                "max_quantity": { "type": "integer", "minimum": 1 },
+                "billing_model": { "enum": ["per_request", "per_unit", "subscription", "fixed"] },
+                "terms_digest": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
+}

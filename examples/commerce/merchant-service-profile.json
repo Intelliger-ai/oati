@@ -1,0 +1,32 @@
+{
+  "oati_version": "1.0",
+  "profile": "https://specs.intelliger.ai/oati/profiles/commerce/v0.1",
+  "id": "oati:service:acme-weather:forecast",
+  "merchant_organisation_id": "oati:org:acme-weather",
+  "name": "Verified weather forecast API",
+  "endpoint": "https://api.acme-weather.example/v1/forecast",
+  "protocol": "http",
+  "actions": ["forecast.read"],
+  "offers": [
+    {
+      "id": "forecast-eu-per-request-v1",
+      "currency": "EUR",
+      "unit": "request",
+      "unit_price": "0.20",
+      "billing_model": "per_request",
+      "terms_uri": "https://acme-weather.example/terms/forecast-v1",
+      "terms_digest": "sha256:terms-example-001"
+    }
+  ],
+  "data_use": {
+    "purposes": ["travel_planning"],
+    "redistribution": "prohibited",
+    "retention_seconds": 86400,
+    "destinations": ["buyer_application"]
+  },
+  "status": "active",
+  "issued_at": "2026-07-27T08:00:00Z",
+  "expires_at": "2026-08-27T08:00:00Z",
+  "issuer": "oati:org:acme-weather",
+  "proof": { "type": "DataIntegrityProof", "signature": "example" }
+}

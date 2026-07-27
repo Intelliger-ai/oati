@@ -1,0 +1,19 @@
+{
+  "oati_version": "1.0",
+  "profile": "https://specs.intelliger.ai/oati/profiles/rwa/v0.1",
+  "id": "oati:claim:example:reserve-20260727-0900",
+  "asset_id": "oati:asset:example:eur-reserve-token",
+  "claim_type": "reserve_balance",
+  "value": "1000.00",
+  "unit": "EUR",
+  "observed_at": "2026-07-27T09:00:00Z",
+  "valid_until": "2026-07-27T10:00:00Z",
+  "issuer": "oati:org:example-custodian",
+  "issuer_role": "custodian",
+  "evidence": {
+    "uri": "https://evidence.example/reserve/2026-07-27T09:00:00Z",
+    "digest": "sha256:reserve-evidence-example-001",
+    "media_type": "application/json"
+  },
+  "proof": { "type": "DataIntegrityProof", "signature": "example" }
+}

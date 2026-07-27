@@ -1,0 +1,31 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:receipt:example:mint-250-001",
+  "transaction_id": "oati:tx:example:mint-250-001",
+  "agent_id": "oati:agent:example-issuer:mint-operator",
+  "organisation_id": "oati:org:example-issuer",
+  "mandate_id": "oati:mandate:example:mint-250-001",
+  "decision": "allow",
+  "outcome": "succeeded",
+  "policy_digest": "sha256:mint-policy-example-001",
+  "request_digest": "sha256:mint-request-example-001",
+  "response_digest": "sha256:mint-response-example-001",
+  "occurred_at": "2026-07-27T09:07:15Z",
+  "issuer": "oati:org:example-issuer",
+  "profile": "https://specs.intelliger.ai/oati/profiles/rwa/v0.1",
+  "extensions": {
+    "rwa": {
+      "asset_id": "oati:asset:example:eur-reserve-token",
+      "state_claim_id": "oati:claim:example:reserve-20260727-0900",
+      "operation": "mint",
+      "network": "eip155:1",
+      "token_contract": "0x1111111111111111111111111111111111111111",
+      "quantity": "250.00",
+      "unit": "EUR",
+      "chain_transaction_hash": "0xaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "approval_count": 2,
+      "resulting_supply": "250.00"
+    }
+  },
+  "proof": { "type": "DataIntegrityProof", "signature": "example" }
+}

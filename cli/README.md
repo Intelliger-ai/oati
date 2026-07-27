@@ -30,6 +30,23 @@ oati lookup \
 
 # Use another compatible resolver
 oati lookup --api http://localhost:8080/oati/v1 --type agent --id oati:agent:intelliger:commerce-demo
+
+# Validate the Commerce paid-API flow
+oati commerce validate-offer ./examples/commerce/merchant-service-profile.json
+oati commerce validate-mandate ./examples/commerce/purchase-mandate.json
+oati commerce validate-receipt \
+  --mandate ./examples/commerce/purchase-mandate.json \
+  ./examples/commerce/commerce-receipt.json
+
+# Validate the RWA controlled-mint flow
+oati rwa validate-asset ./examples/rwa/asset-profile.json
+oati rwa validate-state-claim ./examples/rwa/asset-state-claim.json
+oati rwa validate-mint-mandate \
+  --claim ./examples/rwa/asset-state-claim.json \
+  ./examples/rwa/mint-mandate.json
+oati rwa validate-receipt \
+  --mandate ./examples/rwa/mint-mandate.json \
+  ./examples/rwa/rwa-receipt.json
 ```
 
 `validate` performs the structural and semantic checks implemented by this developer preview, including required fields, identifier prefixes, timestamps, status values, and object-specific invariants. Published JSON Schema and conformance vectors remain the interoperable source of truth.
