@@ -156,6 +156,32 @@ Every authenticated allow or denial produces a signed Receipt. Small receipts ar
 
 See the normative [HTTP middleware profile](../../specification/HTTP_MIDDLEWARE_PROFILE.md).
 
+## Protocol adapters
+
+`@intelliger/oati/adapters` maps protocol-native requests into the same OATI Envelope/Mandate authority context:
+
+```ts
+import {
+  mcpProtectedResourceMetadata,
+  mcpToolCallEnvelope,
+  toAuthZenRequest,
+  toCedarRequest,
+  toOpaInput,
+  verifyDpopProof,
+} from "@intelliger/oati/adapters"
+```
+
+- MCP: RFC 9728 protected-resource metadata, OAuth carriers, `tools/call` Envelopes, and Receipt result metadata.
+- A2A: Agent Card OAuth/OATI declarations, Message Envelopes, task/context bindings, and authority metadata.
+- OAuth/DPoP: RFC 9449 ES256/EdDSA proof verification, `ath`, `htm`, `htu`, `iat`, `jti`, JWK thumbprints, replay, and OATI token-claim binding.
+- AuthZEN: subject/action/resource/context requests and fail-closed Decision mapping.
+- Cedar and OPA: normalized principal/action/resource/context mappings; OPA accepts only an exact boolean `true` result.
+- Envoy: v3 `ext_authz` CheckRequest extraction and reviewed decision/Receipt response headers.
+
+Protocol adapters translate data; they do not replace signature verification or deterministic authority evaluation. OAuth issuer/audience/scope validation remains the OAuth resource server’s responsibility. DPoP requires an atomic replay store, and external policy engines may narrow an OATI allow decision but must never override an OATI denial.
+
+See the [Protocol Adapter Profile](../../specification/PROTOCOL_ADAPTERS.md) and [Envoy reference bundle](../../integrations/envoy/).
+
 ## Signing and verification
 
 OATI uses an RFC 7797 detached JWS over canonical JSON. Both Ed25519 (`EdDSA`) and P-256 (`ES256`) are supported.

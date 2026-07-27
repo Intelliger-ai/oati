@@ -118,6 +118,7 @@ The current CLI is ready for object validation, fixtures, deterministic JSON pro
 | [`sdk/typescript/`](sdk/typescript/) | builders, schemas, crypto/trust verification, deterministic authority evaluator, lookup, reference HTTP middleware, and typed errors |
 | [`conformance/`](conformance/) | shared fixtures, test vectors, and compatibility tests |
 | [`api/lookup.openapi.yaml`](api/lookup.openapi.yaml) | public lookup API contract for client generation |
+| [`integrations/envoy/`](integrations/envoy/) | fail-closed Envoy ext_authz and OPA reference integration |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | system boundaries and deployment model |
 
 ## Public lookup and privacy
@@ -151,7 +152,7 @@ Do not report security vulnerabilities in a public issue. Until a dedicated secu
 
 ## Project status
 
-The repository is an early developer preview. Core and profile schemas, Commerce and RWA flows, a functional CLI, and a tested TypeScript SDK now cover schema validation, lookup, signing, trust verification, deterministic authority evaluation, non-amplification, and consumption. A versioned executable conformance suite covers core objects, canonicalization, cryptography, authority evaluation, and privacy projection. The cryptographic profile requires independent review and additional SDK languages remain under active development. Production lookup operations are deliberately outside this repository.
+The repository is an early developer preview. Core and profile schemas, Commerce and RWA flows, a functional CLI, and a tested TypeScript SDK now cover schema validation, lookup, signing, trust verification, deterministic authority evaluation, reference middleware, and MCP, A2A, OAuth/DPoP, AuthZEN, Cedar/OPA, and Envoy adapters. A versioned executable conformance suite covers core objects, canonicalization, cryptography, authority evaluation, and privacy projection. The cryptographic and protocol profiles require independent review and additional SDK languages remain under active development. Production lookup operations are deliberately outside this repository.
 
 Compatibility claims must reference a published OATI version and conformance-suite version.
 

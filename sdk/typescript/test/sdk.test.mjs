@@ -5,6 +5,8 @@ import {
   OatiError,
   OatiLookupClient,
   OatiLookupError,
+  OATI_A2A_EXTENSION_URI,
+  OATI_MCP_EXTENSION_URI,
   OatiValidationError,
   assertSchema,
   canonicalJson,
@@ -21,6 +23,24 @@ import {
   MemoryReplayCache,
   LookupTrustResolver,
   projectPublicRecord,
+  a2aAgentCard,
+  a2aMessageEnvelope,
+  a2aMessageWithAuthority,
+  accessTokenHash,
+  fromAuthZenResponse,
+  fromEnvoyCheckRequest,
+  jwkThumbprint,
+  mcpAuthorizationHeaders,
+  mcpProtectedResourceMetadata,
+  mcpResultWithReceipt,
+  mcpToolCallEnvelope,
+  oatiOAuthClaims,
+  opaAllowed,
+  toAuthZenRequest,
+  toCedarRequest,
+  toOpaInput,
+  validateOAuthBinding,
+  verifyDpopProof,
   signDocument,
   StaticTrustResolver,
   verifyDocument,
@@ -374,6 +394,72 @@ test("reference middleware atomically consumes usage and receipts conflicts and 
   assert.equal(failed.status, 500)
   const failedReceipt = JSON.parse(Buffer.from(failed.headers.get("OATI-Receipt"), "base64url").toString("utf8"))
   assert.equal(failedReceipt.outcome, "failed")
+})
+
+test("MCP and A2A adapters produce protocol metadata and schema-valid Envelopes", async () => {
+  const mandate = await example("commerce/purchase-mandate.json")
+  const common = { id: "oati:tx:test:adapter:1", agentId: mandate.subject, organisationId: "oati:org:intelliger", mandateId: mandate.id,
+    purpose: mandate.purpose, issuedAt: "2026-07-27T12:00:00Z", nonce: "adapter-nonce-000000001" }
+  const metadata = mcpProtectedResourceMetadata("https://mcp.example/server", ["https://auth.example"], "https://api.intelliger.ai/oati/v1", ["tools:call"])
+  assert.equal(metadata.oati.extension, OATI_MCP_EXTENSION_URI)
+  const mcpEnvelope = await mcpToolCallEnvelope({ ...common, serverId: "weather", toolName: "forecast", arguments: { city: "Berlin" } })
+  assert.equal(mcpEnvelope.action, "mcp.tools.call")
+  assert.equal(validateSchema("envelope", mcpEnvelope).valid, true)
+  const headers = mcpAuthorizationHeaders(mcpEnvelope, mandate, "access-token")
+  assert.equal(headers.get("Authorization"), "Bearer access-token")
+  const receipt = await example("commerce/commerce-receipt.json")
+  assert.equal(mcpResultWithReceipt({ content: [] }, receipt)._meta[OATI_MCP_EXTENSION_URI].receipt.id, receipt.id)
+
+  const card = a2aAgentCard({ name: "Weather" }, "https://auth.example/authorize", "https://auth.example/token", { "a2a:send": "Send messages" })
+  assert.ok(card.capabilities.extensions.some((item) => item.uri === OATI_A2A_EXTENSION_URI))
+  const a2aEnvelope = await a2aMessageEnvelope({ ...common, id: "oati:tx:test:adapter:2", targetAgentId: "oati:agent:weather:server", messageId: "message-1", contextId: "context-1", parts: [{ text: "forecast" }] })
+  assert.equal(a2aEnvelope.action, "a2a.message.send")
+  assert.equal(validateSchema("envelope", a2aEnvelope).valid, true)
+  const message = a2aMessageWithAuthority({ role: "user", parts: [] }, a2aEnvelope, mandate)
+  assert.equal(message.metadata[OATI_A2A_EXTENSION_URI].envelope.id, a2aEnvelope.id)
+})
+
+test("OAuth and DPoP adapter verifies signature, request, token, key, and replay binding", async () => {
+  const generated = await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"])
+  const jwk = await crypto.subtle.exportKey("jwk", generated.publicKey)
+  delete jwk.key_ops; delete jwk.ext
+  const token = "opaque-access-token", request = new Request("https://api.example/resource?ignored=yes", { method: "POST" })
+  const header = { typ: "dpop+jwt", alg: "ES256", jwk }
+  const claims = { jti: "dpop-jti-000000000001", htm: "POST", htu: "https://api.example/resource", iat: Date.parse("2026-07-27T12:00:00Z") / 1000, ath: await accessTokenHash(token) }
+  const encoded = (value) => Buffer.from(JSON.stringify(value)).toString("base64url")
+  const protectedHeader = encoded(header), payload = encoded(claims), signingInput = new TextEncoder().encode(`${protectedHeader}.${payload}`)
+  const signature = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, generated.privateKey, signingInput)
+  const proof = `${protectedHeader}.${payload}.${Buffer.from(signature).toString("base64url")}`
+  const used = new Set(), replayStore = { checkAndStore: (jti) => used.has(jti) ? false : (used.add(jti), true) }
+  const jkt = await jwkThumbprint(jwk)
+  const verified = await verifyDpopProof(proof, request, { accessToken: token, expectedJkt: jkt, now: new Date("2026-07-27T12:00:00Z"), replayStore })
+  assert.equal(verified.valid, true, JSON.stringify(verified.issues))
+  assert.deepEqual((await verifyDpopProof(proof, request, { accessToken: token, expectedJkt: jkt, now: new Date("2026-07-27T12:00:00Z"), replayStore })).issues, ["DPOP_REPLAY"])
+
+  const mandate = await example("commerce/purchase-mandate.json"), envelope = await example("commerce/transaction-envelope.json")
+  const oauthClaims = oatiOAuthClaims(envelope, mandate, jkt)
+  assert.deepEqual(validateOAuthBinding(oauthClaims, envelope, jkt), [])
+  assert.ok(validateOAuthBinding({ ...oauthClaims, cnf: { jkt: "wrong" } }, envelope, jkt).includes("OAUTH_DPOP_KEY_MISMATCH"))
+})
+
+test("AuthZEN, Cedar, OPA, and Envoy adapters map one normalized authority context", async () => {
+  const mandate = await example("commerce/purchase-mandate.json"), envelope = await example("commerce/transaction-envelope.json")
+  const authzen = toAuthZenRequest(envelope, mandate)
+  assert.equal(authzen.subject.id, envelope.agent_id)
+  assert.equal(authzen.action.id, envelope.action)
+  const decision = fromAuthZenResponse({ decision: false, context: { policy_digest: "sha256:authzen", reason_codes: ["policy_denied"] } }, envelope, "oati:org:pdp", new Date("2026-07-27T12:00:00Z"))
+  assert.equal(decision.decision, "deny")
+  assert.equal(validateSchema("decision", decision).valid, true)
+  assert.equal(toCedarRequest(envelope, mandate).principal.type, "OatiAgent")
+  assert.equal(toOpaInput(envelope, mandate, decision).input.oati.decision, "deny")
+  assert.equal(opaAllowed({ result: true }), true)
+  assert.equal(opaAllowed({ result: { allow: true } }), false)
+
+  const envoy = fromEnvoyCheckRequest({ attributes: { request: { http: { method: "POST", path: "/weather", host: "api.example", headers: {
+    "oati-envelope": encodeOatiHeader(envelope), "oati-mandate": encodeOatiHeader(mandate),
+  } } } } })
+  assert.equal(envoy.envelope.id, envelope.id)
+  assert.equal(envoy.mandate.id, mandate.id)
 })
 
 const cryptoFixture = async (algorithm = "EdDSA", overrides = {}) => {

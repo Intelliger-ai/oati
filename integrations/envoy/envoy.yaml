@@ -1,0 +1,63 @@
+static_resources:
+  listeners:
+    - name: public_http
+      address:
+        socket_address: { address: 0.0.0.0, port_value: 8080 }
+      filter_chains:
+        - filters:
+            - name: envoy.filters.network.http_connection_manager
+              typed_config:
+                "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
+                stat_prefix: oati_gateway
+                route_config:
+                  name: protected_routes
+                  virtual_hosts:
+                    - name: application
+                      domains: ["*"]
+                      routes:
+                        - match: { prefix: "/" }
+                          route: { cluster: application }
+                http_filters:
+                  - name: envoy.filters.http.ext_authz
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
+                      transport_api_version: V3
+                      failure_mode_allow: false
+                      status_on_error: { code: ServiceUnavailable }
+                      grpc_service:
+                        envoy_grpc: { cluster_name: oati_authorizer }
+                        timeout: 2s
+                      authorization_request:
+                        allowed_headers:
+                          patterns:
+                            - { exact: authorization, ignore_case: true }
+                            - { exact: dpop, ignore_case: true }
+                            - { exact: oati-envelope, ignore_case: true }
+                            - { exact: oati-mandate, ignore_case: true }
+                            - { exact: oati-parent-mandate, ignore_case: true }
+                            - { exact: oati-transaction-id, ignore_case: true }
+                            - { exact: oati-correlation-id, ignore_case: true }
+                      authorization_response:
+                        allowed_upstream_headers:
+                          patterns:
+                            - { prefix: x-oati- }
+                  - name: envoy.filters.http.router
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
+  clusters:
+    - name: application
+      connect_timeout: 2s
+      type: STRICT_DNS
+      load_assignment:
+        cluster_name: application
+        endpoints: [{ lb_endpoints: [{ endpoint: { address: { socket_address: { address: application, port_value: 8080 } } } }] }]
+    - name: oati_authorizer
+      connect_timeout: 1s
+      type: STRICT_DNS
+      typed_extension_protocol_options:
+        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
+          "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
+          explicit_http_config: { http2_protocol_options: {} }
+      load_assignment:
+        cluster_name: oati_authorizer
+        endpoints: [{ lb_endpoints: [{ endpoint: { address: { socket_address: { address: oati-authz, port_value: 9001 } } } }] }]

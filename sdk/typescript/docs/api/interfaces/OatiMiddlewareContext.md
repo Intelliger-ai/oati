@@ -6,7 +6,7 @@
 
 # Interface: OatiMiddlewareContext
 
-Defined in: src/middleware.ts:63
+Defined in: [src/middleware.ts:63](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L63)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: src/middleware.ts:63
 
 > **correlationId**: `string`
 
-Defined in: src/middleware.ts:68
+Defined in: [src/middleware.ts:68](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L68)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: src/middleware.ts:68
 
 > **envelope**: [`TransactionEnvelope`](TransactionEnvelope.md)
 
-Defined in: src/middleware.ts:65
+Defined in: [src/middleware.ts:65](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L65)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: src/middleware.ts:65
 
 > **envelopeVerification**: [`VerificationResult`](VerificationResult.md)
 
-Defined in: src/middleware.ts:70
+Defined in: [src/middleware.ts:70](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L70)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: src/middleware.ts:70
 
 > **evaluation**: [`EvaluationResult`](EvaluationResult.md)
 
-Defined in: src/middleware.ts:73
+Defined in: [src/middleware.ts:73](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L73)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: src/middleware.ts:73
 
 > **mandate**: [`AgentMandate`](AgentMandate.md)
 
-Defined in: src/middleware.ts:66
+Defined in: [src/middleware.ts:66](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L66)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: src/middleware.ts:66
 
 > **mandateVerification**: [`VerificationResult`](VerificationResult.md)
 
-Defined in: src/middleware.ts:71
+Defined in: [src/middleware.ts:71](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L71)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: src/middleware.ts:71
 
 > `optional` **parentMandate?**: [`AgentMandate`](AgentMandate.md)
 
-Defined in: src/middleware.ts:67
+Defined in: [src/middleware.ts:67](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L67)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: src/middleware.ts:67
 
 > `optional` **parentMandateVerification?**: [`VerificationResult`](VerificationResult.md)
 
-Defined in: src/middleware.ts:72
+Defined in: [src/middleware.ts:72](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L72)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: src/middleware.ts:72
 
 > **request**: `Request`
 
-Defined in: src/middleware.ts:64
+Defined in: [src/middleware.ts:64](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L64)
 
 ***
 
@@ -86,4 +86,4 @@ Defined in: src/middleware.ts:64
 
 > **transactionId**: `string`
 
-Defined in: src/middleware.ts:69
+Defined in: [src/middleware.ts:69](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L69)

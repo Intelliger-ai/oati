@@ -17,4 +17,6 @@ The [`Deterministic Authority Evaluator 0.1`](AUTHORITY_EVALUATOR.md) defines ac
 
 The [`HTTP Middleware Profile 0.1`](HTTP_MIDDLEWARE_PROFILE.md) defines request carriers, HTTP digest binding, processing order, failure semantics, correlation identifiers, and signed Receipt delivery.
 
+The [`Protocol Adapter Profile 0.1`](PROTOCOL_ADAPTERS.md) defines MCP, A2A, OAuth/DPoP, AuthZEN, Cedar/OPA, and Envoy mappings.
+
 Domain behaviour is defined through [`profiles/`](profiles/). The first developer-preview profiles cover Commerce paid-API transactions and RWA controlled minting.

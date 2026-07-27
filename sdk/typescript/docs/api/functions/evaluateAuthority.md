@@ -8,7 +8,7 @@
 
 > **evaluateAuthority**(`request`): [`EvaluationResult`](../interfaces/EvaluationResult.md)
 
-Defined in: [src/evaluator.ts:73](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L73)
+Defined in: [src/evaluator.ts:73](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/evaluator.ts#L73)
 
 Deterministically evaluate authority from explicit objects, time, and prior usage.
 

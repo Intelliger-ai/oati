@@ -356,6 +356,7 @@ function compareDecimal(left: string, right: string): number {
 }
 
 export * from "./builders.js"
+export * from "./adapters.js"
 export * from "./canonical.js"
 export * from "./crypto.js"
 export * from "./errors.js"

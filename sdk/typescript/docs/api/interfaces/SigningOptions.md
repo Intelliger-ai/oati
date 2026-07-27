@@ -6,7 +6,7 @@
 
 # Interface: SigningOptions
 
-Defined in: [src/crypto.ts:26](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L26)
+Defined in: [src/crypto.ts:26](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L26)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/crypto.ts:26](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > **algorithm**: `"EdDSA"` \| `"ES256"`
 
-Defined in: [src/crypto.ts:27](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L27)
+Defined in: [src/crypto.ts:27](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L27)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/crypto.ts:27](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > **audience**: `string` \| `string`[]
 
-Defined in: [src/crypto.ts:30](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L30)
+Defined in: [src/crypto.ts:30](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L30)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/crypto.ts:30](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > `optional` **created?**: `string` \| `Date`
 
-Defined in: [src/crypto.ts:32](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L32)
+Defined in: [src/crypto.ts:32](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L32)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/crypto.ts:32](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > **expires**: `string` \| `Date`
 
-Defined in: [src/crypto.ts:33](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L33)
+Defined in: [src/crypto.ts:33](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L33)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [src/crypto.ts:33](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > **nonce**: `string`
 
-Defined in: [src/crypto.ts:31](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L31)
+Defined in: [src/crypto.ts:31](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L31)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [src/crypto.ts:31](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > **privateKey**: `CryptoKey` \| `JsonWebKey`
 
-Defined in: [src/crypto.ts:29](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L29)
+Defined in: [src/crypto.ts:29](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L29)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: [src/crypto.ts:29](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > **verificationMethod**: `string`
 
-Defined in: [src/crypto.ts:28](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L28)
+Defined in: [src/crypto.ts:28](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L28)

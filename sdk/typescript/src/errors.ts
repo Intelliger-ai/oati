@@ -15,6 +15,7 @@ export type OatiErrorCode =
   | "MIDDLEWARE_REPLAY"
   | "MIDDLEWARE_USAGE_CONFLICT"
   | "MIDDLEWARE_UNAVAILABLE"
+  | "ADAPTER_INVALID_INPUT"
 
 export interface OatiErrorOptions {
   cause?: unknown

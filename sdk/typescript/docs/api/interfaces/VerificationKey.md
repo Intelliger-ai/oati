@@ -6,7 +6,7 @@
 
 # Interface: VerificationKey
 
-Defined in: [src/crypto.ts:36](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L36)
+Defined in: [src/crypto.ts:36](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L36)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/crypto.ts:36](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > **algorithm**: `"EdDSA"` \| `"ES256"`
 
-Defined in: [src/crypto.ts:40](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L40)
+Defined in: [src/crypto.ts:40](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L40)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/crypto.ts:40](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > **controller**: `string`
 
-Defined in: [src/crypto.ts:38](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L38)
+Defined in: [src/crypto.ts:38](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L38)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/crypto.ts:38](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > **id**: `string`
 
-Defined in: [src/crypto.ts:37](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L37)
+Defined in: [src/crypto.ts:37](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L37)
 
 ***
 
@@ -38,15 +38,15 @@ Defined in: [src/crypto.ts:37](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > **issuer**: `string`
 
-Defined in: [src/crypto.ts:39](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L39)
+Defined in: [src/crypto.ts:39](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L39)
 
 ***
 
 ### proofStatus?
 
-> `optional` **proofStatus?**: `"verified"` \| `"invalid"` \| `"unavailable"` \| `"unknown"`
+> `optional` **proofStatus?**: `"unknown"` \| `"verified"` \| `"invalid"` \| `"unavailable"`
 
-Defined in: [src/crypto.ts:46](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L46)
+Defined in: [src/crypto.ts:46](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L46)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [src/crypto.ts:46](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > **publicKeyJwk**: `JsonWebKey`
 
-Defined in: [src/crypto.ts:41](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L41)
+Defined in: [src/crypto.ts:41](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L41)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [src/crypto.ts:41](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > `optional` **revokedAt?**: `string`
 
-Defined in: [src/crypto.ts:45](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L45)
+Defined in: [src/crypto.ts:45](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L45)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [src/crypto.ts:45](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > **status**: `"active"` \| `"revoked"` \| `"retired"`
 
-Defined in: [src/crypto.ts:42](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L42)
+Defined in: [src/crypto.ts:42](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L42)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [src/crypto.ts:42](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > **validFrom**: `string`
 
-Defined in: [src/crypto.ts:43](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L43)
+Defined in: [src/crypto.ts:43](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L43)
 
 ***
 
@@ -86,4 +86,4 @@ Defined in: [src/crypto.ts:43](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > `optional` **validUntil?**: `string`
 
-Defined in: [src/crypto.ts:44](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L44)
+Defined in: [src/crypto.ts:44](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L44)

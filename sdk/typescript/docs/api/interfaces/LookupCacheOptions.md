@@ -6,7 +6,7 @@
 
 # Interface: LookupCacheOptions
 
-Defined in: [src/lookup.ts:56](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L56)
+Defined in: [src/lookup.ts:56](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L56)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/lookup.ts:56](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > `optional` **maxEntries?**: `number`
 
-Defined in: [src/lookup.ts:56](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L56)
+Defined in: [src/lookup.ts:56](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L56)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/lookup.ts:56](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > `optional` **negativeTtlMs?**: `number`
 
-Defined in: [src/lookup.ts:56](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L56)
+Defined in: [src/lookup.ts:56](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L56)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [src/lookup.ts:56](https://github.com/Intelliger-ai/oati/blob/48aa12
 
 > `optional` **ttlMs?**: `number`
 
-Defined in: [src/lookup.ts:56](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L56)
+Defined in: [src/lookup.ts:56](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L56)
