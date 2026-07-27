@@ -93,6 +93,8 @@ oati sign --algorithm EdDSA --key ./private.jwk \
   --nonce 01K0EXAMPLE000000000000000 \
   --expires 5m ./examples/commerce/transaction-envelope.json
 
+oati evaluate ./evaluation-request.json
+
 oati commerce validate-offer ./examples/commerce/merchant-service-profile.json
 oati commerce validate-receipt \
   --mandate ./examples/commerce/purchase-mandate.json \
@@ -103,7 +105,7 @@ oati rwa validate-mint-mandate \
   ./examples/rwa/mint-mandate.json
 ```
 
-The current CLI is ready for object validation, fixtures, deterministic JSON processing, lookup integration, detached-JWS signing, and verification of key lifecycle, issuer trust, revocation, time, audience, and replay. Delegation subset proofs are not yet claimed. See [CLI documentation](cli/README.md).
+The current CLI is ready for object validation, fixtures, deterministic JSON processing, lookup integration, detached-JWS signing, trust verification, delegation subset proofs, non-amplification, and deterministic Commerce/RWA authority evaluation. See [CLI documentation](cli/README.md).
 
 ## Repository map
 
@@ -113,7 +115,7 @@ The current CLI is ready for object validation, fixtures, deterministic JSON pro
 | [`schemas/`](schemas/) | versioned JSON Schemas |
 | [`examples/`](examples/) | valid example objects and transactions |
 | [`cli/`](cli/) | developer CLI |
-| [`sdk/typescript/`](sdk/typescript/) | core/profile builders, JSON Schema validation, canonical JSON, lookup client, and typed errors |
+| [`sdk/typescript/`](sdk/typescript/) | builders, schemas, crypto/trust verification, deterministic authority evaluator, lookup, and typed errors |
 | [`conformance/`](conformance/) | shared fixtures, test vectors, and compatibility tests |
 | [`api/lookup.openapi.yaml`](api/lookup.openapi.yaml) | public lookup API contract for client generation |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | system boundaries and deployment model |
@@ -149,7 +151,7 @@ Do not report security vulnerabilities in a public issue. Until a dedicated secu
 
 ## Project status
 
-The repository is an early developer preview. Core and profile schemas, complete Commerce and RWA example flows, a functional CLI, a tested TypeScript SDK with embedded schema validation, public lookup, signing and trust verification, and cross-language cryptographic vectors are available. The cryptographic profile requires independent review; the broader normative specification, additional SDK languages, authority evaluator, and full conformance suite remain under active development. Production lookup operations are deliberately outside this repository.
+The repository is an early developer preview. Core and profile schemas, Commerce and RWA flows, a functional CLI, and a tested TypeScript SDK now cover schema validation, lookup, signing, trust verification, deterministic authority evaluation, non-amplification, and consumption. Cross-language cryptographic and evaluator vectors are available. The cryptographic profile requires independent review; additional SDK languages and the broader conformance suite remain under active development. Production lookup operations are deliberately outside this repository.
 
 Compatibility claims must reference a published OATI version and conformance-suite version.
 

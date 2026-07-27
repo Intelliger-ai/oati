@@ -76,6 +76,7 @@ export interface TransactionEnvelope {
   resource: string
   purpose?: string
   destination?: string
+  counterparty?: string
   protocol?: "http" | "grpc" | "mcp" | "a2a"
   commercial_profile?: string
   request_digest?: string
@@ -358,5 +359,6 @@ export * from "./builders.js"
 export * from "./canonical.js"
 export * from "./crypto.js"
 export * from "./errors.js"
+export * from "./evaluator.js"
 export * from "./lookup.js"
 export * from "./validation.js"

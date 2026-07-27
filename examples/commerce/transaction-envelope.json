@@ -8,6 +8,7 @@
   "resource": "oati:service:acme-weather:forecast",
   "purpose": "travel_planning",
   "destination": "buyer_application",
+  "counterparty": "oati:org:acme-weather",
   "protocol": "http",
   "commercial_profile": "forecast-eu-per-request-v1",
   "request_digest": "sha256:request-example-001",

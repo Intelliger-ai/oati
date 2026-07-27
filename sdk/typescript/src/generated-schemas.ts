@@ -269,6 +269,272 @@ export const schemas = {
       }
     }
   },
+  "evaluationRequest": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://schemas.intelliger.ai/oati/v1/evaluation-request.schema.json",
+    "title": "OATI Deterministic Authority Evaluation Request",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "oati_version",
+      "evaluation_time",
+      "mandate",
+      "envelope",
+      "usage"
+    ],
+    "properties": {
+      "oati_version": {
+        "const": "1.0"
+      },
+      "evaluation_time": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "mandate": {
+        "$ref": "https://schemas.intelliger.ai/oati/v1/mandate.schema.json"
+      },
+      "parent_mandate": {
+        "$ref": "https://schemas.intelliger.ai/oati/v1/mandate.schema.json"
+      },
+      "delegation_depth": {
+        "type": "integer",
+        "minimum": 0
+      },
+      "envelope": {
+        "$ref": "https://schemas.intelliger.ai/oati/v1/transaction-envelope.schema.json"
+      },
+      "usage": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "calls": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          },
+          "quantity": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+          },
+          "consumed": {
+            "type": "boolean"
+          },
+          "idempotency_keys": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "minted_supply": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+          }
+        }
+      },
+      "consumption": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "calls": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "amount": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          },
+          "quantity": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+          },
+          "idempotency_key": {
+            "type": "string"
+          },
+          "consume": {
+            "type": "boolean"
+          }
+        }
+      },
+      "commerce": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "merchant_organisation_id",
+          "service_id",
+          "offer_id",
+          "currency",
+          "quantity",
+          "unit_price",
+          "total_amount",
+          "idempotency_key"
+        ],
+        "properties": {
+          "merchant_organisation_id": {
+            "type": "string"
+          },
+          "service_id": {
+            "type": "string"
+          },
+          "offer_id": {
+            "type": "string"
+          },
+          "currency": {
+            "type": "string",
+            "pattern": "^[A-Z]{3}$"
+          },
+          "quantity": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "unit_price": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+          },
+          "total_amount": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "terms_digest": {
+            "type": "string"
+          }
+        }
+      },
+      "rwa": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "asset_id",
+          "state_claim_id",
+          "network",
+          "token_contract",
+          "operation",
+          "unit",
+          "quantity",
+          "reserve",
+          "approval_count",
+          "approval_roles",
+          "current_supply",
+          "claim_valid_until"
+        ],
+        "properties": {
+          "asset_id": {
+            "type": "string"
+          },
+          "state_claim_id": {
+            "type": "string"
+          },
+          "network": {
+            "type": "string"
+          },
+          "token_contract": {
+            "type": "string"
+          },
+          "operation": {
+            "enum": [
+              "mint",
+              "burn",
+              "transfer",
+              "redeem",
+              "publish_state"
+            ]
+          },
+          "unit": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+          },
+          "reserve": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+          },
+          "approval_count": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "approval_roles": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "current_supply": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+          },
+          "maximum_supply": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
+          },
+          "claim_valid_until": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    }
+  },
+  "evaluationResult": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://schemas.intelliger.ai/oati/v1/evaluation-result.schema.json",
+    "title": "OATI Deterministic Authority Evaluation Result",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "oati_version",
+      "decision",
+      "mandate_id",
+      "transaction_id",
+      "reason_codes",
+      "next_usage"
+    ],
+    "properties": {
+      "oati_version": {
+        "const": "1.0"
+      },
+      "decision": {
+        "enum": [
+          "allow",
+          "deny"
+        ]
+      },
+      "mandate_id": {
+        "type": "string"
+      },
+      "transaction_id": {
+        "type": "string"
+      },
+      "reason_codes": {
+        "type": "array",
+        "uniqueItems": true,
+        "items": {
+          "type": "string"
+        }
+      },
+      "next_usage": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  },
   "passport": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://schemas.intelliger.ai/oati/v1/passport.schema.json",
@@ -571,6 +837,9 @@ export const schemas = {
         "type": "string"
       },
       "destination": {
+        "type": "string"
+      },
+      "counterparty": {
         "type": "string"
       },
       "protocol": {

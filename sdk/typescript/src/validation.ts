@@ -5,6 +5,7 @@ import { schemas } from "./generated-schemas.js"
 
 export type OatiSchemaName =
   | "proof" | "verificationKey" | "issuer" | "revocation"
+  | "evaluationRequest" | "evaluationResult"
   | "passport" | "mandate" | "envelope" | "decision" | "receipt"
   | "commerceOffer" | "commerceMandate" | "commerceReceipt"
   | "rwaAsset" | "rwaStateClaim" | "rwaMandate" | "rwaReceipt"

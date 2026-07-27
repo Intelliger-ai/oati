@@ -204,6 +204,52 @@ func TestES256PrimitiveRoundTrip(t *testing.T) {
 	}
 }
 
+func TestEvaluatorConformanceVectors(t *testing.T) {
+	path := filepath.Join("..", "..", "..", "conformance", "evaluator", "cases.json")
+	suite, err := readObject(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	cases, ok := suite["cases"].([]any)
+	if !ok || len(cases) == 0 {
+		t.Fatal("missing evaluator cases")
+	}
+	for _, raw := range cases {
+		vector := objectFromAny(raw)
+		t.Run(stringValue(vector, "name"), func(t *testing.T) {
+			result, err := evaluateAuthority(objectValue(vector, "request"))
+			if err != nil {
+				t.Fatal(err)
+			}
+			expected := objectValue(vector, "expected")
+			if result["decision"] != expected["decision"] || !objectsEqual(result["reason_codes"], expected["reason_codes"]) {
+				t.Fatalf("unexpected decision: %#v expected %#v", result, expected)
+			}
+			if expectedUsage := objectValue(expected, "next_usage"); expectedUsage != nil && !objectsEqual(result["next_usage"], expectedUsage) {
+				t.Fatalf("unexpected usage: %#v expected %#v", result["next_usage"], expectedUsage)
+			}
+		})
+	}
+}
+
+func TestEvaluateCommandReturnsDeterministicJSON(t *testing.T) {
+	path := filepath.Join("..", "..", "..", "conformance", "evaluator", "cases.json")
+	suite, err := readObject(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	vector := objectFromAny(suite["cases"].([]any)[0])
+	request, _ := json.Marshal(vector["request"])
+	requestPath := writeFixture(t, string(request))
+	var stdout, stderr bytes.Buffer
+	if err := run([]string{"evaluate", requestPath}, &stdout, &stderr); err != nil {
+		t.Fatalf("evaluate: %v %s", err, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), `"decision": "allow"`) || !strings.Contains(stdout.String(), `"next_usage"`) {
+		t.Fatalf("unexpected output: %s", stdout.String())
+	}
+}
+
 func objectsEqual(left, right any) bool {
 	a, _ := json.Marshal(left)
 	b, _ := json.Marshal(right)

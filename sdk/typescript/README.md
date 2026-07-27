@@ -142,12 +142,43 @@ import {
 
 Profile semantic validators check cross-object constraints in addition to JSON Schema structure—for example Commerce price/currency limits and RWA reserve/approval constraints.
 
+## Deterministic authority evaluation
+
+```ts
+import { evaluateAuthority } from "@intelliger/oati/evaluator"
+
+const result = evaluateAuthority({
+  oati_version: "1.0",
+  evaluation_time: "2026-07-27T09:03:00Z",
+  mandate,
+  envelope,
+  usage: {
+    calls: 3,
+    amount: "0.60",
+    currency: "EUR",
+    quantity: "3",
+    consumed: false,
+    idempotency_keys: ["request-1", "request-2", "request-3"],
+  },
+  commerce: quotedPurchase,
+})
+
+if (result.decision === "allow") {
+  // Commit result.next_usage atomically with execution/receipt state.
+}
+```
+
+The evaluator uses only the supplied time and usage snapshot. It checks activation and expiry, core action/resource/counterparty/destination/purpose constraints, parent-child subset and non-amplification, calls and budget consumption, one-time use, Commerce cumulative pricing, and RWA reserve/approval/supply controls. Decimal arithmetic is exact and does not use floating point.
+
+Evaluation does not mutate or persist state. Production callers must atomically guard the prior snapshot and commit `next_usage` so concurrent requests cannot double-spend authority.
+
 ## Package entry points
 
 - `@intelliger/oati` — complete public API;
 - `@intelliger/oati/validation` — schema validation only;
 - `@intelliger/oati/lookup` — public resolver client only.
 - `@intelliger/oati/crypto` — signing, trust resolution, replay, and verification.
+- `@intelliger/oati/evaluator` — deterministic authority decisions and proposed usage transitions.
 
 Generated API documentation is available in [`docs/api/`](docs/api/README.md).
 

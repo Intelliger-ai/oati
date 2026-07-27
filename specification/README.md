@@ -13,4 +13,6 @@ The first normative object set is Agent Passport, Agent Mandate, Agent Transacti
 
 The developer-preview [`Cryptographic Profile 1.0`](CRYPTOGRAPHIC_PROFILE.md) defines canonical detached JWS proofs, Ed25519 and P-256, key rotation, issuer trust, revocation, time, audience, and replay verification.
 
+The [`Deterministic Authority Evaluator 0.1`](AUTHORITY_EVALUATOR.md) defines activation, scope, delegation subset, non-amplification, consumption, Commerce, and RWA decision semantics.
+
 Domain behaviour is defined through [`profiles/`](profiles/). The first developer-preview profiles cover Commerce paid-API transactions and RWA controlled minting.

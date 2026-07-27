@@ -6,7 +6,7 @@
 
 # Class: MemoryReplayCache
 
-Defined in: src/crypto.ts:187
+Defined in: [src/crypto.ts:187](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L187)
 
 ## Implements
 
@@ -28,7 +28,7 @@ Defined in: src/crypto.ts:187
 
 > **checkAndStore**(`key`, `expiresAt`, `verificationTime?`): `boolean`
 
-Defined in: src/crypto.ts:189
+Defined in: [src/crypto.ts:189](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L189)
 
 Atomically return false when the key was already present and unexpired.
 

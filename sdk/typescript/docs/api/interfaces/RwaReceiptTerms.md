@@ -6,7 +6,7 @@
 
 # Interface: RwaReceiptTerms
 
-Defined in: [src/index.ts:199](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L199)
+Defined in: [src/index.ts:200](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/index.ts#L200)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/index.ts:199](https://github.com/Intelliger-ai/oati/blob/c08e10
 
 > **approval\_count**: `number`
 
-Defined in: [src/index.ts:208](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L208)
+Defined in: [src/index.ts:209](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/index.ts#L209)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/index.ts:208](https://github.com/Intelliger-ai/oati/blob/c08e10
 
 > **asset\_id**: `string`
 
-Defined in: [src/index.ts:200](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L200)
+Defined in: [src/index.ts:201](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/index.ts#L201)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/index.ts:200](https://github.com/Intelliger-ai/oati/blob/c08e10
 
 > **chain\_transaction\_hash**: `string`
 
-Defined in: [src/index.ts:207](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L207)
+Defined in: [src/index.ts:208](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/index.ts#L208)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/index.ts:207](https://github.com/Intelliger-ai/oati/blob/c08e10
 
 > **network**: `string`
 
-Defined in: [src/index.ts:203](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L203)
+Defined in: [src/index.ts:204](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/index.ts#L204)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [src/index.ts:203](https://github.com/Intelliger-ai/oati/blob/c08e10
 
 > **operation**: `"mint"` \| `"burn"` \| `"transfer"` \| `"redeem"` \| `"publish_state"`
 
-Defined in: [src/index.ts:202](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L202)
+Defined in: [src/index.ts:203](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/index.ts#L203)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [src/index.ts:202](https://github.com/Intelliger-ai/oati/blob/c08e10
 
 > **quantity**: `` `${number}` ``
 
-Defined in: [src/index.ts:205](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L205)
+Defined in: [src/index.ts:206](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/index.ts#L206)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [src/index.ts:205](https://github.com/Intelliger-ai/oati/blob/c08e10
 
 > `optional` **resulting\_supply?**: `` `${number}` ``
 
-Defined in: [src/index.ts:209](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L209)
+Defined in: [src/index.ts:210](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/index.ts#L210)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [src/index.ts:209](https://github.com/Intelliger-ai/oati/blob/c08e10
 
 > **state\_claim\_id**: `string`
 
-Defined in: [src/index.ts:201](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L201)
+Defined in: [src/index.ts:202](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/index.ts#L202)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [src/index.ts:201](https://github.com/Intelliger-ai/oati/blob/c08e10
 
 > **token\_contract**: `string`
 
-Defined in: [src/index.ts:204](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L204)
+Defined in: [src/index.ts:205](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/index.ts#L205)
 
 ***
 
@@ -86,4 +86,4 @@ Defined in: [src/index.ts:204](https://github.com/Intelliger-ai/oati/blob/c08e10
 
 > **unit**: `string`
 
-Defined in: [src/index.ts:206](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L206)
+Defined in: [src/index.ts:207](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/index.ts#L207)

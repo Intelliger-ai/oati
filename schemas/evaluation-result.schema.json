@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/v1/evaluation-result.schema.json",
+  "title": "OATI Deterministic Authority Evaluation Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["oati_version", "decision", "mandate_id", "transaction_id", "reason_codes", "next_usage"],
+  "properties": {
+    "oati_version": { "const": "1.0" },
+    "decision": { "enum": ["allow", "deny"] },
+    "mandate_id": { "type": "string" },
+    "transaction_id": { "type": "string" },
+    "reason_codes": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+    "next_usage": { "type": "object", "additionalProperties": true }
+  }
+}

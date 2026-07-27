@@ -14,6 +14,7 @@ import {
   createPassport,
   createReceipt,
   createTransactionEnvelope,
+  evaluateAuthority,
   MemoryReplayCache,
   signDocument,
   StaticTrustResolver,
@@ -28,7 +29,7 @@ const cryptoVector = async (path) => JSON.parse(await readFile(new URL(`../../..
 
 test("all published SDK schemas are bundled", () => {
   assert.deepEqual(schemaNames, [
-    "proof", "verificationKey", "issuer", "revocation",
+    "proof", "verificationKey", "issuer", "revocation", "evaluationRequest", "evaluationResult",
     "passport", "mandate", "envelope", "decision", "receipt", "commerceOffer",
     "commerceMandate", "commerceReceipt", "rwaAsset", "rwaStateClaim", "rwaMandate", "rwaReceipt",
   ])
@@ -248,4 +249,16 @@ test("TypeScript verifies the deterministic vector produced by the Go CLI", asyn
     replayCache: new MemoryReplayCache(), now: new Date("2026-07-27T12:01:00Z"),
   })
   assert.ok(rejected.issues.some((issue) => issue.code === "SIGNATURE_INVALID"))
+})
+
+test("deterministic evaluator satisfies every shared conformance case", async () => {
+  const suite = JSON.parse(await readFile(new URL("../../../conformance/evaluator/cases.json", import.meta.url), "utf8"))
+  for (const vector of suite.cases) {
+    const result = evaluateAuthority(vector.request)
+    assert.equal(result.decision, vector.expected.decision, vector.name)
+    assert.deepEqual(result.reason_codes, vector.expected.reason_codes, vector.name)
+    if (vector.expected.next_usage) assert.deepEqual(result.next_usage, vector.expected.next_usage, vector.name)
+    assert.equal(validateSchema("evaluationRequest", vector.request).valid, true, vector.name)
+    assert.equal(validateSchema("evaluationResult", result).valid, true, vector.name)
+  }
 })

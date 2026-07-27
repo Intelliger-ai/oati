@@ -6,7 +6,7 @@
 
 # Interface: LookupClientOptions
 
-Defined in: [src/lookup.ts:23](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L23)
+Defined in: [src/lookup.ts:23](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L23)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/lookup.ts:23](https://github.com/Intelliger-ai/oati/blob/c08e10
 
 > `optional` **baseUrl?**: `string`
 
-Defined in: [src/lookup.ts:24](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L24)
+Defined in: [src/lookup.ts:24](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L24)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/lookup.ts:24](https://github.com/Intelliger-ai/oati/blob/c08e10
 
 > `optional` **fetch?**: (`input`, `init?`) => `Promise`\<`Response`\>
 
-Defined in: [src/lookup.ts:25](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L25)
+Defined in: [src/lookup.ts:25](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L25)
 
 [MDN Reference](https://developer.mozilla.org/docs/Web/API/Window/fetch)
 
@@ -46,7 +46,7 @@ Defined in: [src/lookup.ts:25](https://github.com/Intelliger-ai/oati/blob/c08e10
 
 > `optional` **headers?**: `HeadersInit`
 
-Defined in: [src/lookup.ts:27](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L27)
+Defined in: [src/lookup.ts:27](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L27)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [src/lookup.ts:27](https://github.com/Intelliger-ai/oati/blob/c08e10
 
 > `optional` **timeoutMs?**: `number`
 
-Defined in: [src/lookup.ts:26](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L26)
+Defined in: [src/lookup.ts:26](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/lookup.ts#L26)

@@ -6,7 +6,7 @@
 
 # Interface: SigningOptions
 
-Defined in: src/crypto.ts:26
+Defined in: [src/crypto.ts:26](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L26)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: src/crypto.ts:26
 
 > **algorithm**: `"EdDSA"` \| `"ES256"`
 
-Defined in: src/crypto.ts:27
+Defined in: [src/crypto.ts:27](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L27)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: src/crypto.ts:27
 
 > **audience**: `string` \| `string`[]
 
-Defined in: src/crypto.ts:30
+Defined in: [src/crypto.ts:30](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L30)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: src/crypto.ts:30
 
 > `optional` **created?**: `string` \| `Date`
 
-Defined in: src/crypto.ts:32
+Defined in: [src/crypto.ts:32](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L32)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: src/crypto.ts:32
 
 > **expires**: `string` \| `Date`
 
-Defined in: src/crypto.ts:33
+Defined in: [src/crypto.ts:33](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L33)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: src/crypto.ts:33
 
 > **nonce**: `string`
 
-Defined in: src/crypto.ts:31
+Defined in: [src/crypto.ts:31](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L31)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: src/crypto.ts:31
 
 > **privateKey**: `CryptoKey` \| `JsonWebKey`
 
-Defined in: src/crypto.ts:29
+Defined in: [src/crypto.ts:29](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L29)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: src/crypto.ts:29
 
 > **verificationMethod**: `string`
 
-Defined in: src/crypto.ts:28
+Defined in: [src/crypto.ts:28](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L28)

@@ -48,6 +48,9 @@ oati verify \
   --replay-cache ./.oati-replay.json \
   ./signed-envelope.json
 
+# Evaluate scope, delegation, budgets, Commerce/RWA constraints, and consumption
+oati evaluate ./evaluation-request.json
+
 # Validate the Commerce paid-API flow
 oati commerce validate-offer ./examples/commerce/merchant-service-profile.json
 oati commerce validate-mandate ./examples/commerce/purchase-mandate.json
@@ -74,6 +77,8 @@ oati rwa validate-receipt \
 
 The CLI implements the developer-preview [OATI Cryptographic Profile](../specification/CRYPTOGRAPHIC_PROFILE.md), including Ed25519 and P-256. Its file replay cache is intended for local and single-process workflows. Production gateways require shared atomic replay storage and KMS/HSM-backed signing.
 
+`evaluate` implements the [Deterministic Authority Evaluator](../specification/AUTHORITY_EVALUATOR.md). Evaluation requests include their own time and prior usage state. An allow result proposes `next_usage`; the CLI never persists it.
+
 ## Current boundary
 
-The CLI is ready for schema-oriented development, fixtures, local testing, canonical JSON, public lookup, signing, and full proof verification. Child-Mandate non-amplification proofs remain planned for the authority-evaluation milestone.
+The CLI is ready for schema-oriented development, fixtures, local testing, canonical JSON, public lookup, signing, proof verification, child-Mandate non-amplification, and deterministic authority evaluation.

@@ -10,6 +10,8 @@ const entries = {
   verificationKey: "verification-key.schema.json",
   issuer: "issuer.schema.json",
   revocation: "revocation.schema.json",
+  evaluationRequest: "evaluation-request.schema.json",
+  evaluationResult: "evaluation-result.schema.json",
   passport: "passport.schema.json",
   mandate: "mandate.schema.json",
   envelope: "transaction-envelope.schema.json",

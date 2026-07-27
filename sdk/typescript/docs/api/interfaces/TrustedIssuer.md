@@ -6,7 +6,7 @@
 
 # Interface: TrustedIssuer
 
-Defined in: src/crypto.ts:49
+Defined in: [src/crypto.ts:49](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L49)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: src/crypto.ts:49
 
 > **id**: `string`
 
-Defined in: src/crypto.ts:50
+Defined in: [src/crypto.ts:50](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L50)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: src/crypto.ts:50
 
 > `optional` **parent?**: `string`
 
-Defined in: src/crypto.ts:51
+Defined in: [src/crypto.ts:51](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L51)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: src/crypto.ts:51
 
 > `optional` **proofStatus?**: `"verified"` \| `"invalid"` \| `"unavailable"` \| `"unknown"`
 
-Defined in: src/crypto.ts:56
+Defined in: [src/crypto.ts:56](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L56)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: src/crypto.ts:56
 
 > `optional` **revokedAt?**: `string`
 
-Defined in: src/crypto.ts:55
+Defined in: [src/crypto.ts:55](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L55)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: src/crypto.ts:55
 
 > **status**: `"active"` \| `"revoked"` \| `"suspended"`
 
-Defined in: src/crypto.ts:52
+Defined in: [src/crypto.ts:52](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L52)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: src/crypto.ts:52
 
 > `optional` **validFrom?**: `string`
 
-Defined in: src/crypto.ts:53
+Defined in: [src/crypto.ts:53](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L53)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: src/crypto.ts:53
 
 > `optional` **validUntil?**: `string`
 
-Defined in: src/crypto.ts:54
+Defined in: [src/crypto.ts:54](https://github.com/Intelliger-ai/oati/blob/c5e5048f3717fa2834ac9d3541ad9c4be1c89965/sdk/typescript/src/crypto.ts#L54)

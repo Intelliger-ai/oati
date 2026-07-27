@@ -15,6 +15,7 @@
     "resource": { "type": "string" },
     "purpose": { "type": "string" },
     "destination": { "type": "string" },
+    "counterparty": { "type": "string" },
     "protocol": { "enum": ["http", "grpc", "mcp", "a2a"] },
     "commercial_profile": { "type": "string" },
     "request_digest": { "type": "string" },
