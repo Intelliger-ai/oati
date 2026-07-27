@@ -8,4 +8,4 @@
 
 > **JsonValue** = [`JsonPrimitive`](JsonPrimitive.md) \| `JsonValue`[] \| \{\[`key`: `string`\]: `JsonValue`; \}
 
-Defined in: [src/canonical.ts:4](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/canonical.ts#L4)
+Defined in: [src/canonical.ts:4](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/canonical.ts#L4)

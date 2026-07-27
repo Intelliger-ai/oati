@@ -6,7 +6,7 @@
 
 # Interface: AdapterEnvelopeInput
 
-Defined in: src/adapters.ts:9
+Defined in: [src/adapters.ts:9](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L9)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: src/adapters.ts:9
 
 > **agentId**: `` `oati:agent:${string}` ``
 
-Defined in: src/adapters.ts:10
+Defined in: [src/adapters.ts:10](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L10)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: src/adapters.ts:10
 
 > **id**: `` `oati:tx:${string}` ``
 
-Defined in: src/adapters.ts:10
+Defined in: [src/adapters.ts:10](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L10)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: src/adapters.ts:10
 
 > **issuedAt**: `string`
 
-Defined in: src/adapters.ts:11
+Defined in: [src/adapters.ts:11](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L11)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: src/adapters.ts:11
 
 > **mandateId**: `` `oati:mandate:${string}` ``
 
-Defined in: src/adapters.ts:11
+Defined in: [src/adapters.ts:11](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L11)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: src/adapters.ts:11
 
 > **nonce**: `string`
 
-Defined in: src/adapters.ts:11
+Defined in: [src/adapters.ts:11](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L11)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: src/adapters.ts:11
 
 > **organisationId**: `` `oati:org:${string}` ``
 
-Defined in: src/adapters.ts:10
+Defined in: [src/adapters.ts:10](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L10)
 
 ***
 
@@ -62,4 +62,4 @@ Defined in: src/adapters.ts:10
 
 > **purpose**: `string`
 
-Defined in: src/adapters.ts:11
+Defined in: [src/adapters.ts:11](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L11)

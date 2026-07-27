@@ -1,6 +1,6 @@
 {
   "name": "@intelliger/oati",
-  "version": "0.7.0-dev.0",
+  "version": "0.8.0-dev.0",
   "description": "TypeScript SDK for OATI objects, trust verification, deterministic authority evaluation, Commerce, RWA, and lookup",
   "type": "module",
   "license": "Apache-2.0",
@@ -32,6 +32,10 @@
     "./evaluator": {
       "types": "./dist/evaluator.d.ts",
       "import": "./dist/evaluator.js"
+    },
+    "./development": {
+      "types": "./dist/development.d.ts",
+      "import": "./dist/development.js"
     }
   },
   "files": ["dist", "docs/api", "README.md"],

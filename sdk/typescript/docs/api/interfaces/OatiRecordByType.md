@@ -6,7 +6,7 @@
 
 # Interface: OatiRecordByType
 
-Defined in: [src/lookup.ts:36](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L36)
+Defined in: [src/lookup.ts:36](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L36)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/lookup.ts:36](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **agent**: [`AgentRecord`](AgentRecord.md)
 
-Defined in: [src/lookup.ts:37](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L37)
+Defined in: [src/lookup.ts:37](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L37)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/lookup.ts:37](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **issuer**: [`IssuerRecord`](IssuerRecord.md)
 
-Defined in: [src/lookup.ts:38](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L38)
+Defined in: [src/lookup.ts:38](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L38)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/lookup.ts:38](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **key**: [`KeyRecord`](KeyRecord.md)
 
-Defined in: [src/lookup.ts:38](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L38)
+Defined in: [src/lookup.ts:38](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L38)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/lookup.ts:38](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **mandate**: [`MandateRecord`](MandateRecord.md)
 
-Defined in: [src/lookup.ts:37](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L37)
+Defined in: [src/lookup.ts:37](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L37)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [src/lookup.ts:37](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **organisation**: [`OrganisationRecord`](OrganisationRecord.md)
 
-Defined in: [src/lookup.ts:37](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L37)
+Defined in: [src/lookup.ts:37](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L37)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [src/lookup.ts:37](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **passport**: [`PassportRecord`](PassportRecord.md)
 
-Defined in: [src/lookup.ts:37](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L37)
+Defined in: [src/lookup.ts:37](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L37)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [src/lookup.ts:37](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **receipt**: [`ReceiptRecord`](ReceiptRecord.md)
 
-Defined in: [src/lookup.ts:38](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L38)
+Defined in: [src/lookup.ts:38](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L38)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [src/lookup.ts:38](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **revocation**: [`RevocationRecord`](RevocationRecord.md)
 
-Defined in: [src/lookup.ts:38](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L38)
+Defined in: [src/lookup.ts:38](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L38)

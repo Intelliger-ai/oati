@@ -6,7 +6,7 @@
 
 # Interface: OatiOAuthClaims
 
-Defined in: src/adapters.ts:120
+Defined in: [src/adapters.ts:120](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L120)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: src/adapters.ts:120
 
 > **cnf**: `object`
 
-Defined in: src/adapters.ts:121
+Defined in: [src/adapters.ts:121](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L121)
 
 #### jkt
 
@@ -26,7 +26,7 @@ Defined in: src/adapters.ts:121
 
 > **oati**: `object`
 
-Defined in: src/adapters.ts:122
+Defined in: [src/adapters.ts:122](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L122)
 
 #### agent\_id
 

@@ -6,7 +6,7 @@
 
 # Interface: McpProtectedResourceMetadata
 
-Defined in: src/adapters.ts:14
+Defined in: [src/adapters.ts:14](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L14)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: src/adapters.ts:14
 
 > **authorization\_servers**: `string`[]
 
-Defined in: src/adapters.ts:15
+Defined in: [src/adapters.ts:15](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L15)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: src/adapters.ts:15
 
 > **oati**: `object`
 
-Defined in: src/adapters.ts:16
+Defined in: [src/adapters.ts:16](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L16)
 
 #### envelope\_header
 
@@ -46,7 +46,7 @@ Defined in: src/adapters.ts:16
 
 > **resource**: `string`
 
-Defined in: src/adapters.ts:15
+Defined in: [src/adapters.ts:15](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L15)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: src/adapters.ts:15
 
 > `optional` **scopes\_supported?**: `string`[]
 
-Defined in: src/adapters.ts:15
+Defined in: [src/adapters.ts:15](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L15)

@@ -1,0 +1,221 @@
+{
+  "report_version": "1.0",
+  "suite_version": "0.1.0",
+  "standard_version": "1.0",
+  "implementation": {
+    "name": "@intelliger/oati",
+    "version": "0.8.0-dev.0",
+    "language": "typescript"
+  },
+  "summary": {
+    "total": 22,
+    "passed": 22,
+    "failed": 0
+  },
+  "results": [
+    {
+      "id": "core.passport.valid",
+      "category": "core",
+      "status": "pass",
+      "expected_outcome": "pass",
+      "observed_outcome": "pass",
+      "codes": []
+    },
+    {
+      "id": "core.passport.invalid",
+      "category": "core",
+      "status": "pass",
+      "expected_outcome": "fail",
+      "observed_outcome": "fail",
+      "codes": [
+        "SCHEMA_CONST",
+        "SCHEMA_MINITEMS",
+        "SCHEMA_PATTERN"
+      ]
+    },
+    {
+      "id": "core.mandate.valid",
+      "category": "core",
+      "status": "pass",
+      "expected_outcome": "pass",
+      "observed_outcome": "pass",
+      "codes": []
+    },
+    {
+      "id": "core.mandate.invalid",
+      "category": "core",
+      "status": "pass",
+      "expected_outcome": "fail",
+      "observed_outcome": "fail",
+      "codes": [
+        "SCHEMA_ADDITIONALPROPERTIES",
+        "SCHEMA_MINITEMS"
+      ]
+    },
+    {
+      "id": "core.envelope.valid",
+      "category": "core",
+      "status": "pass",
+      "expected_outcome": "pass",
+      "observed_outcome": "pass",
+      "codes": []
+    },
+    {
+      "id": "core.envelope.invalid",
+      "category": "core",
+      "status": "pass",
+      "expected_outcome": "fail",
+      "observed_outcome": "fail",
+      "codes": [
+        "SCHEMA_FORMAT",
+        "SCHEMA_MINLENGTH"
+      ]
+    },
+    {
+      "id": "core.decision.valid",
+      "category": "core",
+      "status": "pass",
+      "expected_outcome": "pass",
+      "observed_outcome": "pass",
+      "codes": []
+    },
+    {
+      "id": "core.decision.invalid",
+      "category": "core",
+      "status": "pass",
+      "expected_outcome": "fail",
+      "observed_outcome": "fail",
+      "codes": [
+        "SCHEMA_ENUM",
+        "SCHEMA_MINLENGTH",
+        "SCHEMA_PATTERN"
+      ]
+    },
+    {
+      "id": "core.receipt.valid",
+      "category": "core",
+      "status": "pass",
+      "expected_outcome": "pass",
+      "observed_outcome": "pass",
+      "codes": []
+    },
+    {
+      "id": "core.receipt.invalid",
+      "category": "core",
+      "status": "pass",
+      "expected_outcome": "fail",
+      "observed_outcome": "fail",
+      "codes": [
+        "SCHEMA_PATTERN",
+        "SCHEMA_REQUIRED"
+      ]
+    },
+    {
+      "id": "canonicalization.nested",
+      "category": "canonicalization",
+      "status": "pass",
+      "expected_outcome": "pass",
+      "observed_outcome": "pass",
+      "codes": []
+    },
+    {
+      "id": "canonicalization.numbers",
+      "category": "canonicalization",
+      "status": "pass",
+      "expected_outcome": "pass",
+      "observed_outcome": "pass",
+      "codes": []
+    },
+    {
+      "id": "signature.ed25519.valid",
+      "category": "signature",
+      "status": "pass",
+      "expected_outcome": "pass",
+      "observed_outcome": "pass",
+      "codes": []
+    },
+    {
+      "id": "signature.ed25519.tampered",
+      "category": "signature",
+      "status": "pass",
+      "expected_outcome": "fail",
+      "observed_outcome": "fail",
+      "codes": [
+        "SIGNATURE_INVALID"
+      ]
+    },
+    {
+      "id": "revocation.key",
+      "category": "revocation-expiry",
+      "status": "pass",
+      "expected_outcome": "fail",
+      "observed_outcome": "fail",
+      "codes": [
+        "KEY_REVOKED"
+      ]
+    },
+    {
+      "id": "expiry.proof",
+      "category": "revocation-expiry",
+      "status": "pass",
+      "expected_outcome": "fail",
+      "observed_outcome": "fail",
+      "codes": [
+        "PROOF_EXPIRED",
+        "PROOF_TOO_OLD"
+      ]
+    },
+    {
+      "id": "audience.mismatch",
+      "category": "replay-audience",
+      "status": "pass",
+      "expected_outcome": "fail",
+      "observed_outcome": "fail",
+      "codes": [
+        "AUDIENCE_MISMATCH"
+      ]
+    },
+    {
+      "id": "replay.second-use",
+      "category": "replay-audience",
+      "status": "pass",
+      "expected_outcome": "fail",
+      "observed_outcome": "fail",
+      "codes": [
+        "REPLAY_DETECTED"
+      ]
+    },
+    {
+      "id": "evaluator.authority-and-delegation",
+      "category": "delegation",
+      "status": "pass",
+      "expected_outcome": "pass",
+      "observed_outcome": "pass",
+      "codes": []
+    },
+    {
+      "id": "evaluator.commerce",
+      "category": "commerce",
+      "status": "pass",
+      "expected_outcome": "pass",
+      "observed_outcome": "pass",
+      "codes": []
+    },
+    {
+      "id": "evaluator.rwa",
+      "category": "rwa",
+      "status": "pass",
+      "expected_outcome": "pass",
+      "observed_outcome": "pass",
+      "codes": []
+    },
+    {
+      "id": "privacy.public-projection",
+      "category": "privacy",
+      "status": "pass",
+      "expected_outcome": "pass",
+      "observed_outcome": "pass",
+      "codes": []
+    }
+  ]
+}

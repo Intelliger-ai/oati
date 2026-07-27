@@ -6,7 +6,7 @@
 
 # Interface: ExtractedOatiRequest
 
-Defined in: [src/middleware.ts:23](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L23)
+Defined in: [src/middleware.ts:23](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/middleware.ts#L23)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/middleware.ts:23](https://github.com/Intelliger-ai/oati/blob/fb
 
 > **envelope**: [`TransactionEnvelope`](TransactionEnvelope.md)
 
-Defined in: [src/middleware.ts:24](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L24)
+Defined in: [src/middleware.ts:24](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/middleware.ts#L24)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/middleware.ts:24](https://github.com/Intelliger-ai/oati/blob/fb
 
 > **mandate**: [`AgentMandate`](AgentMandate.md)
 
-Defined in: [src/middleware.ts:25](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L25)
+Defined in: [src/middleware.ts:25](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/middleware.ts#L25)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [src/middleware.ts:25](https://github.com/Intelliger-ai/oati/blob/fb
 
 > `optional` **parentMandate?**: [`AgentMandate`](AgentMandate.md)
 
-Defined in: [src/middleware.ts:26](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L26)
+Defined in: [src/middleware.ts:26](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/middleware.ts#L26)

@@ -6,7 +6,7 @@
 
 # Interface: AgentMandate
 
-Defined in: [src/index.ts:46](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L46)
+Defined in: [src/index.ts:48](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L48)
 
 ## Extended by
 
@@ -19,7 +19,7 @@ Defined in: [src/index.ts:46](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > **actions**: `string`[]
 
-Defined in: [src/index.ts:54](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L54)
+Defined in: [src/index.ts:56](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L56)
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: [src/index.ts:54](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > `optional` **counterparties?**: `string`[]
 
-Defined in: [src/index.ts:56](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L56)
+Defined in: [src/index.ts:58](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L58)
 
 ***
 
@@ -35,7 +35,7 @@ Defined in: [src/index.ts:56](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > `optional` **data\_use?**: `Record`\<`string`, `unknown`\>
 
-Defined in: [src/index.ts:59](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L59)
+Defined in: [src/index.ts:61](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L61)
 
 ***
 
@@ -43,7 +43,7 @@ Defined in: [src/index.ts:59](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > `optional` **delegation?**: `object`
 
-Defined in: [src/index.ts:60](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L60)
+Defined in: [src/index.ts:62](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L62)
 
 #### allowed
 
@@ -59,7 +59,7 @@ Defined in: [src/index.ts:60](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > `optional` **destinations?**: `string`[]
 
-Defined in: [src/index.ts:57](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L57)
+Defined in: [src/index.ts:59](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L59)
 
 ***
 
@@ -67,7 +67,7 @@ Defined in: [src/index.ts:57](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > **expires\_at**: `string`
 
-Defined in: [src/index.ts:62](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L62)
+Defined in: [src/index.ts:64](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L64)
 
 ***
 
@@ -75,7 +75,7 @@ Defined in: [src/index.ts:62](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > `optional` **extensions?**: `Record`\<`string`, `unknown`\>
 
-Defined in: [src/index.ts:65](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L65)
+Defined in: [src/index.ts:67](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L67)
 
 ***
 
@@ -83,7 +83,7 @@ Defined in: [src/index.ts:65](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > **id**: `` `oati:mandate:${string}` ``
 
-Defined in: [src/index.ts:48](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L48)
+Defined in: [src/index.ts:50](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L50)
 
 ***
 
@@ -91,7 +91,7 @@ Defined in: [src/index.ts:48](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > **issuer**: `string`
 
-Defined in: [src/index.ts:49](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L49)
+Defined in: [src/index.ts:51](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L51)
 
 ***
 
@@ -99,7 +99,7 @@ Defined in: [src/index.ts:49](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > `optional` **limits?**: `Record`\<`string`, `unknown`\>
 
-Defined in: [src/index.ts:58](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L58)
+Defined in: [src/index.ts:60](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L60)
 
 ***
 
@@ -107,7 +107,7 @@ Defined in: [src/index.ts:58](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > **not\_before**: `string`
 
-Defined in: [src/index.ts:61](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L61)
+Defined in: [src/index.ts:63](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L63)
 
 ***
 
@@ -115,7 +115,7 @@ Defined in: [src/index.ts:61](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > **oati\_version**: `"1.0"`
 
-Defined in: [src/index.ts:47](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L47)
+Defined in: [src/index.ts:49](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L49)
 
 ***
 
@@ -123,7 +123,7 @@ Defined in: [src/index.ts:47](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > `optional` **parent\_mandate?**: `string`
 
-Defined in: [src/index.ts:52](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L52)
+Defined in: [src/index.ts:54](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L54)
 
 ***
 
@@ -131,7 +131,7 @@ Defined in: [src/index.ts:52](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > `optional` **profile?**: `string`
 
-Defined in: [src/index.ts:64](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L64)
+Defined in: [src/index.ts:66](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L66)
 
 ***
 
@@ -139,7 +139,7 @@ Defined in: [src/index.ts:64](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > `optional` **proof?**: [`Proof`](Proof.md)
 
-Defined in: [src/index.ts:66](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L66)
+Defined in: [src/index.ts:68](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L68)
 
 ***
 
@@ -147,7 +147,7 @@ Defined in: [src/index.ts:66](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > **purpose**: `string`
 
-Defined in: [src/index.ts:53](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L53)
+Defined in: [src/index.ts:55](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L55)
 
 ***
 
@@ -155,7 +155,7 @@ Defined in: [src/index.ts:53](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > `optional` **resources?**: `string`[]
 
-Defined in: [src/index.ts:55](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L55)
+Defined in: [src/index.ts:57](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L57)
 
 ***
 
@@ -163,7 +163,7 @@ Defined in: [src/index.ts:55](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > `optional` **sponsor?**: `string`
 
-Defined in: [src/index.ts:51](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L51)
+Defined in: [src/index.ts:53](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L53)
 
 ***
 
@@ -171,7 +171,7 @@ Defined in: [src/index.ts:51](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > **status**: `"active"` \| `"suspended"` \| `"revoked"` \| `"expired"` \| `"consumed"`
 
-Defined in: [src/index.ts:63](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L63)
+Defined in: [src/index.ts:65](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L65)
 
 ***
 
@@ -179,4 +179,4 @@ Defined in: [src/index.ts:63](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > **subject**: `` `oati:agent:${string}` ``
 
-Defined in: [src/index.ts:50](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L50)
+Defined in: [src/index.ts:52](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L52)

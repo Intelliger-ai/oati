@@ -8,7 +8,7 @@
 
 > **createAssetStateClaim**(`claim`): [`AssetStateClaim`](../interfaces/AssetStateClaim.md)
 
-Defined in: [src/index.ts:261](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L261)
+Defined in: [src/index.ts:263](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L263)
 
 ## Parameters
 

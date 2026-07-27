@@ -6,7 +6,7 @@
 
 # Interface: DpopVerificationOptions
 
-Defined in: src/adapters.ts:71
+Defined in: [src/adapters.ts:71](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L71)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: src/adapters.ts:71
 
 > **accessToken**: `string`
 
-Defined in: src/adapters.ts:71
+Defined in: [src/adapters.ts:71](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L71)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: src/adapters.ts:71
 
 > `optional` **clockSkewSeconds?**: `number`
 
-Defined in: src/adapters.ts:71
+Defined in: [src/adapters.ts:71](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L71)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: src/adapters.ts:71
 
 > `optional` **expectedJkt?**: `string`
 
-Defined in: src/adapters.ts:71
+Defined in: [src/adapters.ts:71](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L71)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: src/adapters.ts:71
 
 > `optional` **maxAgeSeconds?**: `number`
 
-Defined in: src/adapters.ts:71
+Defined in: [src/adapters.ts:71](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L71)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: src/adapters.ts:71
 
 > `optional` **now?**: `Date`
 
-Defined in: src/adapters.ts:71
+Defined in: [src/adapters.ts:71](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L71)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: src/adapters.ts:71
 
 > **replayStore**: [`DpopReplayStore`](DpopReplayStore.md)
 
-Defined in: src/adapters.ts:71
+Defined in: [src/adapters.ts:71](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L71)

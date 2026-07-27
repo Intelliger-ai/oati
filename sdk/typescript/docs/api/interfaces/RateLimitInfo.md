@@ -6,7 +6,7 @@
 
 # Interface: RateLimitInfo
 
-Defined in: [src/lookup.ts:41](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L41)
+Defined in: [src/lookup.ts:41](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L41)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/lookup.ts:41](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `optional` **limit?**: `number`
 
-Defined in: [src/lookup.ts:41](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L41)
+Defined in: [src/lookup.ts:41](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L41)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/lookup.ts:41](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `optional` **remaining?**: `number`
 
-Defined in: [src/lookup.ts:41](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L41)
+Defined in: [src/lookup.ts:41](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L41)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/lookup.ts:41](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `optional` **resetAt?**: `string`
 
-Defined in: [src/lookup.ts:41](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L41)
+Defined in: [src/lookup.ts:41](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L41)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [src/lookup.ts:41](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `optional` **retryAfter?**: `number`
 
-Defined in: [src/lookup.ts:41](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L41)
+Defined in: [src/lookup.ts:41](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L41)

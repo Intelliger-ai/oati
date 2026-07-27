@@ -6,7 +6,7 @@
 
 # Interface: EnvoyOatiInput
 
-Defined in: src/adapters.ts:172
+Defined in: [src/adapters.ts:172](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L172)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: src/adapters.ts:172
 
 > `optional` **destination?**: `unknown`
 
-Defined in: src/adapters.ts:172
+Defined in: [src/adapters.ts:172](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L172)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: src/adapters.ts:172
 
 > **envelope**: [`TransactionEnvelope`](TransactionEnvelope.md)
 
-Defined in: src/adapters.ts:172
+Defined in: [src/adapters.ts:172](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L172)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: src/adapters.ts:172
 
 > **headers**: `Record`\<`string`, `string`\>
 
-Defined in: src/adapters.ts:172
+Defined in: [src/adapters.ts:172](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L172)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: src/adapters.ts:172
 
 > **host**: `string`
 
-Defined in: src/adapters.ts:172
+Defined in: [src/adapters.ts:172](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L172)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: src/adapters.ts:172
 
 > **mandate**: [`AgentMandate`](AgentMandate.md)
 
-Defined in: src/adapters.ts:172
+Defined in: [src/adapters.ts:172](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L172)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: src/adapters.ts:172
 
 > `optional` **metadata?**: `unknown`
 
-Defined in: src/adapters.ts:172
+Defined in: [src/adapters.ts:172](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L172)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: src/adapters.ts:172
 
 > **method**: `string`
 
-Defined in: src/adapters.ts:172
+Defined in: [src/adapters.ts:172](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L172)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: src/adapters.ts:172
 
 > `optional` **parentMandate?**: [`AgentMandate`](AgentMandate.md)
 
-Defined in: src/adapters.ts:172
+Defined in: [src/adapters.ts:172](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L172)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: src/adapters.ts:172
 
 > **path**: `string`
 
-Defined in: src/adapters.ts:172
+Defined in: [src/adapters.ts:172](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L172)
 
 ***
 
@@ -86,4 +86,4 @@ Defined in: src/adapters.ts:172
 
 > `optional` **source?**: `unknown`
 
-Defined in: src/adapters.ts:172
+Defined in: [src/adapters.ts:172](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L172)

@@ -6,7 +6,7 @@
 
 # Interface: CedarRequest
 
-Defined in: src/adapters.ts:158
+Defined in: [src/adapters.ts:158](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L158)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: src/adapters.ts:158
 
 > **action**: [`CedarEntityUid`](CedarEntityUid.md)
 
-Defined in: src/adapters.ts:158
+Defined in: [src/adapters.ts:158](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L158)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: src/adapters.ts:158
 
 > **context**: `Record`\<`string`, `unknown`\>
 
-Defined in: src/adapters.ts:158
+Defined in: [src/adapters.ts:158](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L158)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: src/adapters.ts:158
 
 > **principal**: [`CedarEntityUid`](CedarEntityUid.md)
 
-Defined in: src/adapters.ts:158
+Defined in: [src/adapters.ts:158](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L158)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: src/adapters.ts:158
 
 > **resource**: [`CedarEntityUid`](CedarEntityUid.md)
 
-Defined in: src/adapters.ts:158
+Defined in: [src/adapters.ts:158](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L158)

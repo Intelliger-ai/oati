@@ -6,7 +6,7 @@
 
 # Class: OatiLookupClient
 
-Defined in: [src/lookup.ts:78](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L78)
+Defined in: [src/lookup.ts:78](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L78)
 
 Production client for OATI-compatible public resolvers.
 
@@ -16,7 +16,7 @@ Production client for OATI-compatible public resolvers.
 
 > **new OatiLookupClient**(`options?`): `OatiLookupClient`
 
-Defined in: [src/lookup.ts:89](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L89)
+Defined in: [src/lookup.ts:89](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L89)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: [src/lookup.ts:89](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `readonly` **baseUrl**: `string`
 
-Defined in: [src/lookup.ts:81](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L81)
+Defined in: [src/lookup.ts:81](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L81)
 
 First configured resolver, retained for source compatibility.
 
@@ -44,7 +44,7 @@ First configured resolver, retained for source compatibility.
 
 > `readonly` **resolverUrls**: readonly `string`[]
 
-Defined in: [src/lookup.ts:79](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L79)
+Defined in: [src/lookup.ts:79](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L79)
 
 ## Methods
 
@@ -52,7 +52,7 @@ Defined in: [src/lookup.ts:79](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **clearCache**(`type?`, `id?`): `void`
 
-Defined in: [src/lookup.ts:167](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L167)
+Defined in: [src/lookup.ts:167](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L167)
 
 #### Parameters
 
@@ -74,7 +74,7 @@ Defined in: [src/lookup.ts:167](https://github.com/Intelliger-ai/oati/blob/fb53f
 
 > **lookup**\<`T`\>(`type`, `id`, `options?`): `Promise`\<[`OatiRecordByType`](../interfaces/OatiRecordByType.md)\[`T`\]\>
 
-Defined in: [src/lookup.ts:110](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L110)
+Defined in: [src/lookup.ts:110](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L110)
 
 #### Type Parameters
 
@@ -106,7 +106,7 @@ Defined in: [src/lookup.ts:110](https://github.com/Intelliger-ai/oati/blob/fb53f
 
 > **lookupDetailed**\<`T`\>(`type`, `id`, `options?`): `Promise`\<[`LookupResponse`](../interfaces/LookupResponse.md)\<`T`\>\>
 
-Defined in: [src/lookup.ts:115](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L115)
+Defined in: [src/lookup.ts:115](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L115)
 
 Lookup with resolver, cache, and rate-limit metadata.
 
@@ -140,7 +140,7 @@ Lookup with resolver, cache, and rate-limit metadata.
 
 > **lookupState**\<`T`\>(`type`, `id`, `options?`): `Promise`\<[`LookupState`](../type-aliases/LookupState.md)\<`T`\>\>
 
-Defined in: [src/lookup.ts:152](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L152)
+Defined in: [src/lookup.ts:152](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L152)
 
 Resolve expected absence and proof-state failures without exception-based control flow.
 

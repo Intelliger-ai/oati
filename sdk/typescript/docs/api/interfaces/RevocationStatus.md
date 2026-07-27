@@ -6,7 +6,7 @@
 
 # Interface: RevocationStatus
 
-Defined in: [src/crypto.ts:59](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L59)
+Defined in: [src/crypto.ts:59](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L59)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/crypto.ts:59](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `optional` **effectiveAt?**: `string`
 
-Defined in: [src/crypto.ts:62](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L62)
+Defined in: [src/crypto.ts:62](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L62)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/crypto.ts:62](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **status**: `"suspended"` \| `"revoked"` \| `"good"`
 
-Defined in: [src/crypto.ts:61](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L61)
+Defined in: [src/crypto.ts:61](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L61)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [src/crypto.ts:61](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **target**: `string`
 
-Defined in: [src/crypto.ts:60](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/crypto.ts#L60)
+Defined in: [src/crypto.ts:60](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L60)

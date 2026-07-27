@@ -6,6 +6,7 @@
 
 ## Classes
 
+- [DevelopmentIssuer](classes/DevelopmentIssuer.md)
 - [LookupTrustResolver](classes/LookupTrustResolver.md)
 - [MemoryReplayCache](classes/MemoryReplayCache.md)
 - [OatiError](classes/OatiError.md)
@@ -35,6 +36,10 @@
 - [CommerceReceiptTerms](interfaces/CommerceReceiptTerms.md)
 - [CommerceTerms](interfaces/CommerceTerms.md)
 - [Consumption](interfaces/Consumption.md)
+- [DevelopmentAgentInput](interfaces/DevelopmentAgentInput.md)
+- [DevelopmentMandateInput](interfaces/DevelopmentMandateInput.md)
+- [DevelopmentOrganisationInput](interfaces/DevelopmentOrganisationInput.md)
+- [DevelopmentTransactionInput](interfaces/DevelopmentTransactionInput.md)
 - [DpopReplayStore](interfaces/DpopReplayStore.md)
 - [DpopVerificationOptions](interfaces/DpopVerificationOptions.md)
 - [DpopVerificationResult](interfaces/DpopVerificationResult.md)
@@ -96,6 +101,7 @@
 ## Type Aliases
 
 - [DecimalString](type-aliases/DecimalString.md)
+- [DevelopmentRecordStatus](type-aliases/DevelopmentRecordStatus.md)
 - [JsonPrimitive](type-aliases/JsonPrimitive.md)
 - [JsonValue](type-aliases/JsonValue.md)
 - [LookupState](type-aliases/LookupState.md)

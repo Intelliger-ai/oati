@@ -3,6 +3,8 @@ export const COMMERCE_PROFILE =
 export const RWA_PROFILE =
   "https://specs.intelliger.ai/oati/profiles/rwa/v0.1" as const
 
+export * from "./development.js"
+
 export type DecimalString = `${number}`
 
 export interface Proof {

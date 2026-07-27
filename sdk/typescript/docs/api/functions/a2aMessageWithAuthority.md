@@ -8,7 +8,7 @@
 
 > **a2aMessageWithAuthority**\<`T`\>(`message`, `envelope`, `mandate`): `T`
 
-Defined in: src/adapters.ts:65
+Defined in: [src/adapters.ts:65](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/adapters.ts#L65)
 
 ## Type Parameters
 

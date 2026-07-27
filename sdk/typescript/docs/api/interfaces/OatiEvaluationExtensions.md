@@ -6,7 +6,7 @@
 
 # Interface: OatiEvaluationExtensions
 
-Defined in: [src/middleware.ts:36](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L36)
+Defined in: [src/middleware.ts:36](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/middleware.ts#L36)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/middleware.ts:36](https://github.com/Intelliger-ai/oati/blob/fb
 
 > `optional` **commerce?**: [`CommerceEvaluationContext`](CommerceEvaluationContext.md)
 
-Defined in: [src/middleware.ts:39](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L39)
+Defined in: [src/middleware.ts:39](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/middleware.ts#L39)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/middleware.ts:39](https://github.com/Intelliger-ai/oati/blob/fb
 
 > `optional` **consumption?**: [`Consumption`](Consumption.md)
 
-Defined in: [src/middleware.ts:38](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L38)
+Defined in: [src/middleware.ts:38](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/middleware.ts#L38)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/middleware.ts:38](https://github.com/Intelliger-ai/oati/blob/fb
 
 > `optional` **delegation\_depth?**: `number`
 
-Defined in: [src/middleware.ts:37](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L37)
+Defined in: [src/middleware.ts:37](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/middleware.ts#L37)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [src/middleware.ts:37](https://github.com/Intelliger-ai/oati/blob/fb
 
 > `optional` **rwa?**: [`RwaEvaluationContext`](RwaEvaluationContext.md)
 
-Defined in: [src/middleware.ts:40](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/middleware.ts#L40)
+Defined in: [src/middleware.ts:40](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/middleware.ts#L40)

@@ -275,6 +275,32 @@ Generated API documentation is available in [`docs/api/`](docs/api/README.md).
 
 ## Development
 
+### Test identity issuance
+
+`DevelopmentIssuer` runs the complete credential lifecycle locally with an ephemeral Ed25519 key. It creates a development organisation, registers an agent, issues signed Passport and Mandate objects, signs example transactions, produces strict public projections, and emits suspension or revocation records.
+
+```ts
+import { DevelopmentIssuer } from "@intelliger/oati/development"
+
+const issuer = await DevelopmentIssuer.create({ slug: "acme-labs", displayName: "Acme Labs" })
+const passport = await issuer.registerAgent({ slug: "buyer", displayName: "Buyer", protocols: ["mcp"] })
+const mandate = await issuer.createMandate(passport.id, {
+  purpose: "Exercise the sandbox API",
+  actions: ["api.call"],
+  resources: ["https://sandbox.example/api"],
+})
+const envelope = await issuer.signTransaction(passport.id, mandate, {
+  action: "api.call",
+  resource: "https://sandbox.example/api",
+  protocol: "mcp",
+})
+const publicPassport = issuer.publish("passport", passport.id)
+const registryRecords = issuer.registryRecords() // POST each to the private control plane
+const revocation = issuer.setStatus("mandate", mandate.id, "revoked")
+```
+
+Development issuers and their keys are memory-only, deliberately marked with `assurance_level: development`, and must never be promoted into production trust stores.
+
 ```bash
 pnpm install
 pnpm test

@@ -6,7 +6,7 @@
 
 # Interface: LookupRetryOptions
 
-Defined in: [src/lookup.ts:57](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L57)
+Defined in: [src/lookup.ts:57](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L57)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/lookup.ts:57](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `optional` **baseDelayMs?**: `number`
 
-Defined in: [src/lookup.ts:57](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L57)
+Defined in: [src/lookup.ts:57](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L57)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/lookup.ts:57](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `optional` **maxDelayMs?**: `number`
 
-Defined in: [src/lookup.ts:57](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L57)
+Defined in: [src/lookup.ts:57](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L57)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [src/lookup.ts:57](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `optional` **maxRetries?**: `number`
 
-Defined in: [src/lookup.ts:57](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L57)
+Defined in: [src/lookup.ts:57](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L57)

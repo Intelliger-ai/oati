@@ -6,7 +6,7 @@
 
 # Interface: CommerceReceipt
 
-Defined in: [src/index.ts:155](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L155)
+Defined in: [src/index.ts:157](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L157)
 
 ## Extends
 
@@ -22,7 +22,7 @@ Defined in: [src/index.ts:155](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **agent\_id**: `` `oati:agent:${string}` ``
 
-Defined in: [src/index.ts:108](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L108)
+Defined in: [src/index.ts:110](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L110)
 
 #### Inherited from
 
@@ -34,7 +34,7 @@ Defined in: [src/index.ts:108](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `optional` **commercial\_profile?**: `string`
 
-Defined in: [src/index.ts:121](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L121)
+Defined in: [src/index.ts:123](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L123)
 
 #### Inherited from
 
@@ -46,7 +46,7 @@ Defined in: [src/index.ts:121](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **decision**: `"allow"` \| `"deny"` \| `"transform"` \| `"approval_required"`
 
-Defined in: [src/index.ts:111](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L111)
+Defined in: [src/index.ts:113](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L113)
 
 #### Inherited from
 
@@ -58,7 +58,7 @@ Defined in: [src/index.ts:111](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **extensions**: `object`
 
-Defined in: [src/index.ts:157](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L157)
+Defined in: [src/index.ts:159](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L159)
 
 #### commerce
 
@@ -74,7 +74,7 @@ Defined in: [src/index.ts:157](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **id**: `` `oati:receipt:${string}` ``
 
-Defined in: [src/index.ts:106](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L106)
+Defined in: [src/index.ts:108](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L108)
 
 #### Inherited from
 
@@ -86,7 +86,7 @@ Defined in: [src/index.ts:106](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **issuer**: `string`
 
-Defined in: [src/index.ts:114](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L114)
+Defined in: [src/index.ts:116](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L116)
 
 #### Inherited from
 
@@ -98,7 +98,7 @@ Defined in: [src/index.ts:114](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **mandate\_id**: `` `oati:mandate:${string}` ``
 
-Defined in: [src/index.ts:110](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L110)
+Defined in: [src/index.ts:112](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L112)
 
 #### Inherited from
 
@@ -110,7 +110,7 @@ Defined in: [src/index.ts:110](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **oati\_version**: `"1.0"`
 
-Defined in: [src/index.ts:105](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L105)
+Defined in: [src/index.ts:107](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L107)
 
 #### Inherited from
 
@@ -122,7 +122,7 @@ Defined in: [src/index.ts:105](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **occurred\_at**: `string`
 
-Defined in: [src/index.ts:113](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L113)
+Defined in: [src/index.ts:115](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L115)
 
 #### Inherited from
 
@@ -134,7 +134,7 @@ Defined in: [src/index.ts:113](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **organisation\_id**: `` `oati:org:${string}` ``
 
-Defined in: [src/index.ts:109](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L109)
+Defined in: [src/index.ts:111](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L111)
 
 #### Inherited from
 
@@ -146,7 +146,7 @@ Defined in: [src/index.ts:109](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **outcome**: `"succeeded"` \| `"failed"` \| `"denied"` \| `"pending"` \| `"unknown"`
 
-Defined in: [src/index.ts:112](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L112)
+Defined in: [src/index.ts:114](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L114)
 
 #### Inherited from
 
@@ -158,7 +158,7 @@ Defined in: [src/index.ts:112](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `optional` **policy\_digest?**: `string`
 
-Defined in: [src/index.ts:118](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L118)
+Defined in: [src/index.ts:120](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L120)
 
 #### Inherited from
 
@@ -170,7 +170,7 @@ Defined in: [src/index.ts:118](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **profile**: `"https://specs.intelliger.ai/oati/profiles/commerce/v0.1"`
 
-Defined in: [src/index.ts:156](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L156)
+Defined in: [src/index.ts:158](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L158)
 
 #### Overrides
 
@@ -182,7 +182,7 @@ Defined in: [src/index.ts:156](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **proof**: [`Proof`](Proof.md)
 
-Defined in: [src/index.ts:117](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L117)
+Defined in: [src/index.ts:119](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L119)
 
 #### Inherited from
 
@@ -194,7 +194,7 @@ Defined in: [src/index.ts:117](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `optional` **request\_digest?**: `string`
 
-Defined in: [src/index.ts:119](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L119)
+Defined in: [src/index.ts:121](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L121)
 
 #### Inherited from
 
@@ -206,7 +206,7 @@ Defined in: [src/index.ts:119](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `optional` **response\_digest?**: `string`
 
-Defined in: [src/index.ts:120](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L120)
+Defined in: [src/index.ts:122](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L122)
 
 #### Inherited from
 
@@ -218,7 +218,7 @@ Defined in: [src/index.ts:120](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > **transaction\_id**: `string`
 
-Defined in: [src/index.ts:107](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L107)
+Defined in: [src/index.ts:109](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L109)
 
 #### Inherited from
 

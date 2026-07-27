@@ -8,6 +8,7 @@ import {
   OATI_A2A_EXTENSION_URI,
   OATI_MCP_EXTENSION_URI,
   OatiValidationError,
+  DevelopmentIssuer,
   assertSchema,
   canonicalJson,
   canonicalize,
@@ -48,6 +49,22 @@ import {
   schemaNames,
   validateSchema,
 } from "../dist/index.js"
+
+test("development issuer runs the complete test credential lifecycle", async () => {
+  const issuer = await DevelopmentIssuer.create({ slug: "acme-labs", displayName: "Acme Labs" })
+  const passport = await issuer.registerAgent({ slug: "buyer-agent", displayName: "Buyer Agent", protocols: ["mcp", "http"] })
+  assert.equal(validateSchema("passport", passport).valid, true)
+  const mandate = await issuer.createMandate(passport.id, { purpose: "Buy test data", actions: ["commerce.purchase"], resources: ["oati:service:test"] })
+  assert.equal(validateSchema("mandate", mandate).valid, true)
+  const transaction = await issuer.signTransaction(passport.id, mandate, { action: "commerce.purchase", resource: "oati:service:test", protocol: "mcp" })
+  assert.equal(validateSchema("envelope", transaction).valid, true)
+  const publicPassport = issuer.publish("passport", passport.id)
+  assert.equal(publicPassport.type, "passport")
+  assert.equal("private_attributes" in publicPassport, false)
+  const revocation = issuer.setStatus("mandate", mandate.id, "revoked")
+  assert.equal(revocation.status, "revoked")
+  assert.equal(revocation.public_attributes.target, mandate.id)
+})
 
 const example = async (path) => JSON.parse(await readFile(new URL(`../../../examples/${path}`, import.meta.url), "utf8"))
 const cryptoVector = async (path) => JSON.parse(await readFile(new URL(`../../../conformance/crypto/${path}`, import.meta.url), "utf8"))

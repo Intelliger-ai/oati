@@ -6,7 +6,7 @@
 
 # Class: OatiLookupError
 
-Defined in: [src/errors.ts:57](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/errors.ts#L57)
+Defined in: [src/errors.ts:57](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L57)
 
 Base error for failures produced by the OATI SDK.
 
@@ -20,7 +20,7 @@ Base error for failures produced by the OATI SDK.
 
 > **new OatiLookupError**(`code`, `message`, `options?`): `OatiLookupError`
 
-Defined in: [src/errors.ts:58](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/errors.ts#L58)
+Defined in: [src/errors.ts:58](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L58)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: [src/errors.ts:58](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `readonly` `optional` **cache?**: `"hit"` \| `"miss"` \| `"revalidated"`
 
-Defined in: [src/errors.ts:36](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/errors.ts#L36)
+Defined in: [src/errors.ts:36](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L36)
 
 #### Inherited from
 
@@ -74,7 +74,7 @@ Defined in: node\_modules/.pnpm/typescript@5.9.3/node\_modules/typescript/lib/li
 
 > `readonly` **code**: [`OatiErrorCode`](../type-aliases/OatiErrorCode.md)
 
-Defined in: [src/errors.ts:31](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/errors.ts#L31)
+Defined in: [src/errors.ts:31](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L31)
 
 #### Inherited from
 
@@ -86,7 +86,7 @@ Defined in: [src/errors.ts:31](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `readonly` `optional` **details?**: `unknown`
 
-Defined in: [src/errors.ts:32](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/errors.ts#L32)
+Defined in: [src/errors.ts:32](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L32)
 
 #### Inherited from
 
@@ -122,7 +122,7 @@ Defined in: node\_modules/.pnpm/typescript@5.9.3/node\_modules/typescript/lib/li
 
 > `readonly` `optional` **rateLimit?**: `object`
 
-Defined in: [src/errors.ts:35](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/errors.ts#L35)
+Defined in: [src/errors.ts:35](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L35)
 
 #### limit?
 
@@ -150,7 +150,7 @@ Defined in: [src/errors.ts:35](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `readonly` `optional` **retryAfter?**: `number`
 
-Defined in: [src/errors.ts:34](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/errors.ts#L34)
+Defined in: [src/errors.ts:34](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L34)
 
 #### Inherited from
 
@@ -174,7 +174,7 @@ Defined in: node\_modules/.pnpm/typescript@5.9.3/node\_modules/typescript/lib/li
 
 > `readonly` `optional` **status?**: `number`
 
-Defined in: [src/errors.ts:33](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/errors.ts#L33)
+Defined in: [src/errors.ts:33](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L33)
 
 #### Inherited from
 

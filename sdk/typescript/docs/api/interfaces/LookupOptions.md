@@ -6,7 +6,7 @@
 
 # Interface: LookupOptions
 
-Defined in: [src/lookup.ts:69](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L69)
+Defined in: [src/lookup.ts:69](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L69)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/lookup.ts:69](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `optional` **cache?**: `"default"` \| `"reload"` \| `"no-store"`
 
-Defined in: [src/lookup.ts:71](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L71)
+Defined in: [src/lookup.ts:71](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L71)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/lookup.ts:71](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `optional` **signal?**: `AbortSignal`
 
-Defined in: [src/lookup.ts:70](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L70)
+Defined in: [src/lookup.ts:70](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L70)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [src/lookup.ts:70](https://github.com/Intelliger-ai/oati/blob/fb53f4
 
 > `optional` **timeoutMs?**: `number`
 
-Defined in: [src/lookup.ts:72](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/lookup.ts#L72)
+Defined in: [src/lookup.ts:72](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/lookup.ts#L72)

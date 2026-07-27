@@ -6,7 +6,7 @@
 
 # Interface: VerificationMethod
 
-Defined in: [src/index.ts:22](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L22)
+Defined in: [src/index.ts:24](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L24)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/index.ts:22](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > **controller**: `string`
 
-Defined in: [src/index.ts:25](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L25)
+Defined in: [src/index.ts:27](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L27)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/index.ts:25](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > **id**: `string`
 
-Defined in: [src/index.ts:23](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L23)
+Defined in: [src/index.ts:25](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L25)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/index.ts:23](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > **public\_key\_jwk**: `Record`\<`string`, `unknown`\>
 
-Defined in: [src/index.ts:26](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L26)
+Defined in: [src/index.ts:28](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L28)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: [src/index.ts:26](https://github.com/Intelliger-ai/oati/blob/fb53f49
 
 > **type**: `string`
 
-Defined in: [src/index.ts:24](https://github.com/Intelliger-ai/oati/blob/fb53f49753ff3953e73a68b65793610a73015837/sdk/typescript/src/index.ts#L24)
+Defined in: [src/index.ts:26](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L26)
