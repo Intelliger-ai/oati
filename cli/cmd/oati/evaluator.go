@@ -63,6 +63,9 @@ func evaluateAuthority(request map[string]any) (map[string]any, error) {
 	if stringValue(envelope, "mandate_id") != stringValue(mandate, "id") {
 		reasons["MANDATE_REFERENCE_MISMATCH"] = true
 	}
+	if stringValue(envelope, "agent_id") != stringValue(mandate, "subject") {
+		reasons["SUBJECT_MISMATCH"] = true
+	}
 	if !contains(stringList(mandate["actions"]), stringValue(envelope, "action")) {
 		reasons["ACTION_NOT_ALLOWED"] = true
 	}

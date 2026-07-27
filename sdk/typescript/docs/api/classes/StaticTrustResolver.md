@@ -6,7 +6,7 @@
 
 # Class: StaticTrustResolver
 
-Defined in: [src/crypto.ts:199](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L199)
+Defined in: [src/crypto.ts:199](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L199)
 
 ## Implements
 
@@ -18,7 +18,7 @@ Defined in: [src/crypto.ts:199](https://github.com/Intelliger-ai/oati/blob/5c4cc
 
 > **new StaticTrustResolver**(`keys`, `issuers`, `revocations?`): `StaticTrustResolver`
 
-Defined in: [src/crypto.ts:200](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L200)
+Defined in: [src/crypto.ts:200](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L200)
 
 #### Parameters
 
@@ -44,7 +44,7 @@ readonly [`RevocationStatus`](../interfaces/RevocationStatus.md)[] = `[]`
 
 > **resolveIssuer**(`id`): `Promise`\<[`TrustedIssuer`](../interfaces/TrustedIssuer.md) \| `null`\>
 
-Defined in: [src/crypto.ts:206](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L206)
+Defined in: [src/crypto.ts:206](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L206)
 
 #### Parameters
 
@@ -66,7 +66,7 @@ Defined in: [src/crypto.ts:206](https://github.com/Intelliger-ai/oati/blob/5c4cc
 
 > **resolveKey**(`id`): `Promise`\<[`VerificationKey`](../interfaces/VerificationKey.md) \| `null`\>
 
-Defined in: [src/crypto.ts:205](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L205)
+Defined in: [src/crypto.ts:205](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L205)
 
 #### Parameters
 
@@ -88,7 +88,7 @@ Defined in: [src/crypto.ts:205](https://github.com/Intelliger-ai/oati/blob/5c4cc
 
 > **resolveRevocation**(`target`): `Promise`\<[`RevocationStatus`](../interfaces/RevocationStatus.md) \| `null`\>
 
-Defined in: [src/crypto.ts:207](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L207)
+Defined in: [src/crypto.ts:207](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L207)
 
 #### Parameters
 

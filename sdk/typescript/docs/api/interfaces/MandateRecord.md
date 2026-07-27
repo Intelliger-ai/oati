@@ -6,7 +6,7 @@
 
 # Interface: MandateRecord
 
-Defined in: [src/lookup.ts:25](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L25)
+Defined in: [src/lookup.ts:25](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L25)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [src/lookup.ts:25](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **assurance\_level?**: `string`
 
-Defined in: [src/lookup.ts:18](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L18)
+Defined in: [src/lookup.ts:18](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L18)
 
 #### Inherited from
 
@@ -30,7 +30,7 @@ Defined in: [src/lookup.ts:18](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **display\_name?**: `string`
 
-Defined in: [src/lookup.ts:12](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L12)
+Defined in: [src/lookup.ts:12](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L12)
 
 #### Inherited from
 
@@ -42,7 +42,7 @@ Defined in: [src/lookup.ts:12](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **expires\_at?**: `string`
 
-Defined in: [src/lookup.ts:17](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L17)
+Defined in: [src/lookup.ts:17](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L17)
 
 #### Inherited from
 
@@ -54,7 +54,7 @@ Defined in: [src/lookup.ts:17](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **id**: `string`
 
-Defined in: [src/lookup.ts:11](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L11)
+Defined in: [src/lookup.ts:11](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L11)
 
 #### Inherited from
 
@@ -66,7 +66,7 @@ Defined in: [src/lookup.ts:11](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **issued\_at?**: `string`
 
-Defined in: [src/lookup.ts:16](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L16)
+Defined in: [src/lookup.ts:16](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L16)
 
 #### Inherited from
 
@@ -78,7 +78,7 @@ Defined in: [src/lookup.ts:16](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **issuer**: `string`
 
-Defined in: [src/lookup.ts:14](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L14)
+Defined in: [src/lookup.ts:14](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L14)
 
 #### Inherited from
 
@@ -90,7 +90,7 @@ Defined in: [src/lookup.ts:14](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **organisation\_id?**: `string`
 
-Defined in: [src/lookup.ts:15](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L15)
+Defined in: [src/lookup.ts:15](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L15)
 
 #### Inherited from
 
@@ -102,7 +102,7 @@ Defined in: [src/lookup.ts:15](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **proof\_status**: [`ProofStatus`](../type-aliases/ProofStatus.md)
 
-Defined in: [src/lookup.ts:19](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L19)
+Defined in: [src/lookup.ts:19](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L19)
 
 #### Inherited from
 
@@ -114,7 +114,7 @@ Defined in: [src/lookup.ts:19](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **public\_attributes**: `A`
 
-Defined in: [src/lookup.ts:20](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L20)
+Defined in: [src/lookup.ts:20](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L20)
 
 #### Inherited from
 
@@ -126,7 +126,7 @@ Defined in: [src/lookup.ts:20](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **status**: `"unknown"` \| `"active"` \| `"suspended"` \| `"revoked"` \| `"expired"` \| `"consumed"`
 
-Defined in: [src/lookup.ts:25](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L25)
+Defined in: [src/lookup.ts:25](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L25)
 
 #### Overrides
 
@@ -138,7 +138,7 @@ Defined in: [src/lookup.ts:25](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **type**: `"mandate"`
 
-Defined in: [src/lookup.ts:10](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L10)
+Defined in: [src/lookup.ts:10](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L10)
 
 #### Inherited from
 

@@ -6,7 +6,7 @@
 
 # Interface: KeyAttributes
 
-Defined in: [src/lookup.ts:29](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L29)
+Defined in: [src/lookup.ts:29](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L29)
 
 ## Extends
 
@@ -22,7 +22,7 @@ Defined in: [src/lookup.ts:29](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **algorithm**: `"EdDSA"` \| `"ES256"`
 
-Defined in: [src/lookup.ts:30](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L30)
+Defined in: [src/lookup.ts:30](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L30)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/lookup.ts:30](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **controller**: `string`
 
-Defined in: [src/lookup.ts:30](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L30)
+Defined in: [src/lookup.ts:30](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L30)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/lookup.ts:30](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **issuer**: `string`
 
-Defined in: [src/lookup.ts:30](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L30)
+Defined in: [src/lookup.ts:30](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L30)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [src/lookup.ts:30](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **public\_key\_jwk**: `string`
 
-Defined in: [src/lookup.ts:30](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L30)
+Defined in: [src/lookup.ts:30](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L30)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [src/lookup.ts:30](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **revoked\_at?**: `string`
 
-Defined in: [src/lookup.ts:31](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L31)
+Defined in: [src/lookup.ts:31](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L31)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [src/lookup.ts:31](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **valid\_from**: `string`
 
-Defined in: [src/lookup.ts:31](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L31)
+Defined in: [src/lookup.ts:31](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L31)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [src/lookup.ts:31](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **valid\_until?**: `string`
 
-Defined in: [src/lookup.ts:31](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/lookup.ts#L31)
+Defined in: [src/lookup.ts:31](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/lookup.ts#L31)

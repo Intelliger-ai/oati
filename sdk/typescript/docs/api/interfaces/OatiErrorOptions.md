@@ -6,7 +6,7 @@
 
 # Interface: OatiErrorOptions
 
-Defined in: [src/errors.ts:13](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/errors.ts#L13)
+Defined in: [src/errors.ts:19](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/errors.ts#L19)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/errors.ts:13](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **cache?**: `"hit"` \| `"miss"` \| `"revalidated"`
 
-Defined in: [src/errors.ts:19](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/errors.ts#L19)
+Defined in: [src/errors.ts:25](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/errors.ts#L25)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/errors.ts:19](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **cause?**: `unknown`
 
-Defined in: [src/errors.ts:14](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/errors.ts#L14)
+Defined in: [src/errors.ts:20](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/errors.ts#L20)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/errors.ts:14](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **details?**: `unknown`
 
-Defined in: [src/errors.ts:15](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/errors.ts#L15)
+Defined in: [src/errors.ts:21](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/errors.ts#L21)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/errors.ts:15](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **rateLimit?**: `object`
 
-Defined in: [src/errors.ts:18](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/errors.ts#L18)
+Defined in: [src/errors.ts:24](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/errors.ts#L24)
 
 #### limit?
 
@@ -62,7 +62,7 @@ Defined in: [src/errors.ts:18](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **retryAfter?**: `number`
 
-Defined in: [src/errors.ts:17](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/errors.ts#L17)
+Defined in: [src/errors.ts:23](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/errors.ts#L23)
 
 ***
 
@@ -70,4 +70,4 @@ Defined in: [src/errors.ts:17](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **status?**: `number`
 
-Defined in: [src/errors.ts:16](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/errors.ts#L16)
+Defined in: [src/errors.ts:22](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/errors.ts#L22)

@@ -6,7 +6,7 @@
 
 # Interface: VerificationPolicy
 
-Defined in: [src/crypto.ts:76](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L76)
+Defined in: [src/crypto.ts:76](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L76)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/crypto.ts:76](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **allowedAlgorithms?**: readonly (`"EdDSA"` \| `"ES256"`)[]
 
-Defined in: [src/crypto.ts:82](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L82)
+Defined in: [src/crypto.ts:82](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L82)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/crypto.ts:82](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **clockSkewMs?**: `number`
 
-Defined in: [src/crypto.ts:83](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L83)
+Defined in: [src/crypto.ts:83](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L83)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/crypto.ts:83](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **expectedAudience**: `string`
 
-Defined in: [src/crypto.ts:79](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L79)
+Defined in: [src/crypto.ts:79](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L79)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/crypto.ts:79](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **maxProofAgeMs?**: `number`
 
-Defined in: [src/crypto.ts:84](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L84)
+Defined in: [src/crypto.ts:84](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L84)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [src/crypto.ts:84](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **maxTrustDepth?**: `number`
 
-Defined in: [src/crypto.ts:85](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L85)
+Defined in: [src/crypto.ts:85](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L85)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [src/crypto.ts:85](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **now?**: `Date`
 
-Defined in: [src/crypto.ts:81](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L81)
+Defined in: [src/crypto.ts:81](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L81)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [src/crypto.ts:81](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **replayCache**: [`ReplayCache`](ReplayCache.md)
 
-Defined in: [src/crypto.ts:80](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L80)
+Defined in: [src/crypto.ts:80](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L80)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [src/crypto.ts:80](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **resolver**: [`TrustResolver`](TrustResolver.md)
 
-Defined in: [src/crypto.ts:77](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L77)
+Defined in: [src/crypto.ts:77](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L77)
 
 ***
 
@@ -78,4 +78,4 @@ Defined in: [src/crypto.ts:77](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **trustAnchors**: readonly `string`[]
 
-Defined in: [src/crypto.ts:78](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L78)
+Defined in: [src/crypto.ts:78](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L78)

@@ -15,4 +15,6 @@ The developer-preview [`Cryptographic Profile 1.0`](CRYPTOGRAPHIC_PROFILE.md) de
 
 The [`Deterministic Authority Evaluator 0.1`](AUTHORITY_EVALUATOR.md) defines activation, scope, delegation subset, non-amplification, consumption, Commerce, and RWA decision semantics.
 
+The [`HTTP Middleware Profile 0.1`](HTTP_MIDDLEWARE_PROFILE.md) defines request carriers, HTTP digest binding, processing order, failure semantics, correlation identifiers, and signed Receipt delivery.
+
 Domain behaviour is defined through [`profiles/`](profiles/). The first developer-preview profiles cover Commerce paid-API transactions and RWA controlled minting.

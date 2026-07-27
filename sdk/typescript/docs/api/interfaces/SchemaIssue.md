@@ -6,7 +6,7 @@
 
 # Interface: SchemaIssue
 
-Defined in: [src/validation.ts:15](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/validation.ts#L15)
+Defined in: [src/validation.ts:15](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/validation.ts#L15)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/validation.ts:15](https://github.com/Intelliger-ai/oati/blob/5c
 
 > **code**: `` `SCHEMA_${string}` ``
 
-Defined in: [src/validation.ts:17](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/validation.ts#L17)
+Defined in: [src/validation.ts:17](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/validation.ts#L17)
 
 Stable, implementation-neutral conformance code derived from the JSON Schema keyword.
 
@@ -24,7 +24,7 @@ Stable, implementation-neutral conformance code derived from the JSON Schema key
 
 > **keyword**: `string`
 
-Defined in: [src/validation.ts:19](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/validation.ts#L19)
+Defined in: [src/validation.ts:19](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/validation.ts#L19)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [src/validation.ts:19](https://github.com/Intelliger-ai/oati/blob/5c
 
 > **message**: `string`
 
-Defined in: [src/validation.ts:20](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/validation.ts#L20)
+Defined in: [src/validation.ts:20](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/validation.ts#L20)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [src/validation.ts:20](https://github.com/Intelliger-ai/oati/blob/5c
 
 > **params**: `Record`\<`string`, `unknown`\>
 
-Defined in: [src/validation.ts:21](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/validation.ts#L21)
+Defined in: [src/validation.ts:21](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/validation.ts#L21)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [src/validation.ts:21](https://github.com/Intelliger-ai/oati/blob/5c
 
 > **path**: `string`
 
-Defined in: [src/validation.ts:18](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/validation.ts#L18)
+Defined in: [src/validation.ts:18](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/validation.ts#L18)
 
 ***
 
@@ -56,4 +56,4 @@ Defined in: [src/validation.ts:18](https://github.com/Intelliger-ai/oati/blob/5c
 
 > **schemaPath**: `string`
 
-Defined in: [src/validation.ts:22](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/validation.ts#L22)
+Defined in: [src/validation.ts:22](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/validation.ts#L22)

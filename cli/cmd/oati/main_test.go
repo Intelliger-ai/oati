@@ -250,6 +250,24 @@ func TestEvaluateCommandReturnsDeterministicJSON(t *testing.T) {
 	}
 }
 
+func TestEvaluatorBindsMandateSubjectToEnvelopeAgent(t *testing.T) {
+	path := filepath.Join("..", "..", "..", "conformance", "evaluator", "cases.json")
+	suite, err := readObject(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	vector := objectFromAny(suite["cases"].([]any)[7])
+	request := objectValue(vector, "request")
+	objectValue(request, "envelope")["agent_id"] = "oati:agent:attacker:one"
+	result, err := evaluateAuthority(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !contains(stringList(result["reason_codes"]), "SUBJECT_MISMATCH") {
+		t.Fatalf("expected SUBJECT_MISMATCH: %#v", result)
+	}
+}
+
 func objectsEqual(left, right any) bool {
 	a, _ := json.Marshal(left)
 	b, _ := json.Marshal(right)

@@ -6,7 +6,7 @@
 
 # Interface: EvaluationRequest
 
-Defined in: [src/evaluator.ts:50](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L50)
+Defined in: [src/evaluator.ts:50](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L50)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/evaluator.ts:50](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > `optional` **commerce?**: [`CommerceEvaluationContext`](CommerceEvaluationContext.md)
 
-Defined in: [src/evaluator.ts:59](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L59)
+Defined in: [src/evaluator.ts:59](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L59)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/evaluator.ts:59](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > `optional` **consumption?**: [`Consumption`](Consumption.md)
 
-Defined in: [src/evaluator.ts:58](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L58)
+Defined in: [src/evaluator.ts:58](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L58)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/evaluator.ts:58](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > `optional` **delegation\_depth?**: `number`
 
-Defined in: [src/evaluator.ts:55](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L55)
+Defined in: [src/evaluator.ts:55](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L55)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/evaluator.ts:55](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > **envelope**: [`TransactionEnvelope`](TransactionEnvelope.md)
 
-Defined in: [src/evaluator.ts:56](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L56)
+Defined in: [src/evaluator.ts:56](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L56)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [src/evaluator.ts:56](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > **evaluation\_time**: `string`
 
-Defined in: [src/evaluator.ts:52](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L52)
+Defined in: [src/evaluator.ts:52](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L52)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [src/evaluator.ts:52](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > **mandate**: [`AgentMandate`](AgentMandate.md)
 
-Defined in: [src/evaluator.ts:53](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L53)
+Defined in: [src/evaluator.ts:53](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L53)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [src/evaluator.ts:53](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > **oati\_version**: `"1.0"`
 
-Defined in: [src/evaluator.ts:51](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L51)
+Defined in: [src/evaluator.ts:51](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L51)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [src/evaluator.ts:51](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > `optional` **parent\_mandate?**: [`AgentMandate`](AgentMandate.md)
 
-Defined in: [src/evaluator.ts:54](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L54)
+Defined in: [src/evaluator.ts:54](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L54)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: [src/evaluator.ts:54](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > `optional` **rwa?**: [`RwaEvaluationContext`](RwaEvaluationContext.md)
 
-Defined in: [src/evaluator.ts:60](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L60)
+Defined in: [src/evaluator.ts:60](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L60)
 
 ***
 
@@ -86,4 +86,4 @@ Defined in: [src/evaluator.ts:60](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > **usage**: [`UsageSnapshot`](UsageSnapshot.md)
 
-Defined in: [src/evaluator.ts:57](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L57)
+Defined in: [src/evaluator.ts:57](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L57)

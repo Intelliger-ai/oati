@@ -8,7 +8,7 @@
 
 > **WithoutVersion**\<`T`\> = `Omit`\<`T`, `"oati_version"`\>
 
-Defined in: [src/builders.ts:9](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/builders.ts#L9)
+Defined in: [src/builders.ts:9](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/builders.ts#L9)
 
 ## Type Parameters
 

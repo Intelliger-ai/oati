@@ -79,6 +79,7 @@ export function evaluateAuthority(request: EvaluationRequest): EvaluationResult 
   if (timestamp(mandate.not_before) > now) reasons.add("MANDATE_NOT_YET_ACTIVE")
   if (timestamp(mandate.expires_at) <= now) reasons.add("MANDATE_EXPIRED")
   if (envelope.mandate_id !== mandate.id) reasons.add("MANDATE_REFERENCE_MISMATCH")
+  if (envelope.agent_id !== mandate.subject) reasons.add("SUBJECT_MISMATCH")
   if (!mandate.actions.includes(envelope.action)) reasons.add("ACTION_NOT_ALLOWED")
   checkSetConstraint(mandate.resources, envelope.resource, "RESOURCE_NOT_ALLOWED", reasons)
   if (envelope.purpose !== mandate.purpose) reasons.add("PURPOSE_MISMATCH")

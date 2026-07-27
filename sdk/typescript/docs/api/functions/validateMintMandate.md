@@ -8,7 +8,7 @@
 
 > **validateMintMandate**(`mandate`, `claim?`, `now?`): [`ValidationResult`](../interfaces/ValidationResult.md)
 
-Defined in: [src/index.ts:267](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/index.ts#L267)
+Defined in: [src/index.ts:267](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/index.ts#L267)
 
 ## Parameters
 

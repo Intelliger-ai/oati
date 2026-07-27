@@ -6,7 +6,7 @@
 
 # Interface: Consumption
 
-Defined in: [src/evaluator.ts:13](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L13)
+Defined in: [src/evaluator.ts:13](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L13)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/evaluator.ts:13](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > `optional` **amount?**: `string`
 
-Defined in: [src/evaluator.ts:15](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L15)
+Defined in: [src/evaluator.ts:15](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L15)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/evaluator.ts:15](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > `optional` **calls?**: `number`
 
-Defined in: [src/evaluator.ts:14](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L14)
+Defined in: [src/evaluator.ts:14](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L14)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/evaluator.ts:14](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > `optional` **consume?**: `boolean`
 
-Defined in: [src/evaluator.ts:19](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L19)
+Defined in: [src/evaluator.ts:19](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L19)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/evaluator.ts:19](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > `optional` **currency?**: `string`
 
-Defined in: [src/evaluator.ts:16](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L16)
+Defined in: [src/evaluator.ts:16](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L16)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [src/evaluator.ts:16](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > `optional` **idempotency\_key?**: `string`
 
-Defined in: [src/evaluator.ts:18](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L18)
+Defined in: [src/evaluator.ts:18](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L18)
 
 ***
 
@@ -54,4 +54,4 @@ Defined in: [src/evaluator.ts:18](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > `optional` **quantity?**: `string`
 
-Defined in: [src/evaluator.ts:17](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L17)
+Defined in: [src/evaluator.ts:17](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L17)

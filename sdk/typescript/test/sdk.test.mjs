@@ -14,7 +14,10 @@ import {
   createPassport,
   createReceipt,
   createTransactionEnvelope,
+  createOatiMiddleware,
   evaluateAuthority,
+  encodeOatiHeader,
+  httpRequestDigest,
   MemoryReplayCache,
   LookupTrustResolver,
   projectPublicRecord,
@@ -243,6 +246,134 @@ test("lookup trust resolver maps typed key, issuer, and revocation records", asy
   assert.equal((await resolver.resolveKey("oati:key:test:1")).algorithm, "EdDSA")
   assert.equal((await resolver.resolveIssuer("oati:issuer:test")).status, "active")
   assert.equal((await resolver.resolveRevocation("oati:target:test")).status, "good")
+})
+
+const middlewareFixture = async () => {
+  const generated = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"])
+  const publicKeyJwk = await crypto.subtle.exportKey("jwk", generated.publicKey)
+  const key = {
+    id: "oati:key:test:middleware:1", controller: "oati:agent:test:middleware", issuer: "oati:org:test",
+    algorithm: "EdDSA", publicKeyJwk, status: "active", validFrom: "2026-07-27T11:00:00Z", proofStatus: "verified",
+  }
+  const sign = (document, nonce) => signDocument(document, {
+    algorithm: "EdDSA", verificationMethod: key.id, privateKey: generated.privateKey,
+    audience: "https://api.example", nonce, created: "2026-07-27T12:00:00Z", expires: "2026-07-27T12:10:00Z",
+  })
+  const mandate = await sign({
+    oati_version: "1.0", id: "oati:mandate:test:middleware", issuer: "oati:org:test", subject: "oati:agent:test:middleware",
+    purpose: "weather", actions: ["forecast.read"], resources: ["oati:service:test:weather"],
+    not_before: "2026-07-27T11:00:00Z", expires_at: "2026-07-27T13:00:00Z", status: "active",
+  }, "mandate-nonce-0000000001")
+  const requestDigest = await httpRequestDigest(new Request("https://api.example/weather"))
+  const envelope = await sign({
+    oati_version: "1.0", id: "oati:tx:test:middleware:1", agent_id: "oati:agent:test:middleware", organisation_id: "oati:org:test",
+    mandate_id: mandate.id, action: "forecast.read", resource: "oati:service:test:weather", purpose: "weather",
+    protocol: "http", request_digest: requestDigest, issued_at: "2026-07-27T12:01:00Z", nonce: "envelope-object-nonce-01",
+  }, "envelope-proof-nonce-001")
+  const replayCache = new MemoryReplayCache()
+  const options = {
+    receiptIssuer: "oati:org:test", now: () => new Date("2026-07-27T12:02:00Z"),
+    generateCorrelationId: () => "correlation-generated-1", generateReceiptId: () => "oati:receipt:test:middleware:1",
+    verificationPolicy: () => ({ resolver: new StaticTrustResolver([key], []), trustAnchors: ["oati:org:test"],
+      expectedAudience: "https://api.example", replayCache, now: new Date("2026-07-27T12:02:00Z") }),
+    signReceipt: (draft) => sign({ ...draft, oati_version: "1.0" }, `receipt-proof-${Math.random().toString(36).padEnd(20, "0")}`),
+  }
+  const request = (signedEnvelope = envelope, signedMandate = mandate, extraHeaders = {}) => new Request("https://api.example/weather", { headers: {
+    "OATI-Envelope": encodeOatiHeader(signedEnvelope), "OATI-Mandate": encodeOatiHeader(signedMandate), ...extraHeaders,
+  } })
+  return { sign, mandate, envelope, options, request }
+}
+
+test("reference middleware verifies, evaluates, correlates, and issues a signed receipt", async () => {
+  const fixture = await middlewareFixture()
+  const middleware = createOatiMiddleware(fixture.options)
+  let context
+  const response = await middleware(fixture.request(), (_request, value) => { context = value; return Response.json({ ok: true }) })
+  assert.equal(response.status, 200)
+  assert.equal(context.evaluation.decision, "allow")
+  assert.equal(response.headers.get("OATI-Transaction-ID"), fixture.envelope.id)
+  assert.equal(response.headers.get("OATI-Correlation-ID"), "correlation-generated-1")
+  assert.equal(response.headers.get("OATI-Receipt-ID"), "oati:receipt:test:middleware:1")
+  const encodedReceipt = response.headers.get("OATI-Receipt")
+  const receipt = JSON.parse(Buffer.from(encodedReceipt, "base64url").toString("utf8"))
+  assert.equal(receipt.outcome, "succeeded")
+  assert.equal(validateSchema("receipt", receipt).valid, true)
+
+  const replay = await middleware(fixture.request(), () => Response.json({ should_not_run: true }))
+  assert.equal(replay.status, 401)
+  assert.equal((await replay.json()).code, "MIDDLEWARE_REPLAY")
+})
+
+test("reference middleware binds the signed Envelope to the HTTP method, target, and body", async () => {
+  const fixture = await middlewareFixture()
+  const original = fixture.request()
+  const mismatched = new Request("https://api.example/different-target", { headers: original.headers })
+  const response = await createOatiMiddleware(fixture.options)(mismatched, () => Response.json({ should_not_run: true }))
+  assert.equal(response.status, 401)
+  const body = await response.json()
+  assert.ok(body.reason_codes.includes("HTTP_REQUEST_DIGEST_MISMATCH"))
+  assert.equal(body.receipt.outcome, "denied")
+})
+
+test("reference middleware denies authority and fails closed", async () => {
+  const fixture = await middlewareFixture()
+  const { proof: _oldEnvelopeProof, ...unsignedEnvelope } = fixture.envelope
+  const deniedEnvelope = await fixture.sign({ ...unsignedEnvelope, id: "oati:tx:test:middleware:denied", action: "forecast.delete" }, "envelope-proof-nonce-002")
+  const middleware = createOatiMiddleware(fixture.options)
+  const denied = await middleware(fixture.request(deniedEnvelope), () => Response.json({ should_not_run: true }))
+  assert.equal(denied.status, 403)
+  const deniedBody = await denied.json()
+  assert.ok(deniedBody.reason_codes.includes("ACTION_NOT_ALLOWED"))
+  assert.equal(deniedBody.receipt.outcome, "denied")
+
+  const malformed = await middleware(new Request("https://api.example/weather"), () => Response.json({ should_not_run: true }))
+  assert.equal(malformed.status, 400)
+  assert.equal((await malformed.json()).code, "MIDDLEWARE_BAD_REQUEST")
+
+  const noReceipt = createOatiMiddleware({ ...fixture.options, signReceipt: async () => { throw new Error("signer offline") } })
+  const signerFailure = await noReceipt(fixture.request(deniedEnvelope), () => Response.json({ should_not_run: true }))
+  assert.equal(signerFailure.status, 503)
+  assert.equal((await signerFailure.json()).code, "MIDDLEWARE_UNAVAILABLE")
+})
+
+test("reference middleware requires atomic usage storage for constrained Mandates", async () => {
+  const fixture = await middlewareFixture()
+  const { proof: _oldMandateProof, ...unsignedMandate } = fixture.mandate
+  const { proof: _oldEnvelopeProof, ...unsignedEnvelope } = fixture.envelope
+  const constrainedMandate = await fixture.sign({ ...unsignedMandate, limits: { max_calls: 2 } }, "mandate-nonce-0000000002")
+  const constrainedEnvelope = await fixture.sign({ ...unsignedEnvelope, id: "oati:tx:test:middleware:usage", mandate_id: constrainedMandate.id }, "envelope-proof-nonce-003")
+  const response = await createOatiMiddleware(fixture.options)(fixture.request(constrainedEnvelope, constrainedMandate), () => Response.json({ should_not_run: true }))
+  assert.equal(response.status, 503)
+  const body = await response.json()
+  assert.equal(body.code, "MIDDLEWARE_UNAVAILABLE")
+  assert.equal(body.receipt.outcome, "denied")
+})
+
+test("reference middleware atomically consumes usage and receipts conflicts and handler failures", async () => {
+  const fixture = await middlewareFixture()
+  const { proof: _oldMandateProof, ...unsignedMandate } = fixture.mandate
+  const constrainedMandate = await fixture.sign({ ...unsignedMandate, limits: { max_calls: 2 } }, "mandate-nonce-0000000004")
+  let committed
+  const usageStore = { load: async () => ({ calls: 0 }), compareAndSet: async (_id, previous, next) => { committed = { previous, next }; return true } }
+  const allowed = await createOatiMiddleware({ ...fixture.options, usageStore })(fixture.request(fixture.envelope, constrainedMandate), () => Response.json({ ok: true }))
+  assert.equal(allowed.status, 200)
+  assert.deepEqual(committed.previous, { calls: 0 })
+  assert.equal(committed.next.calls, 1)
+
+  const conflictFixture = await middlewareFixture()
+  const { proof: _conflictMandateProof, ...conflictUnsignedMandate } = conflictFixture.mandate
+  const { proof: _conflictEnvelopeProof, ...conflictUnsignedEnvelope } = conflictFixture.envelope
+  const conflictMandate = await conflictFixture.sign({ ...conflictUnsignedMandate, limits: { max_calls: 2 } }, "mandate-nonce-0000000005")
+  const conflictEnvelope = await conflictFixture.sign({ ...conflictUnsignedEnvelope, id: "oati:tx:test:middleware:conflict" }, "envelope-proof-nonce-005")
+  const conflict = await createOatiMiddleware({ ...conflictFixture.options, usageStore: { load: async () => ({ calls: 0 }), compareAndSet: async () => false } })(conflictFixture.request(conflictEnvelope, conflictMandate), () => Response.json({ should_not_run: true }))
+  assert.equal(conflict.status, 409)
+  assert.equal((await conflict.json()).code, "MIDDLEWARE_USAGE_CONFLICT")
+
+  const failureFixture = await middlewareFixture()
+  const failed = await createOatiMiddleware(failureFixture.options)(failureFixture.request(), () => { throw new Error("handler failed") })
+  assert.equal(failed.status, 500)
+  const failedReceipt = JSON.parse(Buffer.from(failed.headers.get("OATI-Receipt"), "base64url").toString("utf8"))
+  assert.equal(failedReceipt.outcome, "failed")
 })
 
 const cryptoFixture = async (algorithm = "EdDSA", overrides = {}) => {

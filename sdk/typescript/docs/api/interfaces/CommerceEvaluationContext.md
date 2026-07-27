@@ -6,7 +6,7 @@
 
 # Interface: CommerceEvaluationContext
 
-Defined in: [src/evaluator.ts:22](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L22)
+Defined in: [src/evaluator.ts:22](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L22)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/evaluator.ts:22](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > **currency**: `string`
 
-Defined in: [src/evaluator.ts:26](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L26)
+Defined in: [src/evaluator.ts:26](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L26)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/evaluator.ts:26](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > **idempotency\_key**: `string`
 
-Defined in: [src/evaluator.ts:30](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L30)
+Defined in: [src/evaluator.ts:30](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L30)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/evaluator.ts:30](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > **merchant\_organisation\_id**: `string`
 
-Defined in: [src/evaluator.ts:23](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L23)
+Defined in: [src/evaluator.ts:23](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L23)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/evaluator.ts:23](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > **offer\_id**: `string`
 
-Defined in: [src/evaluator.ts:25](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L25)
+Defined in: [src/evaluator.ts:25](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L25)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [src/evaluator.ts:25](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > **quantity**: `number`
 
-Defined in: [src/evaluator.ts:27](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L27)
+Defined in: [src/evaluator.ts:27](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L27)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [src/evaluator.ts:27](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > **service\_id**: `string`
 
-Defined in: [src/evaluator.ts:24](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L24)
+Defined in: [src/evaluator.ts:24](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L24)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [src/evaluator.ts:24](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > `optional` **terms\_digest?**: `string`
 
-Defined in: [src/evaluator.ts:31](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L31)
+Defined in: [src/evaluator.ts:31](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L31)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [src/evaluator.ts:31](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > **total\_amount**: `string`
 
-Defined in: [src/evaluator.ts:29](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L29)
+Defined in: [src/evaluator.ts:29](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L29)
 
 ***
 
@@ -78,4 +78,4 @@ Defined in: [src/evaluator.ts:29](https://github.com/Intelliger-ai/oati/blob/5c4
 
 > **unit\_price**: `string`
 
-Defined in: [src/evaluator.ts:28](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/evaluator.ts#L28)
+Defined in: [src/evaluator.ts:28](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/evaluator.ts#L28)

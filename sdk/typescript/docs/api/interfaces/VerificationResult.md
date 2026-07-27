@@ -6,7 +6,7 @@
 
 # Interface: VerificationResult
 
-Defined in: [src/crypto.ts:99](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L99)
+Defined in: [src/crypto.ts:99](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L99)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/crypto.ts:99](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > `optional` **algorithm?**: `"EdDSA"` \| `"ES256"`
 
-Defined in: [src/crypto.ts:101](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L101)
+Defined in: [src/crypto.ts:101](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L101)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/crypto.ts:101](https://github.com/Intelliger-ai/oati/blob/5c4cc
 
 > `optional` **issuer?**: `string`
 
-Defined in: [src/crypto.ts:103](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L103)
+Defined in: [src/crypto.ts:103](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L103)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/crypto.ts:103](https://github.com/Intelliger-ai/oati/blob/5c4cc
 
 > **issues**: [`VerificationIssue`](VerificationIssue.md)[]
 
-Defined in: [src/crypto.ts:104](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L104)
+Defined in: [src/crypto.ts:104](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L104)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/crypto.ts:104](https://github.com/Intelliger-ai/oati/blob/5c4cc
 
 > `optional` **verificationMethod?**: `string`
 
-Defined in: [src/crypto.ts:102](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L102)
+Defined in: [src/crypto.ts:102](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L102)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [src/crypto.ts:102](https://github.com/Intelliger-ai/oati/blob/5c4cc
 
 > **verified**: `boolean`
 
-Defined in: [src/crypto.ts:100](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L100)
+Defined in: [src/crypto.ts:100](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L100)

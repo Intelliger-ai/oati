@@ -6,7 +6,7 @@
 
 # Interface: TrustResolver
 
-Defined in: [src/crypto.ts:65](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L65)
+Defined in: [src/crypto.ts:65](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L65)
 
 ## Methods
 
@@ -14,7 +14,7 @@ Defined in: [src/crypto.ts:65](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **resolveIssuer**(`id`): `Promise`\<[`TrustedIssuer`](TrustedIssuer.md) \| `null`\>
 
-Defined in: [src/crypto.ts:67](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L67)
+Defined in: [src/crypto.ts:67](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L67)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ Defined in: [src/crypto.ts:67](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **resolveKey**(`id`): `Promise`\<[`VerificationKey`](VerificationKey.md) \| `null`\>
 
-Defined in: [src/crypto.ts:66](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L66)
+Defined in: [src/crypto.ts:66](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L66)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: [src/crypto.ts:66](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **resolveRevocation**(`target`): `Promise`\<[`RevocationStatus`](RevocationStatus.md) \| `null`\>
 
-Defined in: [src/crypto.ts:68](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L68)
+Defined in: [src/crypto.ts:68](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L68)
 
 #### Parameters
 

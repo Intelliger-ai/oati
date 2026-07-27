@@ -6,7 +6,7 @@
 
 # Interface: OatiJwsProof
 
-Defined in: [src/crypto.ts:13](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L13)
+Defined in: [src/crypto.ts:13](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L13)
 
 ## Extends
 
@@ -18,7 +18,7 @@ Defined in: [src/crypto.ts:13](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **algorithm**: `"EdDSA"` \| `"ES256"`
 
-Defined in: [src/crypto.ts:16](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L16)
+Defined in: [src/crypto.ts:16](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L16)
 
 #### Overrides
 
@@ -30,7 +30,7 @@ Defined in: [src/crypto.ts:16](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **audience**: `string` \| `string`[]
 
-Defined in: [src/crypto.ts:21](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L21)
+Defined in: [src/crypto.ts:21](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L21)
 
 #### Overrides
 
@@ -42,7 +42,7 @@ Defined in: [src/crypto.ts:21](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **created**: `string`
 
-Defined in: [src/crypto.ts:17](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L17)
+Defined in: [src/crypto.ts:17](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L17)
 
 #### Overrides
 
@@ -54,7 +54,7 @@ Defined in: [src/crypto.ts:17](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **cryptosuite**: [`OatiCryptosuite`](../type-aliases/OatiCryptosuite.md)
 
-Defined in: [src/crypto.ts:15](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L15)
+Defined in: [src/crypto.ts:15](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L15)
 
 #### Overrides
 
@@ -66,7 +66,7 @@ Defined in: [src/crypto.ts:15](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **expires**: `string`
 
-Defined in: [src/crypto.ts:18](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L18)
+Defined in: [src/crypto.ts:18](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L18)
 
 #### Overrides
 
@@ -78,7 +78,7 @@ Defined in: [src/crypto.ts:18](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **nonce**: `string`
 
-Defined in: [src/crypto.ts:22](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L22)
+Defined in: [src/crypto.ts:22](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L22)
 
 #### Overrides
 
@@ -90,7 +90,7 @@ Defined in: [src/crypto.ts:22](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **proof\_purpose**: `"assertionMethod"`
 
-Defined in: [src/crypto.ts:20](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L20)
+Defined in: [src/crypto.ts:20](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L20)
 
 #### Overrides
 
@@ -102,7 +102,7 @@ Defined in: [src/crypto.ts:20](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **signature**: `string`
 
-Defined in: [src/crypto.ts:23](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L23)
+Defined in: [src/crypto.ts:23](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L23)
 
 RFC 7797 detached compact JWS: protected-header..signature
 
@@ -116,7 +116,7 @@ RFC 7797 detached compact JWS: protected-header..signature
 
 > **type**: `"OatiJwsProof2026"`
 
-Defined in: [src/crypto.ts:14](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L14)
+Defined in: [src/crypto.ts:14](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L14)
 
 #### Overrides
 
@@ -128,7 +128,7 @@ Defined in: [src/crypto.ts:14](https://github.com/Intelliger-ai/oati/blob/5c4cc4
 
 > **verification\_method**: `string`
 
-Defined in: [src/crypto.ts:19](https://github.com/Intelliger-ai/oati/blob/5c4cc47720dc4d46e2801d67bc02d86719c82831/sdk/typescript/src/crypto.ts#L19)
+Defined in: [src/crypto.ts:19](https://github.com/Intelliger-ai/oati/blob/48aa12c439121327e2a62aeff2e0eeaf4e838c11/sdk/typescript/src/crypto.ts#L19)
 
 #### Overrides
 
