@@ -49,7 +49,7 @@ The first Commerce workflow lets an enterprise agent purchase one API request un
 - [Profile specification](specification/profiles/commerce/)
 - [Paid-API quickstart](guides/commerce/quickstart.md)
 - [Runnable objects](examples/commerce/)
-- [Conformance vectors](conformance/commerce/)
+- [Executable conformance suite](conformance/)
 
 ### RWA 0.1 — controlled token minting
 
@@ -151,7 +151,7 @@ Do not report security vulnerabilities in a public issue. Until a dedicated secu
 
 ## Project status
 
-The repository is an early developer preview. Core and profile schemas, Commerce and RWA flows, a functional CLI, and a tested TypeScript SDK now cover schema validation, lookup, signing, trust verification, deterministic authority evaluation, non-amplification, and consumption. Cross-language cryptographic and evaluator vectors are available. The cryptographic profile requires independent review; additional SDK languages and the broader conformance suite remain under active development. Production lookup operations are deliberately outside this repository.
+The repository is an early developer preview. Core and profile schemas, Commerce and RWA flows, a functional CLI, and a tested TypeScript SDK now cover schema validation, lookup, signing, trust verification, deterministic authority evaluation, non-amplification, and consumption. A versioned executable conformance suite covers core objects, canonicalization, cryptography, authority evaluation, and privacy projection. The cryptographic profile requires independent review and additional SDK languages remain under active development. Production lookup operations are deliberately outside this repository.
 
 Compatibility claims must reference a published OATI version and conformance-suite version.
 

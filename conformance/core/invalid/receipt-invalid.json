@@ -1,0 +1,12 @@
+{
+  "oati_version": "1.0",
+  "id": "bad-receipt",
+  "transaction_id": "oati:tx:example:one",
+  "agent_id": "oati:agent:example:buyer",
+  "organisation_id": "oati:org:example",
+  "mandate_id": "oati:mandate:example:one",
+  "decision": "allow",
+  "outcome": "succeeded",
+  "occurred_at": "2026-07-28T10:00:00Z",
+  "issuer": "oati:org:example"
+}

@@ -1,0 +1,22 @@
+{
+  "type": "agent",
+  "id": "oati:agent:example:private-test",
+  "display_name": "Privacy test agent",
+  "status": "active",
+  "issuer": "oati:issuer:example",
+  "organisation_id": "oati:org:example",
+  "issued_at": "2026-07-28T08:00:00Z",
+  "expires_at": "2027-07-28T08:00:00Z",
+  "assurance_level": "organisation-verified",
+  "proof_status": "verified",
+  "public_attributes": {
+    "protocol": "mcp"
+  },
+  "private_attributes": {
+    "internal_owner": "security@example.com",
+    "risk_score": 91,
+    "customer_payload": "must never be public"
+  },
+  "tenant_id": "tenant_secret",
+  "operator_notes": "must never be public"
+}

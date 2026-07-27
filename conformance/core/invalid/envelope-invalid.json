@@ -1,0 +1,11 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:tx:invalid:nonce",
+  "agent_id": "oati:agent:example:buyer",
+  "organisation_id": "oati:org:example",
+  "mandate_id": "oati:mandate:example:one",
+  "action": "api.invoke",
+  "resource": "oati:service:example:one",
+  "issued_at": "not-a-time",
+  "nonce": "short"
+}

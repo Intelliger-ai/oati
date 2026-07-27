@@ -1,0 +1,10 @@
+{
+  "oati_version": "2.0",
+  "id": "not-an-agent",
+  "organisation_id": "oati:org:example",
+  "issuer": "oati:issuer:example",
+  "status": "active",
+  "issued_at": "2026-01-01T00:00:00Z",
+  "expires_at": "2027-01-01T00:00:00Z",
+  "verification_methods": []
+}

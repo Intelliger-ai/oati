@@ -16,6 +16,7 @@ import {
   createTransactionEnvelope,
   evaluateAuthority,
   MemoryReplayCache,
+  projectPublicRecord,
   signDocument,
   StaticTrustResolver,
   verifyDocument,
@@ -29,7 +30,7 @@ const cryptoVector = async (path) => JSON.parse(await readFile(new URL(`../../..
 
 test("all published SDK schemas are bundled", () => {
   assert.deepEqual(schemaNames, [
-    "proof", "verificationKey", "issuer", "revocation", "evaluationRequest", "evaluationResult",
+    "proof", "verificationKey", "issuer", "revocation", "evaluationRequest", "evaluationResult", "publicRecord", "conformanceSuite", "conformanceReport",
     "passport", "mandate", "envelope", "decision", "receipt", "commerceOffer",
     "commerceMandate", "commerceReceipt", "rwaAsset", "rwaStateClaim", "rwaMandate", "rwaReceipt",
   ])
@@ -62,8 +63,18 @@ test("schema validation returns stable structured issues", () => {
   const result = validateSchema("passport", { oati_version: "2.0", id: "bad" })
   assert.equal(result.valid, false)
   assert.ok(result.issues.length > 1)
-  assert.ok(result.issues.every((issue) => issue.path && issue.keyword && issue.message && issue.schemaPath))
+  assert.ok(result.issues.every((issue) => issue.code.startsWith("SCHEMA_") && issue.path && issue.keyword && issue.message && issue.schemaPath))
   assert.throws(() => assertSchema("passport", { id: "bad" }), OatiValidationError)
+})
+
+test("public projection uses a strict privacy allowlist", async () => {
+  const source = JSON.parse(await readFile(new URL("../../../conformance/privacy/private-registry-record.json", import.meta.url), "utf8"))
+  const expected = JSON.parse(await readFile(new URL("../../../conformance/privacy/expected-public-record.json", import.meta.url), "utf8"))
+  const projected = projectPublicRecord(source)
+  assert.deepEqual(projected, expected)
+  assert.equal("private_attributes" in projected, false)
+  assert.equal("tenant_id" in projected, false)
+  assert.equal(validateSchema("publicRecord", projected).valid, true)
 })
 
 test("core builders add the OATI version and preserve inputs", async () => {

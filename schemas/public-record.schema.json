@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/v1/public-record.schema.json",
+  "title": "OATI Public Lookup Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "id", "display_name", "status", "issuer", "proof_status", "public_attributes"],
+  "properties": {
+    "type": { "enum": ["organisation", "agent", "passport", "mandate", "receipt", "issuer", "key", "revocation"] },
+    "id": { "type": "string", "minLength": 1 },
+    "display_name": { "type": "string" },
+    "status": { "type": "string" },
+    "issuer": { "type": "string" },
+    "organisation_id": { "type": "string" },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "assurance_level": { "type": "string" },
+    "proof_status": { "enum": ["verified", "invalid", "unavailable", "unknown"] },
+    "public_attributes": { "type": "object", "additionalProperties": { "type": "string" } }
+  }
+}

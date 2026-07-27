@@ -1,0 +1,9 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:decision:invalid:one",
+  "transaction_id": "not-a-transaction",
+  "decision": "maybe",
+  "policy_digest": "",
+  "decided_at": "2026-07-28T10:00:00Z",
+  "issuer": ""
+}

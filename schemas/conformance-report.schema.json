@@ -1,0 +1,35 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/conformance-report.schema.json",
+  "title": "OATI Conformance Report",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["report_version", "suite_version", "standard_version", "implementation", "summary", "results"],
+  "properties": {
+    "report_version": { "const": "1.0" },
+    "suite_version": { "type": "string" },
+    "standard_version": { "type": "string" },
+    "implementation": {
+      "type": "object", "additionalProperties": false,
+      "required": ["name", "version", "language"],
+      "properties": { "name": { "type": "string" }, "version": { "type": "string" }, "language": { "type": "string" } }
+    },
+    "summary": {
+      "type": "object", "additionalProperties": false,
+      "required": ["total", "passed", "failed"],
+      "properties": { "total": { "type": "integer", "minimum": 0 }, "passed": { "type": "integer", "minimum": 0 }, "failed": { "type": "integer", "minimum": 0 } }
+    },
+    "results": {
+      "type": "array",
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "category", "status", "expected_outcome", "observed_outcome", "codes"],
+        "properties": {
+          "id": { "type": "string" }, "category": { "type": "string" }, "status": { "enum": ["pass", "fail"] },
+          "expected_outcome": { "enum": ["pass", "fail"] }, "observed_outcome": { "enum": ["pass", "fail"] },
+          "codes": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    }
+  }
+}

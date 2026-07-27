@@ -535,6 +535,293 @@ export const schemas = {
       }
     }
   },
+  "publicRecord": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://schemas.intelliger.ai/oati/v1/public-record.schema.json",
+    "title": "OATI Public Lookup Record",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "type",
+      "id",
+      "display_name",
+      "status",
+      "issuer",
+      "proof_status",
+      "public_attributes"
+    ],
+    "properties": {
+      "type": {
+        "enum": [
+          "organisation",
+          "agent",
+          "passport",
+          "mandate",
+          "receipt",
+          "issuer",
+          "key",
+          "revocation"
+        ]
+      },
+      "id": {
+        "type": "string",
+        "minLength": 1
+      },
+      "display_name": {
+        "type": "string"
+      },
+      "status": {
+        "type": "string"
+      },
+      "issuer": {
+        "type": "string"
+      },
+      "organisation_id": {
+        "type": "string"
+      },
+      "issued_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "expires_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "assurance_level": {
+        "type": "string"
+      },
+      "proof_status": {
+        "enum": [
+          "verified",
+          "invalid",
+          "unavailable",
+          "unknown"
+        ]
+      },
+      "public_attributes": {
+        "type": "object",
+        "additionalProperties": {
+          "type": "string"
+        }
+      }
+    }
+  },
+  "conformanceSuite": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://schemas.intelliger.ai/oati/conformance-suite.schema.json",
+    "title": "OATI Conformance Suite",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "suite_version",
+      "standard_version",
+      "cases"
+    ],
+    "properties": {
+      "suite_version": {
+        "type": "string",
+        "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+      },
+      "standard_version": {
+        "type": "string"
+      },
+      "cases": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "category",
+            "operation",
+            "input",
+            "expected"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9._-]+$"
+            },
+            "category": {
+              "enum": [
+                "core",
+                "canonicalization",
+                "signature",
+                "delegation",
+                "revocation-expiry",
+                "replay-audience",
+                "privacy",
+                "commerce",
+                "rwa"
+              ]
+            },
+            "operation": {
+              "enum": [
+                "schema",
+                "canonicalize",
+                "verify",
+                "verify-replay",
+                "evaluate-suite",
+                "public-project"
+              ]
+            },
+            "schema": {
+              "type": "string"
+            },
+            "input": {
+              "type": "string"
+            },
+            "auxiliary": {
+              "type": "string"
+            },
+            "options": {
+              "type": "object"
+            },
+            "expected": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "outcome",
+                "codes"
+              ],
+              "properties": {
+                "outcome": {
+                  "enum": [
+                    "pass",
+                    "fail"
+                  ]
+                },
+                "codes": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  },
+                  "uniqueItems": true
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "conformanceReport": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://schemas.intelliger.ai/oati/conformance-report.schema.json",
+    "title": "OATI Conformance Report",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "report_version",
+      "suite_version",
+      "standard_version",
+      "implementation",
+      "summary",
+      "results"
+    ],
+    "properties": {
+      "report_version": {
+        "const": "1.0"
+      },
+      "suite_version": {
+        "type": "string"
+      },
+      "standard_version": {
+        "type": "string"
+      },
+      "implementation": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "version",
+          "language"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "language": {
+            "type": "string"
+          }
+        }
+      },
+      "summary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "total",
+          "passed",
+          "failed"
+        ],
+        "properties": {
+          "total": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "passed": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "failed": {
+            "type": "integer",
+            "minimum": 0
+          }
+        }
+      },
+      "results": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "category",
+            "status",
+            "expected_outcome",
+            "observed_outcome",
+            "codes"
+          ],
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "category": {
+              "type": "string"
+            },
+            "status": {
+              "enum": [
+                "pass",
+                "fail"
+              ]
+            },
+            "expected_outcome": {
+              "enum": [
+                "pass",
+                "fail"
+              ]
+            },
+            "observed_outcome": {
+              "enum": [
+                "pass",
+                "fail"
+              ]
+            },
+            "codes": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
   "passport": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://schemas.intelliger.ai/oati/v1/passport.schema.json",

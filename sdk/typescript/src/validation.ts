@@ -6,11 +6,15 @@ import { schemas } from "./generated-schemas.js"
 export type OatiSchemaName =
   | "proof" | "verificationKey" | "issuer" | "revocation"
   | "evaluationRequest" | "evaluationResult"
+  | "publicRecord"
+  | "conformanceSuite" | "conformanceReport"
   | "passport" | "mandate" | "envelope" | "decision" | "receipt"
   | "commerceOffer" | "commerceMandate" | "commerceReceipt"
   | "rwaAsset" | "rwaStateClaim" | "rwaMandate" | "rwaReceipt"
 
 export interface SchemaIssue {
+  /** Stable, implementation-neutral conformance code derived from the JSON Schema keyword. */
+  code: `SCHEMA_${string}`
   path: string
   keyword: string
   message: string
@@ -54,6 +58,7 @@ export const schemaNames = Object.freeze(Object.keys(schemas) as OatiSchemaName[
 
 function schemaIssues(errors: ErrorObject[] | null | undefined): SchemaIssue[] {
   return (errors ?? []).map((error) => ({
+    code: `SCHEMA_${error.keyword.toUpperCase()}`,
     path: error.instancePath || "/",
     keyword: error.keyword,
     message: error.message ?? "schema validation failed",
