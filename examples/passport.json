@@ -1,0 +1,22 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:agent:intelliger:commerce-demo",
+  "organisation_id": "oati:org:intelliger",
+  "issuer": "https://intelliger.ai/oati/issuers/intelliger",
+  "status": "active",
+  "display_name": "Commerce demo agent",
+  "capabilities": ["api.purchase", "data.query"],
+  "protocols": ["http", "mcp"],
+  "assurance_level": "organisation-verified",
+  "verification_methods": [
+    {
+      "id": "oati:agent:intelliger:commerce-demo#key-1",
+      "type": "JsonWebKey2020",
+      "controller": "oati:org:intelliger",
+      "public_key_jwk": { "kty": "OKP", "crv": "Ed25519", "x": "example-public-key" }
+    }
+  ],
+  "issued_at": "2026-07-27T00:00:00Z",
+  "expires_at": "2027-07-27T00:00:00Z",
+  "status_endpoint": "https://api.intelliger.ai/oati/v1/agents/oati:agent:intelliger:commerce-demo/status"
+}

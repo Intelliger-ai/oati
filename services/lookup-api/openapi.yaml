@@ -1,0 +1,58 @@
+openapi: 3.1.0
+info:
+  title: OATI Public Lookup API
+  version: 1.0.0-draft
+  description: Rate-limited public resolution and verification of OATI records.
+servers:
+  - url: https://api.intelliger.ai/oati/v1
+paths:
+  /lookup:
+    get:
+      operationId: lookupOatiRecord
+      parameters:
+        - name: type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [organisation, agent, passport, mandate, receipt, issuer, key, revocation]
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      responses:
+        "200":
+          description: Privacy-filtered public record and current verification state.
+          headers:
+            X-RateLimit-Limit:
+              schema: { type: integer }
+            X-RateLimit-Remaining:
+              schema: { type: integer }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PublicRecord"
+        "400": { description: Invalid lookup request }
+        "404": { description: No public record found }
+        "429": { description: Rate limit exceeded }
+components:
+  schemas:
+    PublicRecord:
+      type: object
+      required: [type, id, status, issuer, proof_status, public_attributes]
+      properties:
+        type: { type: string }
+        id: { type: string }
+        display_name: { type: string }
+        status: { type: string }
+        issuer: { type: string }
+        organisation_id: { type: string }
+        issued_at: { type: string, format: date-time }
+        expires_at: { type: string, format: date-time }
+        assurance_level: { type: string }
+        proof_status: { type: string, enum: [verified, invalid, unavailable, unknown] }
+        public_attributes:
+          type: object
+          additionalProperties: { type: string }

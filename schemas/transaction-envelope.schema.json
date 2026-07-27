@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/v1/transaction-envelope.schema.json",
+  "title": "OATI Agent Transaction Envelope",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["oati_version", "id", "agent_id", "organisation_id", "mandate_id", "action", "resource", "issued_at", "nonce"],
+  "properties": {
+    "oati_version": { "const": "1.0" },
+    "id": { "type": "string", "pattern": "^oati:tx:[A-Za-z0-9._:-]+$" },
+    "agent_id": { "type": "string" },
+    "organisation_id": { "type": "string" },
+    "mandate_id": { "type": "string" },
+    "action": { "type": "string" },
+    "resource": { "type": "string" },
+    "purpose": { "type": "string" },
+    "destination": { "type": "string" },
+    "protocol": { "enum": ["http", "grpc", "mcp", "a2a"] },
+    "commercial_profile": { "type": "string" },
+    "request_digest": { "type": "string" },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "nonce": { "type": "string", "minLength": 16 },
+    "proof": { "type": "object" }
+  }
+}

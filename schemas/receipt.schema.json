@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/v1/receipt.schema.json",
+  "title": "OATI Action Receipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["oati_version", "id", "transaction_id", "agent_id", "organisation_id", "mandate_id", "decision", "outcome", "occurred_at", "issuer", "proof"],
+  "properties": {
+    "oati_version": { "const": "1.0" },
+    "id": { "type": "string", "pattern": "^oati:receipt:[A-Za-z0-9._:-]+$" },
+    "transaction_id": { "type": "string" },
+    "agent_id": { "type": "string" },
+    "organisation_id": { "type": "string" },
+    "mandate_id": { "type": "string" },
+    "decision": { "enum": ["allow", "deny", "transform", "approval_required"] },
+    "outcome": { "enum": ["succeeded", "failed", "denied", "pending", "unknown"] },
+    "policy_digest": { "type": "string" },
+    "request_digest": { "type": "string" },
+    "response_digest": { "type": "string" },
+    "commercial_profile": { "type": "string" },
+    "occurred_at": { "type": "string", "format": "date-time" },
+    "issuer": { "type": "string" },
+    "proof": { "type": "object" }
+  }
+}
