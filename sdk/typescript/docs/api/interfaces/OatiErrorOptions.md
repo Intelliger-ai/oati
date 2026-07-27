@@ -6,7 +6,7 @@
 
 # Interface: OatiErrorOptions
 
-Defined in: src/errors.ts:11
+Defined in: [src/errors.ts:12](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/errors.ts#L12)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: src/errors.ts:11
 
 > `optional` **cause?**: `unknown`
 
-Defined in: src/errors.ts:12
+Defined in: [src/errors.ts:13](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/errors.ts#L13)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: src/errors.ts:12
 
 > `optional` **details?**: `unknown`
 
-Defined in: src/errors.ts:13
+Defined in: [src/errors.ts:14](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/errors.ts#L14)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: src/errors.ts:13
 
 > `optional` **retryAfter?**: `number`
 
-Defined in: src/errors.ts:15
+Defined in: [src/errors.ts:16](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/errors.ts#L16)
 
 ***
 
@@ -38,4 +38,4 @@ Defined in: src/errors.ts:15
 
 > `optional` **status?**: `number`
 
-Defined in: src/errors.ts:14
+Defined in: [src/errors.ts:15](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/errors.ts#L15)

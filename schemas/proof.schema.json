@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/v1/proof.schema.json",
+  "title": "OATI Detached JWS Proof",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["type", "cryptosuite", "algorithm", "created", "expires", "verification_method", "proof_purpose", "audience", "nonce", "signature"],
+  "properties": {
+    "type": { "const": "OatiJwsProof2026" },
+    "cryptosuite": { "enum": ["eddsa-jcs-2022", "ecdsa-jcs-2019"] },
+    "algorithm": { "enum": ["EdDSA", "ES256"] },
+    "created": { "type": "string", "format": "date-time" },
+    "expires": { "type": "string", "format": "date-time" },
+    "verification_method": { "type": "string", "pattern": "^oati:key:[A-Za-z0-9._:-]+$" },
+    "proof_purpose": { "const": "assertionMethod" },
+    "audience": {
+      "oneOf": [
+        { "type": "string", "minLength": 1 },
+        { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } }
+      ]
+    },
+    "nonce": { "type": "string", "minLength": 16 },
+    "signature": { "type": "string", "pattern": "^[A-Za-z0-9_-]+\\.\\.[A-Za-z0-9_-]+$" }
+  }
+}

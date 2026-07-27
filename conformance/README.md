@@ -16,3 +16,4 @@ Initial profile suites:
 
 - [`commerce/`](commerce/) — paid-API price, currency, quantity, merchant, service, and offer constraints;
 - [`rwa/`](rwa/) — controlled-mint reserve, State Claim, token target, quantity, and approval constraints.
+- [`crypto/`](crypto/) — cross-language detached JWS, tampering, audience, time, trust, revocation, rotation, and replay vectors.

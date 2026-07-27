@@ -1,5 +1,274 @@
 // Generated from ../../schemas by scripts/generate-schema-bundle.mjs. Do not edit.
 export const schemas = {
+  "proof": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://schemas.intelliger.ai/oati/v1/proof.schema.json",
+    "title": "OATI Detached JWS Proof",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "type",
+      "cryptosuite",
+      "algorithm",
+      "created",
+      "expires",
+      "verification_method",
+      "proof_purpose",
+      "audience",
+      "nonce",
+      "signature"
+    ],
+    "properties": {
+      "type": {
+        "const": "OatiJwsProof2026"
+      },
+      "cryptosuite": {
+        "enum": [
+          "eddsa-jcs-2022",
+          "ecdsa-jcs-2019"
+        ]
+      },
+      "algorithm": {
+        "enum": [
+          "EdDSA",
+          "ES256"
+        ]
+      },
+      "created": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "expires": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "verification_method": {
+        "type": "string",
+        "pattern": "^oati:key:[A-Za-z0-9._:-]+$"
+      },
+      "proof_purpose": {
+        "const": "assertionMethod"
+      },
+      "audience": {
+        "oneOf": [
+          {
+            "type": "string",
+            "minLength": 1
+          },
+          {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        ]
+      },
+      "nonce": {
+        "type": "string",
+        "minLength": 16
+      },
+      "signature": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9_-]+\\.\\.[A-Za-z0-9_-]+$"
+      }
+    }
+  },
+  "verificationKey": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://schemas.intelliger.ai/oati/v1/verification-key.schema.json",
+    "title": "OATI Verification Key",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "oati_version",
+      "id",
+      "controller",
+      "issuer",
+      "algorithm",
+      "public_key_jwk",
+      "status",
+      "valid_from"
+    ],
+    "properties": {
+      "oati_version": {
+        "const": "1.0"
+      },
+      "id": {
+        "type": "string",
+        "pattern": "^oati:key:[A-Za-z0-9._:-]+$"
+      },
+      "controller": {
+        "type": "string",
+        "minLength": 1
+      },
+      "issuer": {
+        "type": "string",
+        "minLength": 1
+      },
+      "algorithm": {
+        "enum": [
+          "EdDSA",
+          "ES256"
+        ]
+      },
+      "public_key_jwk": {
+        "type": "object"
+      },
+      "status": {
+        "enum": [
+          "active",
+          "retired",
+          "revoked"
+        ]
+      },
+      "valid_from": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "valid_until": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "revoked_at": {
+        "type": "string",
+        "format": "date-time"
+      }
+    },
+    "allOf": [
+      {
+        "if": {
+          "properties": {
+            "status": {
+              "const": "retired"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "valid_until": true
+          },
+          "required": [
+            "valid_until"
+          ]
+        }
+      },
+      {
+        "if": {
+          "properties": {
+            "status": {
+              "const": "revoked"
+            }
+          }
+        },
+        "then": {
+          "properties": {
+            "revoked_at": true
+          },
+          "required": [
+            "revoked_at"
+          ]
+        }
+      }
+    ]
+  },
+  "issuer": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://schemas.intelliger.ai/oati/v1/issuer.schema.json",
+    "title": "OATI Trusted Issuer",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "oati_version",
+      "id",
+      "status"
+    ],
+    "properties": {
+      "oati_version": {
+        "const": "1.0"
+      },
+      "id": {
+        "type": "string",
+        "pattern": "^oati:issuer:[A-Za-z0-9._:-]+$"
+      },
+      "parent": {
+        "type": "string"
+      },
+      "status": {
+        "enum": [
+          "active",
+          "suspended",
+          "revoked"
+        ]
+      },
+      "valid_from": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "valid_until": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "revoked_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "proof": {
+        "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json"
+      }
+    }
+  },
+  "revocation": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://schemas.intelliger.ai/oati/v1/revocation.schema.json",
+    "title": "OATI Revocation Status",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "oati_version",
+      "id",
+      "target",
+      "status",
+      "effective_at",
+      "issuer"
+    ],
+    "properties": {
+      "oati_version": {
+        "const": "1.0"
+      },
+      "id": {
+        "type": "string",
+        "pattern": "^oati:revocation:[A-Za-z0-9._:-]+$"
+      },
+      "target": {
+        "type": "string",
+        "minLength": 1
+      },
+      "status": {
+        "enum": [
+          "good",
+          "suspended",
+          "revoked"
+        ]
+      },
+      "effective_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "issuer": {
+        "type": "string",
+        "minLength": 1
+      },
+      "reason": {
+        "type": "string"
+      },
+      "proof": {
+        "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json"
+      }
+    }
+  },
   "passport": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://schemas.intelliger.ai/oati/v1/passport.schema.json",

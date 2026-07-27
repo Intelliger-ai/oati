@@ -11,4 +11,6 @@ This directory will contain the normative, versioned specification. Normative ex
 
 The first normative object set is Agent Passport, Agent Mandate, Agent Transaction Envelope, Authorisation Decision, and Action Receipt.
 
+The developer-preview [`Cryptographic Profile 1.0`](CRYPTOGRAPHIC_PROFILE.md) defines canonical detached JWS proofs, Ed25519 and P-256, key rotation, issuer trust, revocation, time, audience, and replay verification.
+
 Domain behaviour is defined through [`profiles/`](profiles/). The first developer-preview profiles cover Commerce paid-API transactions and RWA controlled minting.

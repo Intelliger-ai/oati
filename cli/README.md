@@ -31,6 +31,23 @@ oati lookup \
 # Use another compatible resolver
 oati lookup --api http://localhost:8080/oati/v1 --type agent --id oati:agent:intelliger:commerce-demo
 
+# Add an audience-bound, expiring detached JWS proof
+oati sign \
+  --algorithm EdDSA \
+  --key ./private-signing-key.jwk \
+  --verification-method oati:key:buyer:2026-07 \
+  --audience https://merchant.example \
+  --nonce 01K0EXAMPLE000000000000000 \
+  --expires 5m \
+  ./envelope.json > ./signed-envelope.json
+
+# Verify signature, trust chain, revocation, time, audience, and replay
+oati verify \
+  --trust-bundle ./trust-bundle.json \
+  --audience https://merchant.example \
+  --replay-cache ./.oati-replay.json \
+  ./signed-envelope.json
+
 # Validate the Commerce paid-API flow
 oati commerce validate-offer ./examples/commerce/merchant-service-profile.json
 oati commerce validate-mandate ./examples/commerce/purchase-mandate.json
@@ -51,6 +68,12 @@ oati rwa validate-receipt \
 
 `validate` performs the structural and semantic checks implemented by this developer preview, including required fields, identifier prefixes, timestamps, status values, and object-specific invariants. Published JSON Schema and conformance vectors remain the interoperable source of truth.
 
+## Cryptographic trust bundle
+
+`verify` accepts a JSON bundle containing `trust_anchors`, `keys`, `issuers`, and `revocations`. See [`conformance/crypto/trust-bundle.json`](../conformance/crypto/trust-bundle.json). Private JWK files are accepted only by `sign`; never put production private keys or production replay state in this repository.
+
+The CLI implements the developer-preview [OATI Cryptographic Profile](../specification/CRYPTOGRAPHIC_PROFILE.md), including Ed25519 and P-256. Its file replay cache is intended for local and single-process workflows. Production gateways require shared atomic replay storage and KMS/HSM-backed signing.
+
 ## Current boundary
 
-The CLI is ready for schema-oriented development, fixtures, local testing, canonical JSON, and public lookup. Signature-suite verification, trust-chain evaluation, and child-Mandate non-amplification proofs are planned for the conformance milestone and are not claimed by this version.
+The CLI is ready for schema-oriented development, fixtures, local testing, canonical JSON, public lookup, signing, and full proof verification. Child-Mandate non-amplification proofs remain planned for the authority-evaluation milestone.

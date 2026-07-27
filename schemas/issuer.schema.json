@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/v1/issuer.schema.json",
+  "title": "OATI Trusted Issuer",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["oati_version", "id", "status"],
+  "properties": {
+    "oati_version": { "const": "1.0" },
+    "id": { "type": "string", "pattern": "^oati:issuer:[A-Za-z0-9._:-]+$" },
+    "parent": { "type": "string" },
+    "status": { "enum": ["active", "suspended", "revoked"] },
+    "valid_from": { "type": "string", "format": "date-time" },
+    "valid_until": { "type": "string", "format": "date-time" },
+    "revoked_at": { "type": "string", "format": "date-time" },
+    "proof": { "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json" }
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/v1/revocation.schema.json",
+  "title": "OATI Revocation Status",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["oati_version", "id", "target", "status", "effective_at", "issuer"],
+  "properties": {
+    "oati_version": { "const": "1.0" },
+    "id": { "type": "string", "pattern": "^oati:revocation:[A-Za-z0-9._:-]+$" },
+    "target": { "type": "string", "minLength": 1 },
+    "status": { "enum": ["good", "suspended", "revoked"] },
+    "effective_at": { "type": "string", "format": "date-time" },
+    "issuer": { "type": "string", "minLength": 1 },
+    "reason": { "type": "string" },
+    "proof": { "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json" }
+  }
+}

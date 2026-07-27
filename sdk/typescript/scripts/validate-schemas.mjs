@@ -22,6 +22,7 @@ const examples = [
   ["examples/commerce/purchase-mandate.json", "https://schemas.intelliger.ai/oati/profiles/commerce/v0.1/purchase-mandate.schema.json"],
   ["examples/commerce/transaction-envelope.json", "https://schemas.intelliger.ai/oati/v1/transaction-envelope.schema.json"],
   ["examples/decision.json", "https://schemas.intelliger.ai/oati/v1/decision.schema.json"],
+  ["conformance/crypto/signed-envelope.json", "https://schemas.intelliger.ai/oati/v1/transaction-envelope.schema.json"],
   ["examples/commerce/commerce-receipt.json", "https://schemas.intelliger.ai/oati/profiles/commerce/v0.1/commerce-receipt.schema.json"],
   ["examples/rwa/asset-profile.json", "https://schemas.intelliger.ai/oati/profiles/rwa/v0.1/asset-profile.schema.json"],
   ["examples/rwa/asset-state-claim.json", "https://schemas.intelliger.ai/oati/profiles/rwa/v0.1/asset-state-claim.schema.json"],

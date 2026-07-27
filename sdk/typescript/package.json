@@ -1,7 +1,7 @@
 {
   "name": "@intelliger/oati",
-  "version": "0.1.0-dev.0",
-  "description": "TypeScript SDK for OATI objects, validation, canonical JSON, Commerce, RWA, and public lookup",
+  "version": "0.2.0-dev.0",
+  "description": "TypeScript SDK for OATI objects, validation, detached JWS, trust verification, Commerce, RWA, and public lookup",
   "type": "module",
   "license": "Apache-2.0",
   "exports": {
@@ -16,6 +16,10 @@
     "./lookup": {
       "types": "./dist/lookup.d.ts",
       "import": "./dist/lookup.js"
+    },
+    "./crypto": {
+      "types": "./dist/crypto.d.ts",
+      "import": "./dist/crypto.js"
     }
   },
   "files": ["dist", "docs/api", "README.md"],

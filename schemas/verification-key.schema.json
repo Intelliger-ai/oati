@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/v1/verification-key.schema.json",
+  "title": "OATI Verification Key",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["oati_version", "id", "controller", "issuer", "algorithm", "public_key_jwk", "status", "valid_from"],
+  "properties": {
+    "oati_version": { "const": "1.0" },
+    "id": { "type": "string", "pattern": "^oati:key:[A-Za-z0-9._:-]+$" },
+    "controller": { "type": "string", "minLength": 1 },
+    "issuer": { "type": "string", "minLength": 1 },
+    "algorithm": { "enum": ["EdDSA", "ES256"] },
+    "public_key_jwk": { "type": "object" },
+    "status": { "enum": ["active", "retired", "revoked"] },
+    "valid_from": { "type": "string", "format": "date-time" },
+    "valid_until": { "type": "string", "format": "date-time" },
+    "revoked_at": { "type": "string", "format": "date-time" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "retired" } } },
+      "then": { "properties": { "valid_until": true }, "required": ["valid_until"] }
+    },
+    {
+      "if": { "properties": { "status": { "const": "revoked" } } },
+      "then": { "properties": { "revoked_at": true }, "required": ["revoked_at"] }
+    }
+  ]
+}

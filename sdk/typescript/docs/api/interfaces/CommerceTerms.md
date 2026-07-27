@@ -6,15 +6,15 @@
 
 # Interface: CommerceTerms
 
-Defined in: [src/index.ts:118](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L118)
+Defined in: [src/index.ts:124](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L124)
 
 ## Properties
 
 ### billing\_model?
 
-> `optional` **billing\_model?**: `"per_request"` \| `"per_unit"` \| `"subscription"` \| `"fixed"`
+> `optional` **billing\_model?**: `"fixed"` \| `"per_request"` \| `"per_unit"` \| `"subscription"`
 
-Defined in: [src/index.ts:126](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L126)
+Defined in: [src/index.ts:132](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L132)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [src/index.ts:126](https://github.com/Intelliger-ai/oati/blob/8572d8
 
 > **currency**: `string`
 
-Defined in: [src/index.ts:122](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L122)
+Defined in: [src/index.ts:128](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L128)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [src/index.ts:122](https://github.com/Intelliger-ai/oati/blob/8572d8
 
 > **max\_quantity**: `number`
 
-Defined in: [src/index.ts:125](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L125)
+Defined in: [src/index.ts:131](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L131)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [src/index.ts:125](https://github.com/Intelliger-ai/oati/blob/8572d8
 
 > **max\_total**: `` `${number}` ``
 
-Defined in: [src/index.ts:124](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L124)
+Defined in: [src/index.ts:130](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L130)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: [src/index.ts:124](https://github.com/Intelliger-ai/oati/blob/8572d8
 
 > **max\_unit\_price**: `` `${number}` ``
 
-Defined in: [src/index.ts:123](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L123)
+Defined in: [src/index.ts:129](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L129)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: [src/index.ts:123](https://github.com/Intelliger-ai/oati/blob/8572d8
 
 > **merchant\_organisation\_id**: `` `oati:org:${string}` ``
 
-Defined in: [src/index.ts:119](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L119)
+Defined in: [src/index.ts:125](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L125)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: [src/index.ts:119](https://github.com/Intelliger-ai/oati/blob/8572d8
 
 > **offer\_id**: `string`
 
-Defined in: [src/index.ts:121](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L121)
+Defined in: [src/index.ts:127](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L127)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: [src/index.ts:121](https://github.com/Intelliger-ai/oati/blob/8572d8
 
 > **service\_id**: `` `oati:service:${string}` ``
 
-Defined in: [src/index.ts:120](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L120)
+Defined in: [src/index.ts:126](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L126)
 
 ***
 
@@ -78,4 +78,4 @@ Defined in: [src/index.ts:120](https://github.com/Intelliger-ai/oati/blob/8572d8
 
 > `optional` **terms\_digest?**: `string`
 
-Defined in: [src/index.ts:127](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L127)
+Defined in: [src/index.ts:133](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L133)

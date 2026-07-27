@@ -6,7 +6,7 @@
 
 # Class: OatiValidationError
 
-Defined in: src/errors.ts:35
+Defined in: [src/errors.ts:36](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/errors.ts#L36)
 
 Base error for failures produced by the OATI SDK.
 
@@ -20,7 +20,7 @@ Base error for failures produced by the OATI SDK.
 
 > **new OatiValidationError**(`message`, `details`): `OatiValidationError`
 
-Defined in: src/errors.ts:36
+Defined in: [src/errors.ts:37](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/errors.ts#L37)
 
 #### Parameters
 
@@ -58,7 +58,7 @@ Defined in: node\_modules/.pnpm/typescript@5.9.3/node\_modules/typescript/lib/li
 
 > `readonly` **code**: [`OatiErrorCode`](../type-aliases/OatiErrorCode.md)
 
-Defined in: src/errors.ts:20
+Defined in: [src/errors.ts:21](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/errors.ts#L21)
 
 #### Inherited from
 
@@ -70,7 +70,7 @@ Defined in: src/errors.ts:20
 
 > `readonly` `optional` **details?**: `unknown`
 
-Defined in: src/errors.ts:21
+Defined in: [src/errors.ts:22](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/errors.ts#L22)
 
 #### Inherited from
 
@@ -106,7 +106,7 @@ Defined in: node\_modules/.pnpm/typescript@5.9.3/node\_modules/typescript/lib/li
 
 > `readonly` `optional` **retryAfter?**: `number`
 
-Defined in: src/errors.ts:23
+Defined in: [src/errors.ts:24](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/errors.ts#L24)
 
 #### Inherited from
 
@@ -130,7 +130,7 @@ Defined in: node\_modules/.pnpm/typescript@5.9.3/node\_modules/typescript/lib/li
 
 > `readonly` `optional` **status?**: `number`
 
-Defined in: src/errors.ts:22
+Defined in: [src/errors.ts:23](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/errors.ts#L23)
 
 #### Inherited from
 

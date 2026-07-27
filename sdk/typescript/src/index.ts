@@ -6,11 +6,17 @@ export const RWA_PROFILE =
 export type DecimalString = `${number}`
 
 export interface Proof {
-  type: string
+  type: "OatiJwsProof2026" | string
+  cryptosuite?: "eddsa-jcs-2022" | "ecdsa-jcs-2019" | string
+  algorithm?: "EdDSA" | "ES256" | string
   created?: string
+  expires?: string
   verification_method?: string
+  proof_purpose?: "assertionMethod" | string
+  audience?: string | string[]
+  nonce?: string
+  /** RFC 7797 detached compact JWS: protected-header..signature */
   signature?: string
-  [key: string]: unknown
 }
 
 export interface VerificationMethod {
@@ -350,6 +356,7 @@ function compareDecimal(left: string, right: string): number {
 
 export * from "./builders.js"
 export * from "./canonical.js"
+export * from "./crypto.js"
 export * from "./errors.js"
 export * from "./lookup.js"
 export * from "./validation.js"

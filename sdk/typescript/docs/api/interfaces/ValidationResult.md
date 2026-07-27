@@ -6,7 +6,7 @@
 
 # Interface: ValidationResult
 
-Defined in: [src/index.ts:211](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L211)
+Defined in: [src/index.ts:217](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L217)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [src/index.ts:211](https://github.com/Intelliger-ai/oati/blob/8572d8
 
 > **issues**: `string`[]
 
-Defined in: [src/index.ts:213](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L213)
+Defined in: [src/index.ts:219](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L219)
 
 ***
 
@@ -22,4 +22,4 @@ Defined in: [src/index.ts:213](https://github.com/Intelliger-ai/oati/blob/8572d8
 
 > **valid**: `boolean`
 
-Defined in: [src/index.ts:212](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L212)
+Defined in: [src/index.ts:218](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/index.ts#L218)

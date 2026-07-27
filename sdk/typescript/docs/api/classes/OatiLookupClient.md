@@ -6,7 +6,7 @@
 
 # Class: OatiLookupClient
 
-Defined in: src/lookup.ts:35
+Defined in: [src/lookup.ts:35](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L35)
 
 Client for an OATI-compatible public resolver.
 
@@ -16,7 +16,7 @@ Client for an OATI-compatible public resolver.
 
 > **new OatiLookupClient**(`options?`): `OatiLookupClient`
 
-Defined in: src/lookup.ts:41
+Defined in: [src/lookup.ts:41](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L41)
 
 #### Parameters
 
@@ -34,7 +34,7 @@ Defined in: src/lookup.ts:41
 
 > `readonly` **baseUrl**: `string`
 
-Defined in: src/lookup.ts:36
+Defined in: [src/lookup.ts:36](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L36)
 
 ## Methods
 
@@ -42,7 +42,7 @@ Defined in: src/lookup.ts:36
 
 > **lookup**(`type`, `id`, `options?`): `Promise`\<[`PublicOatiRecord`](../interfaces/PublicOatiRecord.md)\>
 
-Defined in: src/lookup.ts:50
+Defined in: [src/lookup.ts:50](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L50)
 
 #### Parameters
 

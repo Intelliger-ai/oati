@@ -6,6 +6,10 @@ const here = dirname(fileURLToPath(import.meta.url))
 const packageRoot = resolve(here, "..")
 const repositorySchemas = resolve(packageRoot, "..", "..", "schemas")
 const entries = {
+  proof: "proof.schema.json",
+  verificationKey: "verification-key.schema.json",
+  issuer: "issuer.schema.json",
+  revocation: "revocation.schema.json",
   passport: "passport.schema.json",
   mandate: "mandate.schema.json",
   envelope: "transaction-envelope.schema.json",

@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-const version = "0.1.0-dev"
+const version = "0.2.0-dev"
 
 var validKinds = map[string]string{
 	"passport": "oati:agent:",
@@ -52,6 +52,10 @@ func run(args []string, stdout, stderr io.Writer) error {
 		return runCanonicalize(args[1:], stdout, stderr)
 	case "lookup":
 		return runLookup(args[1:], stdout, stderr)
+	case "sign":
+		return runSign(args[1:], stdout, stderr)
+	case "verify":
+		return runVerify(args[1:], stdout, stderr)
 	case "commerce", "rwa":
 		return runProfileCommand(args[0], args[1:], stdout, stderr)
 	default:
@@ -66,6 +70,8 @@ Usage:
   oati validate <passport|mandate|envelope|receipt> <file|->
   oati canonicalize <file|->
   oati lookup --type <type> --id <identifier> [--api <base-url>]
+  oati sign --algorithm <EdDSA|ES256> --key <private.jwk> --verification-method <id> --audience <aud> --nonce <nonce> --expires <duration> <file|->
+  oati verify --trust-bundle <bundle.json> --audience <aud> --replay-cache <file> <file|->
   oati commerce <validate-offer|validate-mandate|validate-receipt> [options] <file|->
   oati rwa <validate-asset|validate-state-claim|validate-mint-mandate|validate-receipt> [options] <file|->
   oati version
@@ -74,6 +80,8 @@ Commands:
   validate      Check the structure and core semantics of an OATI object
   canonicalize  Emit compact JSON with recursively sorted object keys
   lookup        Query an OATI-compatible public resolver
+  sign          Add an OATI detached JWS proof to a JSON object
+  verify        Verify signature, trust, revocation, time, audience, and replay
   commerce      Validate Commerce Profile objects and constraints
   rwa           Validate RWA Profile objects and controlled-mint constraints
   version       Print the CLI version

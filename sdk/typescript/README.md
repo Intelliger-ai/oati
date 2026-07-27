@@ -2,7 +2,7 @@
 
 The official TypeScript SDK for creating and validating OATI core objects, using the Commerce and RWA profiles, producing deterministic JSON, and resolving public OATI records.
 
-> Status: developer preview. Object validation and lookup are functional. Cryptographic signing and proof verification are not yet included.
+> Status: developer preview. Object validation, lookup, detached-JWS signing, and policy-driven verification are functional. The cryptographic profile still requires independent specialist review before production-security claims.
 
 ## Install
 
@@ -91,6 +91,41 @@ try {
 
 Lookup failures use stable codes: `LOOKUP_BAD_REQUEST`, `LOOKUP_NOT_FOUND`, `LOOKUP_RATE_LIMITED`, `LOOKUP_UNAVAILABLE`, `LOOKUP_INVALID_RESPONSE`, and `LOOKUP_TIMEOUT`.
 
+## Signing and verification
+
+OATI uses an RFC 7797 detached JWS over canonical JSON. Both Ed25519 (`EdDSA`) and P-256 (`ES256`) are supported.
+
+```ts
+import {
+  MemoryReplayCache,
+  StaticTrustResolver,
+  signDocument,
+  verifyDocument,
+} from "@intelliger/oati/crypto"
+
+const signed = await signDocument(envelope, {
+  algorithm: "EdDSA",
+  verificationMethod: "oati:key:buyer:2026-07",
+  privateKey, // CryptoKey or private JWK
+  audience: "https://merchant.example",
+  nonce: "01K0EXAMPLE000000000000000",
+  expires: new Date(Date.now() + 5 * 60_000),
+})
+
+const result = await verifyDocument(signed, {
+  resolver: new StaticTrustResolver(keys, issuers, revocations),
+  trustAnchors: ["oati:issuer:intelliger-root"],
+  expectedAudience: "https://merchant.example",
+  replayCache: new MemoryReplayCache(),
+})
+
+if (!result.verified) console.error(result.issues)
+```
+
+`verifyDocument` evaluates the algorithm allow-list, detached JWS, key validity and rotation window, issuer chain, current revocation, document/proof timestamps, exact audience, signer binding, and atomic replay-cache result. `LookupTrustResolver` resolves trust material through an `OatiLookupClient`; `passportTrustResolver` resolves verification methods embedded in an Agent Passport.
+
+`MemoryReplayCache` is only appropriate for development and a single process. Production deployments must provide a shared atomic `ReplayCache` implementation and protected KMS/HSM signing keys.
+
 ## Commerce and RWA
 
 The existing profile APIs remain available:
@@ -112,6 +147,7 @@ Profile semantic validators check cross-object constraints in addition to JSON S
 - `@intelliger/oati` — complete public API;
 - `@intelliger/oati/validation` — schema validation only;
 - `@intelliger/oati/lookup` — public resolver client only.
+- `@intelliger/oati/crypto` — signing, trust resolution, replay, and verification.
 
 Generated API documentation is available in [`docs/api/`](docs/api/README.md).
 
@@ -129,4 +165,4 @@ pnpm pack --dry-run
 
 ## Security boundary
 
-Schema validation establishes document structure, not authenticity or authority. Until the cryptographic milestone lands, applications must not treat a structurally valid `proof` as verified. Signature verification, issuer trust-chain evaluation, revocation policy, and delegation subset proofs remain separate required controls.
+Schema validation establishes document structure, not authenticity or authority. Applications must use `verifyDocument` and an explicit local trust-anchor policy before treating a proof as verified. A valid proof establishes integrity and a trusted signer; it does not prove that a Mandate grants the requested business authority. Delegation subset and policy evaluation remain separate required controls.

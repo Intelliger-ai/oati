@@ -4,6 +4,7 @@ import { OatiValidationError } from "./errors.js"
 import { schemas } from "./generated-schemas.js"
 
 export type OatiSchemaName =
+  | "proof" | "verificationKey" | "issuer" | "revocation"
   | "passport" | "mandate" | "envelope" | "decision" | "receipt"
   | "commerceOffer" | "commerceMandate" | "commerceReceipt"
   | "rwaAsset" | "rwaStateClaim" | "rwaMandate" | "rwaReceipt"

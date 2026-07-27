@@ -6,7 +6,7 @@
 
 # Interface: PublicOatiRecord
 
-Defined in: src/lookup.ts:9
+Defined in: [src/lookup.ts:9](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L9)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: src/lookup.ts:9
 
 > `optional` **assurance\_level?**: `string`
 
-Defined in: src/lookup.ts:18
+Defined in: [src/lookup.ts:18](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L18)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: src/lookup.ts:18
 
 > `optional` **display\_name?**: `string`
 
-Defined in: src/lookup.ts:12
+Defined in: [src/lookup.ts:12](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L12)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: src/lookup.ts:12
 
 > `optional` **expires\_at?**: `string`
 
-Defined in: src/lookup.ts:17
+Defined in: [src/lookup.ts:17](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L17)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: src/lookup.ts:17
 
 > **id**: `string`
 
-Defined in: src/lookup.ts:11
+Defined in: [src/lookup.ts:11](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L11)
 
 ***
 
@@ -46,7 +46,7 @@ Defined in: src/lookup.ts:11
 
 > `optional` **issued\_at?**: `string`
 
-Defined in: src/lookup.ts:16
+Defined in: [src/lookup.ts:16](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L16)
 
 ***
 
@@ -54,7 +54,7 @@ Defined in: src/lookup.ts:16
 
 > **issuer**: `string`
 
-Defined in: src/lookup.ts:14
+Defined in: [src/lookup.ts:14](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L14)
 
 ***
 
@@ -62,7 +62,7 @@ Defined in: src/lookup.ts:14
 
 > `optional` **organisation\_id?**: `string`
 
-Defined in: src/lookup.ts:15
+Defined in: [src/lookup.ts:15](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L15)
 
 ***
 
@@ -70,7 +70,7 @@ Defined in: src/lookup.ts:15
 
 > **proof\_status**: `"verified"` \| `"invalid"` \| `"unavailable"` \| `"unknown"`
 
-Defined in: src/lookup.ts:19
+Defined in: [src/lookup.ts:19](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L19)
 
 ***
 
@@ -78,7 +78,7 @@ Defined in: src/lookup.ts:19
 
 > **public\_attributes**: `Record`\<`string`, `string`\>
 
-Defined in: src/lookup.ts:20
+Defined in: [src/lookup.ts:20](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L20)
 
 ***
 
@@ -86,7 +86,7 @@ Defined in: src/lookup.ts:20
 
 > **status**: `string`
 
-Defined in: src/lookup.ts:13
+Defined in: [src/lookup.ts:13](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L13)
 
 ***
 
@@ -94,4 +94,4 @@ Defined in: src/lookup.ts:13
 
 > **type**: `"organisation"` \| `"agent"` \| `"passport"` \| `"mandate"` \| `"receipt"` \| `"issuer"` \| `"key"` \| `"revocation"`
 
-Defined in: src/lookup.ts:10
+Defined in: [src/lookup.ts:10](https://github.com/Intelliger-ai/oati/blob/c08e10897dc5a776cbc5701b35b0139c32a1c30b/sdk/typescript/src/lookup.ts#L10)

@@ -87,6 +87,12 @@ oati validate passport ./examples/passport.json
 oati canonicalize ./examples/passport.json
 oati lookup --type agent --id oati:agent:intelliger:commerce-demo
 
+oati sign --algorithm EdDSA --key ./private.jwk \
+  --verification-method oati:key:example:2026-07 \
+  --audience https://service.example \
+  --nonce 01K0EXAMPLE000000000000000 \
+  --expires 5m ./examples/commerce/transaction-envelope.json
+
 oati commerce validate-offer ./examples/commerce/merchant-service-profile.json
 oati commerce validate-receipt \
   --mandate ./examples/commerce/purchase-mandate.json \
@@ -97,7 +103,7 @@ oati rwa validate-mint-mandate \
   ./examples/rwa/mint-mandate.json
 ```
 
-The current CLI is ready for object validation, fixtures, deterministic JSON processing, and lookup integration. Signature-suite verification, issuer trust-chain evaluation, and delegation subset proofs are not yet claimed. See [CLI documentation](cli/README.md).
+The current CLI is ready for object validation, fixtures, deterministic JSON processing, lookup integration, detached-JWS signing, and verification of key lifecycle, issuer trust, revocation, time, audience, and replay. Delegation subset proofs are not yet claimed. See [CLI documentation](cli/README.md).
 
 ## Repository map
 
@@ -143,7 +149,7 @@ Do not report security vulnerabilities in a public issue. Until a dedicated secu
 
 ## Project status
 
-The repository is an early developer preview. Core and profile schemas, complete Commerce and RWA example flows, a functional CLI, a tested TypeScript SDK with embedded schema validation and public lookup, and first conformance vectors are available. The normative specification, cryptographic profiles, additional SDK languages, and full conformance suite remain under active development. Production lookup operations are deliberately outside this repository.
+The repository is an early developer preview. Core and profile schemas, complete Commerce and RWA example flows, a functional CLI, a tested TypeScript SDK with embedded schema validation, public lookup, signing and trust verification, and cross-language cryptographic vectors are available. The cryptographic profile requires independent review; the broader normative specification, additional SDK languages, authority evaluator, and full conformance suite remain under active development. Production lookup operations are deliberately outside this repository.
 
 Compatibility claims must reference a published OATI version and conformance-suite version.
 

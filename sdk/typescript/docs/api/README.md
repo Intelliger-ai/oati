@@ -6,10 +6,13 @@
 
 ## Classes
 
+- [LookupTrustResolver](classes/LookupTrustResolver.md)
+- [MemoryReplayCache](classes/MemoryReplayCache.md)
 - [OatiError](classes/OatiError.md)
 - [OatiLookupClient](classes/OatiLookupClient.md)
 - [OatiLookupError](classes/OatiLookupError.md)
 - [OatiValidationError](classes/OatiValidationError.md)
+- [StaticTrustResolver](classes/StaticTrustResolver.md)
 
 ## Interfaces
 
@@ -25,33 +28,49 @@
 - [LookupClientOptions](interfaces/LookupClientOptions.md)
 - [LookupOptions](interfaces/LookupOptions.md)
 - [OatiErrorOptions](interfaces/OatiErrorOptions.md)
+- [OatiJwsProof](interfaces/OatiJwsProof.md)
 - [Proof](interfaces/Proof.md)
 - [PublicOatiRecord](interfaces/PublicOatiRecord.md)
 - [PurchaseMandate](interfaces/PurchaseMandate.md)
+- [ReplayCache](interfaces/ReplayCache.md)
+- [RevocationStatus](interfaces/RevocationStatus.md)
 - [RwaMandateTerms](interfaces/RwaMandateTerms.md)
 - [RwaReceipt](interfaces/RwaReceipt.md)
 - [RwaReceiptTerms](interfaces/RwaReceiptTerms.md)
 - [SchemaIssue](interfaces/SchemaIssue.md)
 - [SchemaValidationResult](interfaces/SchemaValidationResult.md)
+- [SigningOptions](interfaces/SigningOptions.md)
 - [TransactionEnvelope](interfaces/TransactionEnvelope.md)
+- [TrustedIssuer](interfaces/TrustedIssuer.md)
+- [TrustResolver](interfaces/TrustResolver.md)
 - [ValidationResult](interfaces/ValidationResult.md)
+- [VerificationIssue](interfaces/VerificationIssue.md)
+- [VerificationKey](interfaces/VerificationKey.md)
 - [VerificationMethod](interfaces/VerificationMethod.md)
+- [VerificationPolicy](interfaces/VerificationPolicy.md)
+- [VerificationResult](interfaces/VerificationResult.md)
 
 ## Type Aliases
 
 - [DecimalString](type-aliases/DecimalString.md)
 - [JsonPrimitive](type-aliases/JsonPrimitive.md)
 - [JsonValue](type-aliases/JsonValue.md)
+- [OatiAlgorithm](type-aliases/OatiAlgorithm.md)
+- [OatiCryptosuite](type-aliases/OatiCryptosuite.md)
 - [OatiErrorCode](type-aliases/OatiErrorCode.md)
 - [OatiRecordType](type-aliases/OatiRecordType.md)
 - [OatiSchemaName](type-aliases/OatiSchemaName.md)
 - [ReceiptInput](type-aliases/ReceiptInput.md)
+- [VerificationCode](type-aliases/VerificationCode.md)
 - [WithoutVersion](type-aliases/WithoutVersion.md)
 
 ## Variables
 
 - [COMMERCE\_PROFILE](variables/COMMERCE_PROFILE.md)
+- [OATI\_CRYPTO\_PROFILE](variables/OATI_CRYPTO_PROFILE.md)
+- [OATI\_PROOF\_TYPE](variables/OATI_PROOF_TYPE.md)
 - [OATI\_RECORD\_TYPES](variables/OATI_RECORD_TYPES.md)
+- [OATI\_SUPPORTED\_ALGORITHMS](variables/OATI_SUPPORTED_ALGORITHMS.md)
 - [RWA\_PROFILE](variables/RWA_PROFILE.md)
 - [schemaNames](variables/schemaNames.md)
 
@@ -69,7 +88,10 @@
 - [createReceipt](functions/createReceipt.md)
 - [createTransactionEnvelope](functions/createTransactionEnvelope.md)
 - [getSchema](functions/getSchema.md)
+- [passportTrustResolver](functions/passportTrustResolver.md)
+- [signDocument](functions/signDocument.md)
 - [validateCommerceReceipt](functions/validateCommerceReceipt.md)
 - [validateMintMandate](functions/validateMintMandate.md)
 - [validateRwaReceipt](functions/validateRwaReceipt.md)
 - [validateSchema](functions/validateSchema.md)
+- [verifyDocument](functions/verifyDocument.md)

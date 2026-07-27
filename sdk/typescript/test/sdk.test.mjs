@@ -14,15 +14,21 @@ import {
   createPassport,
   createReceipt,
   createTransactionEnvelope,
+  MemoryReplayCache,
+  signDocument,
+  StaticTrustResolver,
+  verifyDocument,
   getSchema,
   schemaNames,
   validateSchema,
 } from "../dist/index.js"
 
 const example = async (path) => JSON.parse(await readFile(new URL(`../../../examples/${path}`, import.meta.url), "utf8"))
+const cryptoVector = async (path) => JSON.parse(await readFile(new URL(`../../../conformance/crypto/${path}`, import.meta.url), "utf8"))
 
 test("all published SDK schemas are bundled", () => {
   assert.deepEqual(schemaNames, [
+    "proof", "verificationKey", "issuer", "revocation",
     "passport", "mandate", "envelope", "decision", "receipt", "commerceOffer",
     "commerceMandate", "commerceReceipt", "rwaAsset", "rwaStateClaim", "rwaMandate", "rwaReceipt",
   ])
@@ -141,4 +147,105 @@ test("lookup client enforces its timeout", async () => {
     init.signal.addEventListener("abort", () => reject(init.signal.reason), { once: true })
   }) })
   await assert.rejects(() => client.lookup("agent", "slow"), (error) => error instanceof OatiLookupError && error.code === "LOOKUP_TIMEOUT")
+})
+
+const cryptoFixture = async (algorithm = "EdDSA", overrides = {}) => {
+  const generated = algorithm === "EdDSA"
+    ? await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"])
+    : await crypto.subtle.generateKey({ name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"])
+  const publicKeyJwk = await crypto.subtle.exportKey("jwk", generated.publicKey)
+  const key = {
+    id: `oati:key:test:${algorithm.toLowerCase()}:1`, controller: "oati:org:test", issuer: "oati:issuer:root",
+    algorithm, publicKeyJwk, status: "active", validFrom: "2026-07-27T11:00:00Z", proofStatus: "verified",
+    ...overrides,
+  }
+  const document = { oati_version: "1.0", id: "oati:receipt:test:crypto", issuer: "oati:org:test", occurred_at: "2026-07-27T12:00:00Z" }
+  const signed = await signDocument(document, {
+    algorithm, verificationMethod: key.id, privateKey: generated.privateKey,
+    audience: "https://merchant.example", nonce: `nonce-${algorithm}-00000000001`,
+    created: "2026-07-27T12:00:00Z", expires: "2026-07-27T12:05:00Z",
+  })
+  return { signed, key }
+}
+
+const policyFor = (key, options = {}) => ({
+  resolver: new StaticTrustResolver([key], []), trustAnchors: ["oati:issuer:root"],
+  expectedAudience: "https://merchant.example", replayCache: new MemoryReplayCache(),
+  now: new Date("2026-07-27T12:01:00Z"), ...options,
+})
+
+test("Ed25519 detached JWS verifies with trust, time, audience, and replay checks", async () => {
+  const { signed, key } = await cryptoFixture()
+  const policy = policyFor(key)
+  const verified = await verifyDocument(signed, policy)
+  assert.equal(verified.verified, true, JSON.stringify(verified.issues))
+  assert.equal(verified.algorithm, "EdDSA")
+  const replayed = await verifyDocument(signed, policy)
+  assert.equal(replayed.verified, false)
+  assert.ok(replayed.issues.some((issue) => issue.code === "REPLAY_DETECTED"))
+})
+
+test("ES256 signing and verification uses the same canonical proof profile", async () => {
+  const { signed, key } = await cryptoFixture("ES256")
+  const verified = await verifyDocument(signed, policyFor(key))
+  assert.equal(verified.verified, true, JSON.stringify(verified.issues))
+  assert.equal(signed.proof.signature.split(".")[1], "")
+})
+
+test("verification detects tampering and audience mismatch", async () => {
+  const { signed, key } = await cryptoFixture()
+  const tampered = { ...signed, issuer: "oati:org:attacker" }
+  const invalid = await verifyDocument(tampered, policyFor(key))
+  assert.equal(invalid.verified, false)
+  assert.ok(invalid.issues.some((issue) => issue.code === "SIGNATURE_INVALID"))
+  assert.ok(invalid.issues.some((issue) => issue.code === "KEY_INVALID"))
+
+  const audience = await verifyDocument(signed, policyFor(key, { expectedAudience: "https://other.example" }))
+  assert.ok(audience.issues.some((issue) => issue.code === "AUDIENCE_MISMATCH"))
+})
+
+test("retired rotation keys remain verifiable for their validity window", async () => {
+  const { signed, key } = await cryptoFixture("EdDSA", { status: "retired", validUntil: "2026-07-27T12:02:00Z" })
+  const verified = await verifyDocument(signed, policyFor(key))
+  assert.equal(verified.verified, true, JSON.stringify(verified.issues))
+})
+
+test("revoked keys, documents, expired proofs, and untrusted issuers fail closed", async () => {
+  const { signed, key } = await cryptoFixture()
+  const revokedKey = await verifyDocument(signed, policyFor({ ...key, status: "revoked", revokedAt: "2026-07-27T12:00:30Z" }))
+  assert.ok(revokedKey.issues.some((issue) => issue.code === "KEY_REVOKED"))
+
+  const documentRevocation = new StaticTrustResolver([key], [], [{ target: signed.id, status: "revoked", effectiveAt: "2026-07-27T12:00:30Z" }])
+  const revokedDocument = await verifyDocument(signed, policyFor(key, { resolver: documentRevocation }))
+  assert.ok(revokedDocument.issues.some((issue) => issue.code === "DOCUMENT_REVOKED"))
+
+  const expired = await verifyDocument(signed, policyFor(key, { now: new Date("2026-07-27T12:10:00Z") }))
+  assert.ok(expired.issues.some((issue) => issue.code === "PROOF_EXPIRED"))
+
+  const untrusted = await verifyDocument(signed, policyFor(key, { trustAnchors: ["oati:issuer:someone-else"] }))
+  assert.ok(untrusted.issues.some((issue) => issue.code === "ISSUER_NOT_TRUSTED"))
+})
+
+test("TypeScript verifies the deterministic vector produced by the Go CLI", async () => {
+  const signed = await cryptoVector("signed-envelope.json")
+  const bundle = await cryptoVector("trust-bundle.json")
+  const keys = bundle.keys.map((key) => ({
+    id: key.id, controller: key.controller, issuer: key.issuer, algorithm: key.algorithm,
+    publicKeyJwk: key.public_key_jwk, status: key.status, validFrom: key.valid_from,
+    validUntil: key.valid_until, proofStatus: key.proof_status,
+  }))
+  const resolver = new StaticTrustResolver(keys, bundle.issuers, bundle.revocations)
+  const verified = await verifyDocument(signed, {
+    resolver, trustAnchors: bundle.trust_anchors, expectedAudience: "https://merchant.example",
+    replayCache: new MemoryReplayCache(), now: new Date("2026-07-27T12:01:00Z"),
+  })
+  assert.equal(verified.verified, true, JSON.stringify(verified.issues))
+  assert.equal(validateSchema("proof", signed.proof).valid, true)
+
+  const tampered = await cryptoVector("tampered-envelope.json")
+  const rejected = await verifyDocument(tampered, {
+    resolver, trustAnchors: bundle.trust_anchors, expectedAudience: "https://merchant.example",
+    replayCache: new MemoryReplayCache(), now: new Date("2026-07-27T12:01:00Z"),
+  })
+  assert.ok(rejected.issues.some((issue) => issue.code === "SIGNATURE_INVALID"))
 })
