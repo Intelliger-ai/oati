@@ -6,7 +6,7 @@ OATI is an Intelliger standard with an Apache-2.0 developer implementation and a
 
 ```text
 intelliger.ai/oati/lookup                 api.intelliger.ai/oati/v1
-        lookup-web  --------------------------> lookup-api
+ private lookup-web  --------------------> private lookup-api
                                                        |
                     +----------------------------------+------------------+
                     |              |                   |                  |
@@ -20,18 +20,18 @@ oati-platform (private) -- publishes approved public projections --> public inde
 
 The lookup service is a public projection, not the system of record for private transaction data. The private platform publishes only approved fields. Mandates and Receipts default to metadata, status, digest, issuer, timestamps, and verification material; payloads and private claims require explicit selective-disclosure grants.
 
-## Public components
+## Open developer components
 
 1. Normative specification and profiles.
 2. Versioned JSON Schemas and canonicalisation/signing rules.
 3. SDKs, verifier, CLI, adapters, examples, and conformance suite.
-4. Public lookup UI.
-5. Rate-limited lookup/resolver API.
+4. Public lookup API contract and clients.
+5. Mock fixtures or a minimal test resolver for interoperability testing.
 6. Reference gateway/middleware sufficient for interoperability testing.
 
 ## Private components
 
-The commercial control plane, policy compiler and studio, data-release engine, commercial-profile compiler, evidence and dispute operations, tenant administration, enterprise integrations, and network operations remain in `oati-platform`.
+The production lookup UI/API, commercial control plane, policy compiler and studio, data-release engine, commercial-profile compiler, evidence and dispute operations, tenant administration, enterprise integrations, and network operations remain in `oati-platform`.
 
 ## Deployment
 

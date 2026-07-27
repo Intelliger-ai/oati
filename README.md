@@ -40,7 +40,7 @@ The central invariant is **non-amplification**: a delegated Mandate may preserve
 
 ## Start in five minutes
 
-Requirements: Go 1.24+ and Node.js 20+ with pnpm.
+Requirement: Go 1.24+.
 
 ```bash
 git clone git@github.com:Intelliger-ai/oati.git
@@ -48,22 +48,7 @@ cd oati
 
 # Validate the included Agent Passport
 go run ./cli/cmd/oati validate passport ./examples/passport.json
-
-# Start the public lookup API
-cd services/lookup-api
-go run ./cmd/server
 ```
-
-In another terminal:
-
-```bash
-cd apps/lookup-web
-cp .env.example .env.local
-pnpm install
-pnpm dev
-```
-
-Open `http://localhost:3000` and verify the prefilled demonstration agent.
 
 ## CLI
 
@@ -93,8 +78,7 @@ The current CLI is ready for object validation, fixtures, deterministic JSON pro
 | [`cli/`](cli/) | developer CLI |
 | [`sdk/`](sdk/) | TypeScript, Python, Go, Java, and .NET SDKs |
 | [`conformance/`](conformance/) | shared fixtures, test vectors, and compatibility tests |
-| [`services/lookup-api/`](services/lookup-api/) | Go public resolver and verification API |
-| [`apps/lookup-web/`](apps/lookup-web/) | shadcn/Next.js public lookup interface |
+| [`api/lookup.openapi.yaml`](api/lookup.openapi.yaml) | public lookup API contract for client generation |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | system boundaries and deployment model |
 
 ## Public lookup and privacy
@@ -103,17 +87,7 @@ The lookup service resolves organisations, agents, Passports, Mandates, Receipts
 
 Lookup is a **privacy-reviewed projection**, not an unrestricted view of OATI Platform records. Mandates and Receipts expose only approved metadata, status, digests, issuer information, timestamps, and verification material unless a selective-disclosure grant permits more.
 
-Run the API locally:
-
-```bash
-cd services/lookup-api
-go test ./...
-go run ./cmd/server
-
-curl 'http://localhost:8080/oati/v1/lookup?type=agent&id=oati:agent:intelliger:commerce-demo'
-```
-
-The API contract is published in [`openapi.yaml`](services/lookup-api/openapi.yaml).
+The production lookup UI and service are operated from the private OATI Platform repository. Developers can integrate against the published [`OpenAPI contract`](api/lookup.openapi.yaml), use the CLI lookup client, or implement a compatible resolver.
 
 ## Open-source boundary
 
@@ -123,10 +97,10 @@ This repository is intended to contain everything an independent developer needs
 - SDKs, verifier, and CLI;
 - conformance tests and test vectors;
 - MCP, A2A, OAuth, AuthZEN, and gateway adapters;
-- public lookup/resolver implementation;
-- reference middleware required for interoperability.
+- lookup client contracts and test fixtures;
+- reference middleware required for interoperability testing.
 
-Intelliger’s commercial control plane, policy studio/compiler, data-release engine, commercial-profile compiler, evidence and dispute operations, enterprise integrations, tenant administration, and network operations remain in the private `Intelliger-ai/oati-platform` repository.
+Intelliger’s production lookup service, commercial control plane, policy studio/compiler, data-release engine, commercial-profile compiler, evidence and dispute operations, enterprise integrations, tenant administration, and network operations remain in the private `Intelliger-ai/oati-platform` repository.
 
 Private code may consume public OATI releases. Public code never depends on private packages.
 
@@ -138,7 +112,7 @@ Do not report security vulnerabilities in a public issue. Until a dedicated secu
 
 ## Project status
 
-The repository is an early developer preview. The lookup application and API run, the initial schemas are available, and the CLI supports structural development workflows. The normative specification, cryptographic profiles, SDKs, full conformance suite, and production persistence are still under active development.
+The repository is an early developer preview. Initial schemas and a functional CLI are available. The normative specification, cryptographic profiles, SDKs, and full conformance suite are still under active development. Production lookup operations are deliberately outside this repository.
 
 Compatibility claims must reference a published OATI version and conformance-suite version.
 
