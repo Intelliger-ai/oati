@@ -1,0 +1,20 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:decision:intelliger:commerce-demo-001",
+  "transaction_id": "oati:tx:intelliger:commerce-demo-001",
+  "decision": "allow",
+  "policy_digest": "sha256:8c457f2a3bd4c57cb7f07db574aef38df78f24d51aa9fd9f59d4e35b610f7f85",
+  "reason_codes": [
+    "passport_active",
+    "mandate_valid",
+    "commerce_limits_satisfied"
+  ],
+  "obligations": [
+    {
+      "type": "issue_action_receipt"
+    }
+  ],
+  "decided_at": "2026-07-27T12:01:01Z",
+  "expires_at": "2026-07-27T12:02:01Z",
+  "issuer": "oati:org:intelliger"
+}

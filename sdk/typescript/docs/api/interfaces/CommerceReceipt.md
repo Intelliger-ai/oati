@@ -1,0 +1,225 @@
+[**@intelliger/oati**](../README.md)
+
+***
+
+[@intelliger/oati](../README.md) / CommerceReceipt
+
+# Interface: CommerceReceipt
+
+Defined in: [src/index.ts:148](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L148)
+
+## Extends
+
+- [`ActionReceipt`](ActionReceipt.md)
+
+## Indexable
+
+> \[`key`: `string`\]: `unknown`
+
+## Properties
+
+### agent\_id
+
+> **agent\_id**: `` `oati:agent:${string}` ``
+
+Defined in: [src/index.ts:101](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L101)
+
+#### Inherited from
+
+[`ActionReceipt`](ActionReceipt.md).[`agent_id`](ActionReceipt.md#agent_id)
+
+***
+
+### commercial\_profile?
+
+> `optional` **commercial\_profile?**: `string`
+
+Defined in: [src/index.ts:114](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L114)
+
+#### Inherited from
+
+[`ActionReceipt`](ActionReceipt.md).[`commercial_profile`](ActionReceipt.md#commercial_profile)
+
+***
+
+### decision
+
+> **decision**: `"allow"` \| `"deny"` \| `"transform"` \| `"approval_required"`
+
+Defined in: [src/index.ts:104](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L104)
+
+#### Inherited from
+
+[`ActionReceipt`](ActionReceipt.md).[`decision`](ActionReceipt.md#decision)
+
+***
+
+### extensions
+
+> **extensions**: `object`
+
+Defined in: [src/index.ts:150](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L150)
+
+#### commerce
+
+> **commerce**: [`CommerceReceiptTerms`](CommerceReceiptTerms.md)
+
+#### Overrides
+
+[`ActionReceipt`](ActionReceipt.md).[`extensions`](ActionReceipt.md#extensions)
+
+***
+
+### id
+
+> **id**: `` `oati:receipt:${string}` ``
+
+Defined in: [src/index.ts:99](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L99)
+
+#### Inherited from
+
+[`ActionReceipt`](ActionReceipt.md).[`id`](ActionReceipt.md#id)
+
+***
+
+### issuer
+
+> **issuer**: `string`
+
+Defined in: [src/index.ts:107](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L107)
+
+#### Inherited from
+
+[`ActionReceipt`](ActionReceipt.md).[`issuer`](ActionReceipt.md#issuer)
+
+***
+
+### mandate\_id
+
+> **mandate\_id**: `` `oati:mandate:${string}` ``
+
+Defined in: [src/index.ts:103](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L103)
+
+#### Inherited from
+
+[`ActionReceipt`](ActionReceipt.md).[`mandate_id`](ActionReceipt.md#mandate_id)
+
+***
+
+### oati\_version
+
+> **oati\_version**: `"1.0"`
+
+Defined in: [src/index.ts:98](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L98)
+
+#### Inherited from
+
+[`ActionReceipt`](ActionReceipt.md).[`oati_version`](ActionReceipt.md#oati_version)
+
+***
+
+### occurred\_at
+
+> **occurred\_at**: `string`
+
+Defined in: [src/index.ts:106](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L106)
+
+#### Inherited from
+
+[`ActionReceipt`](ActionReceipt.md).[`occurred_at`](ActionReceipt.md#occurred_at)
+
+***
+
+### organisation\_id
+
+> **organisation\_id**: `` `oati:org:${string}` ``
+
+Defined in: [src/index.ts:102](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L102)
+
+#### Inherited from
+
+[`ActionReceipt`](ActionReceipt.md).[`organisation_id`](ActionReceipt.md#organisation_id)
+
+***
+
+### outcome
+
+> **outcome**: `"unknown"` \| `"succeeded"` \| `"failed"` \| `"denied"` \| `"pending"`
+
+Defined in: [src/index.ts:105](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L105)
+
+#### Inherited from
+
+[`ActionReceipt`](ActionReceipt.md).[`outcome`](ActionReceipt.md#outcome)
+
+***
+
+### policy\_digest?
+
+> `optional` **policy\_digest?**: `string`
+
+Defined in: [src/index.ts:111](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L111)
+
+#### Inherited from
+
+[`ActionReceipt`](ActionReceipt.md).[`policy_digest`](ActionReceipt.md#policy_digest)
+
+***
+
+### profile
+
+> **profile**: `"https://specs.intelliger.ai/oati/profiles/commerce/v0.1"`
+
+Defined in: [src/index.ts:149](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L149)
+
+#### Overrides
+
+[`ActionReceipt`](ActionReceipt.md).[`profile`](ActionReceipt.md#profile)
+
+***
+
+### proof
+
+> **proof**: [`Proof`](Proof.md)
+
+Defined in: [src/index.ts:110](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L110)
+
+#### Inherited from
+
+[`ActionReceipt`](ActionReceipt.md).[`proof`](ActionReceipt.md#proof)
+
+***
+
+### request\_digest?
+
+> `optional` **request\_digest?**: `string`
+
+Defined in: [src/index.ts:112](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L112)
+
+#### Inherited from
+
+[`ActionReceipt`](ActionReceipt.md).[`request_digest`](ActionReceipt.md#request_digest)
+
+***
+
+### response\_digest?
+
+> `optional` **response\_digest?**: `string`
+
+Defined in: [src/index.ts:113](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L113)
+
+#### Inherited from
+
+[`ActionReceipt`](ActionReceipt.md).[`response_digest`](ActionReceipt.md#response_digest)
+
+***
+
+### transaction\_id
+
+> **transaction\_id**: `string`
+
+Defined in: [src/index.ts:100](https://github.com/Intelliger-ai/oati/blob/8572d85d40769921684aa768caf0fcf2b53cc4b2/sdk/typescript/src/index.ts#L100)
+
+#### Inherited from
+
+[`ActionReceipt`](ActionReceipt.md).[`transaction_id`](ActionReceipt.md#transaction_id)

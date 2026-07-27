@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/v1/decision.schema.json",
+  "title": "OATI Authorisation Decision",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["oati_version", "id", "transaction_id", "decision", "policy_digest", "decided_at", "issuer"],
+  "properties": {
+    "oati_version": { "const": "1.0" },
+    "id": { "type": "string", "pattern": "^oati:decision:[A-Za-z0-9._:-]+$" },
+    "transaction_id": { "type": "string", "pattern": "^oati:tx:[A-Za-z0-9._:-]+$" },
+    "decision": { "enum": ["allow", "deny", "transform", "approval_required"] },
+    "policy_digest": { "type": "string", "minLength": 1 },
+    "reason_codes": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "obligations": { "type": "array", "items": { "type": "object", "additionalProperties": true } },
+    "decided_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "issuer": { "type": "string", "minLength": 1 },
+    "proof": { "type": "object" }
+  }
+}

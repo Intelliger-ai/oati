@@ -107,7 +107,7 @@ The current CLI is ready for object validation, fixtures, deterministic JSON pro
 | [`schemas/`](schemas/) | versioned JSON Schemas |
 | [`examples/`](examples/) | valid example objects and transactions |
 | [`cli/`](cli/) | developer CLI |
-| [`sdk/typescript/`](sdk/typescript/) | typed builders and Commerce/RWA semantic validators |
+| [`sdk/typescript/`](sdk/typescript/) | core/profile builders, JSON Schema validation, canonical JSON, lookup client, and typed errors |
 | [`conformance/`](conformance/) | shared fixtures, test vectors, and compatibility tests |
 | [`api/lookup.openapi.yaml`](api/lookup.openapi.yaml) | public lookup API contract for client generation |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | system boundaries and deployment model |
@@ -143,7 +143,7 @@ Do not report security vulnerabilities in a public issue. Until a dedicated secu
 
 ## Project status
 
-The repository is an early developer preview. Core and profile schemas, complete Commerce and RWA example flows, a functional CLI, an initial TypeScript SDK, and first conformance vectors are available. The normative specification, cryptographic profiles, additional SDK languages, and full conformance suite remain under active development. Production lookup operations are deliberately outside this repository.
+The repository is an early developer preview. Core and profile schemas, complete Commerce and RWA example flows, a functional CLI, a tested TypeScript SDK with embedded schema validation and public lookup, and first conformance vectors are available. The normative specification, cryptographic profiles, additional SDK languages, and full conformance suite remain under active development. Production lookup operations are deliberately outside this repository.
 
 Compatibility claims must reference a published OATI version and conformance-suite version.
 

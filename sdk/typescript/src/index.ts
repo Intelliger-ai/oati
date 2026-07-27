@@ -7,8 +7,34 @@ export type DecimalString = `${number}`
 
 export interface Proof {
   type: string
+  created?: string
+  verification_method?: string
   signature?: string
   [key: string]: unknown
+}
+
+export interface VerificationMethod {
+  id: string
+  type: string
+  controller: string
+  public_key_jwk: Record<string, unknown>
+}
+
+export interface AgentPassport {
+  oati_version: "1.0"
+  id: `oati:agent:${string}`
+  organisation_id: `oati:org:${string}`
+  issuer: string
+  status: "active" | "suspended" | "revoked" | "expired"
+  display_name?: string
+  capabilities?: string[]
+  protocols?: Array<"http" | "grpc" | "mcp" | "a2a">
+  assurance_level?: string
+  verification_methods: VerificationMethod[]
+  issued_at: string
+  expires_at: string
+  status_endpoint?: string
+  proof?: Proof
 }
 
 export interface AgentMandate {
@@ -17,6 +43,7 @@ export interface AgentMandate {
   issuer: string
   subject: `oati:agent:${string}`
   sponsor?: string
+  parent_mandate?: string
   purpose: string
   actions: string[]
   resources?: string[]
@@ -30,6 +57,40 @@ export interface AgentMandate {
   status: "active" | "suspended" | "revoked" | "expired" | "consumed"
   profile?: string
   extensions?: Record<string, unknown>
+  proof?: Proof
+}
+
+export interface TransactionEnvelope {
+  oati_version: "1.0"
+  id: `oati:tx:${string}`
+  agent_id: `oati:agent:${string}`
+  organisation_id: `oati:org:${string}`
+  mandate_id: `oati:mandate:${string}`
+  action: string
+  resource: string
+  purpose?: string
+  destination?: string
+  protocol?: "http" | "grpc" | "mcp" | "a2a"
+  commercial_profile?: string
+  request_digest?: string
+  issued_at: string
+  nonce: string
+  profile?: string
+  extensions?: Record<string, unknown>
+  proof?: Proof
+}
+
+export interface AuthorisationDecision {
+  oati_version: "1.0"
+  id: `oati:decision:${string}`
+  transaction_id: `oati:tx:${string}`
+  decision: "allow" | "deny" | "transform" | "approval_required"
+  policy_digest: string
+  reason_codes?: string[]
+  obligations?: Array<Record<string, unknown>>
+  decided_at: string
+  expires_at?: string
+  issuer: string
   proof?: Proof
 }
 
@@ -47,6 +108,10 @@ export interface ActionReceipt {
   profile?: string
   extensions?: Record<string, unknown>
   proof: Proof
+  policy_digest?: string
+  request_digest?: string
+  response_digest?: string
+  commercial_profile?: string
   [key: string]: unknown
 }
 
@@ -282,3 +347,9 @@ function compareDecimal(left: string, right: string): number {
   const b = rightFraction.padEnd(width, "0")
   return a === b ? 0 : a > b ? 1 : -1
 }
+
+export * from "./builders.js"
+export * from "./canonical.js"
+export * from "./errors.js"
+export * from "./lookup.js"
+export * from "./validation.js"

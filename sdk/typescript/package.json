@@ -1,25 +1,39 @@
 {
   "name": "@intelliger/oati",
   "version": "0.1.0-dev.0",
-  "description": "TypeScript models and validation helpers for OATI core, Commerce, and RWA profiles",
+  "description": "TypeScript SDK for OATI objects, validation, canonical JSON, Commerce, RWA, and public lookup",
   "type": "module",
   "license": "Apache-2.0",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./validation": {
+      "types": "./dist/validation.d.ts",
+      "import": "./dist/validation.js"
+    },
+    "./lookup": {
+      "types": "./dist/lookup.d.ts",
+      "import": "./dist/lookup.js"
     }
   },
-  "files": ["dist"],
+  "files": ["dist", "docs/api", "README.md"],
   "scripts": {
-    "build": "tsc -p tsconfig.json",
-    "test": "pnpm build && node scripts/smoke.mjs && node scripts/validate-schemas.mjs",
+    "generate:schemas": "node scripts/generate-schema-bundle.mjs",
+    "build": "pnpm generate:schemas && tsc -p tsconfig.json",
+    "docs": "pnpm build && typedoc --options typedoc.json",
+    "test": "pnpm build && node --test test/*.test.mjs && node scripts/smoke.mjs && node scripts/validate-schemas.mjs",
     "validate:schemas": "node scripts/validate-schemas.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
-  "devDependencies": {
+  "dependencies": {
     "ajv": "^8.17.1",
-    "ajv-formats": "^3.0.1",
+    "ajv-formats": "^3.0.1"
+  },
+  "devDependencies": {
+    "typedoc": "^0.28.14",
+    "typedoc-plugin-markdown": "^4.9.0",
     "typescript": "^5.9.3"
   }
 }
