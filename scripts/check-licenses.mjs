@@ -7,7 +7,7 @@ if (!license.includes("Apache License") || !license.includes("Version 2.0, Janua
 const packageJson = JSON.parse(readFileSync(new URL("../sdk/typescript/package.json", import.meta.url), "utf8"))
 if (packageJson.license !== "Apache-2.0") throw new Error("TypeScript package must declare Apache-2.0")
 const pyproject = readFileSync(new URL("../sdk/python/pyproject.toml", import.meta.url), "utf8")
-if (!/license\s*=\s*\{\s*text\s*=\s*"Apache-2.0"\s*\}/.test(pyproject)) throw new Error("Python package must declare Apache-2.0")
+if (!/license\s*=\s*(?:"Apache-2.0"|\{\s*text\s*=\s*"Apache-2.0"\s*\})/.test(pyproject)) throw new Error("Python package must declare Apache-2.0")
 
 const modules = new URL("../sdk/typescript/node_modules/.pnpm", import.meta.url).pathname
 const allowed = new Set(["Apache-2.0", "BSD-2-Clause", "BSD-3-Clause", "BlueOak-1.0.0", "ISC", "MIT", "Python-2.0", "0BSD", "CC0-1.0"])

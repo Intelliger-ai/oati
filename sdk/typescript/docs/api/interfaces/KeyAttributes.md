@@ -8,11 +8,11 @@
 
 ## Extends
 
-- `Record`\<`string`, `string`\>
+- `Record`\<`string`, `string` \| `undefined`\>
 
 ## Indexable
 
-> \[`key`: `string`\]: `string`
+> \[`key`: `string`\]: `string` \| `undefined`
 
 ## Properties
 

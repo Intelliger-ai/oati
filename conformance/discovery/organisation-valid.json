@@ -1,0 +1,37 @@
+{
+  "organisation_id": "oati:org:merchant-b",
+  "services": [
+    {
+      "type": "service",
+      "id": "oati:service:merchant-b:checkout",
+      "display_name": "Merchant B checkout",
+      "status": "active",
+      "issuer": "oati:issuer:merchant-b",
+      "organisation_id": "oati:org:merchant-b",
+      "issued_at": "2026-07-28T12:00:00Z",
+      "expires_at": "2027-07-28T12:00:00Z",
+      "assurance_level": "production",
+      "proof_status": "verified",
+      "public_attributes": {
+        "document": "{\"accepted_profiles\":[\"oati:profile:merchant-b:commerce-1\"],\"display_name\":\"Merchant B checkout\",\"endpoints\":[{\"accepted_profiles\":[\"oati:profile:merchant-b:commerce-1\"],\"actions\":[\"commerce.purchase\"],\"audience\":\"https://merchant-b.example\",\"id\":\"purchase\",\"protocol\":\"http\",\"url\":\"https://merchant-b.example/oati/purchase\"}],\"expires_at\":\"2027-07-28T12:00:00Z\",\"id\":\"oati:service:merchant-b:checkout\",\"issued_at\":\"2026-07-28T12:00:00Z\",\"issuer\":\"oati:issuer:merchant-b\",\"oati_version\":\"1.0\",\"organisation_id\":\"oati:org:merchant-b\",\"status\":\"active\"}"
+      }
+    }
+  ],
+  "profiles": [
+    {
+      "type": "profile",
+      "id": "oati:profile:merchant-b:commerce-1",
+      "display_name": "Merchant B Commerce Profile",
+      "status": "active",
+      "issuer": "oati:issuer:merchant-b",
+      "organisation_id": "oati:org:merchant-b",
+      "issued_at": "2026-07-28T12:00:00Z",
+      "expires_at": "2027-07-28T12:00:00Z",
+      "assurance_level": "production",
+      "proof_status": "verified",
+      "public_attributes": {
+        "document": "{\"digest\":\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"expires_at\":\"2027-07-28T12:00:00Z\",\"id\":\"oati:profile:merchant-b:commerce-1\",\"issued_at\":\"2026-07-28T12:00:00Z\",\"issuer\":\"oati:issuer:merchant-b\",\"name\":\"Merchant B Commerce Profile\",\"oati_version\":\"1.0\",\"organisation_id\":\"oati:org:merchant-b\",\"schema_uri\":\"https://schemas.merchant-b.example/oati/commerce-1.json\",\"status\":\"active\",\"version\":\"1.0.0\"}"
+      }
+    }
+  ]
+}

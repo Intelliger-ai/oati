@@ -28,3 +28,5 @@ Replay and usage keys are security state, not a disposable cache. Run them in an
 The Receipt stream is an append-only handoff, not the evidence system of record. A consumer may acknowledge and trim entries only after committing each signed Receipt to durable evidence storage. Until then, capacity pressure intentionally fails authorization closed.
 
 The manual/tagged `Publish gateway authorizer image` workflow publishes multi-architecture GHCR images with an SBOM, provenance, and an immutable digest. Deploy that digest, never a mutable tag.
+
+The real container integration is executable with `./integrations/envoy/test/integration.sh` from the repository root. It covers Envoy-to-authorizer mTLS, lookup trust resolution, Valkey replay and usage state, Transit-compatible Receipt signing, upstream header sanitization, and dependency fail-closed behavior.

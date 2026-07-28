@@ -6,4 +6,4 @@
 
 # Type Alias: OatiSchemaName
 
-> **OatiSchemaName** = `"proof"` \| `"verificationKey"` \| `"issuer"` \| `"revocation"` \| `"evaluationRequest"` \| `"evaluationResult"` \| `"publicRecord"` \| `"conformanceSuite"` \| `"conformanceReport"` \| `"passport"` \| `"mandate"` \| `"envelope"` \| `"decision"` \| `"receipt"` \| `"commerceOffer"` \| `"commerceMandate"` \| `"commerceReceipt"` \| `"rwaAsset"` \| `"rwaStateClaim"` \| `"rwaMandate"` \| `"rwaReceipt"`
+> **OatiSchemaName** = `"proof"` \| `"verificationKey"` \| `"issuer"` \| `"revocation"` \| `"evaluationRequest"` \| `"evaluationResult"` \| `"publicRecord"` \| `"serviceDiscovery"` \| `"profileDiscovery"` \| `"wellKnown"` \| `"conformanceSuite"` \| `"conformanceReport"` \| `"passport"` \| `"mandate"` \| `"envelope"` \| `"decision"` \| `"receipt"` \| `"commerceOffer"` \| `"commerceMandate"` \| `"commerceReceipt"` \| `"rwaAsset"` \| `"rwaStateClaim"` \| `"rwaMandate"` \| `"rwaReceipt"`

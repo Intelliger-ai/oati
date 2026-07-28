@@ -14,4 +14,24 @@ Validate customer configuration with the exact Envoy image before rollout:
 envoy --mode validate -c /etc/envoy/envoy.yaml
 ```
 
+## Container integration test
+
+Run the public end-to-end integration from the repository root:
+
+```sh
+./integrations/envoy/test/integration.sh
+```
+
+The test builds the real authorizer image and starts Envoy 1.33, Valkey, a contract-compatible lookup resolver, an mTLS certificate generator, a protected upstream, and a test-only Transit protocol signer. It proves that:
+
+- Envoy and the authorizer mutually authenticate and the published YAML is accepted by the pinned Envoy image;
+- lookup-resolved issuer/key trust permits a valid request;
+- untrusted decision headers and raw OATI credentials do not reach the upstream;
+- the authorizer emits a Transit-signed Receipt that verifies through lookup;
+- Valkey rejects an exact replay and persists the Mandate usage transition;
+- a fresh request exceeding `max_calls` is denied; and
+- a lookup outage fails closed.
+
+The script removes all containers, networks, and generated TLS material on exit. The lookup, key, and Transit fixtures contain only the repository's public conformance test key and are never suitable for deployment.
+
 The bundled upstream cluster is a placeholder named `application`. Customer deployments must replace only its address/TLS policy and the fixed gateway audience; they must preserve the authorization filter order and fail-closed settings.

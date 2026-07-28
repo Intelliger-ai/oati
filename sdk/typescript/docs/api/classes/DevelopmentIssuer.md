@@ -52,6 +52,26 @@ In-memory, development-only issuer. Never use its ephemeral keys for production 
 
 ***
 
+### issueReceipt()
+
+> **issueReceipt**(`input`, `now?`): `Promise`\<[`ActionReceipt`](../interfaces/ActionReceipt.md) & `Record`\<`string`, `unknown`\>\>
+
+#### Parameters
+
+##### input
+
+[`DevelopmentReceiptInput`](../interfaces/DevelopmentReceiptInput.md)
+
+##### now?
+
+`Date` = `...`
+
+#### Returns
+
+`Promise`\<[`ActionReceipt`](../interfaces/ActionReceipt.md) & `Record`\<`string`, `unknown`\>\>
+
+***
+
 ### publish()
 
 > **publish**(`type`, `id`): [`PublicOatiRecord`](../interfaces/PublicOatiRecord.md)

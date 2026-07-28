@@ -662,6 +662,274 @@ export const schemas = {
       }
     ]
   },
+  "serviceDiscovery": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://schemas.intelliger.ai/oati/v1/service-discovery.schema.json",
+    "title": "OATI Service Discovery Document",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "oati_version",
+      "id",
+      "organisation_id",
+      "issuer",
+      "display_name",
+      "endpoints",
+      "accepted_profiles",
+      "status",
+      "issued_at"
+    ],
+    "properties": {
+      "oati_version": {
+        "const": "1.0"
+      },
+      "id": {
+        "type": "string",
+        "pattern": "^oati:service:[A-Za-z0-9._:-]+$"
+      },
+      "organisation_id": {
+        "type": "string",
+        "pattern": "^oati:org:[A-Za-z0-9._:-]+$"
+      },
+      "issuer": {
+        "type": "string",
+        "pattern": "^oati:issuer:[A-Za-z0-9._:-]+$"
+      },
+      "display_name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "description": {
+        "type": "string",
+        "maxLength": 2000
+      },
+      "endpoints": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 32,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "url",
+            "protocol",
+            "audience"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9._-]{1,64}$"
+            },
+            "url": {
+              "type": "string",
+              "format": "uri",
+              "pattern": "^https://"
+            },
+            "protocol": {
+              "enum": [
+                "http",
+                "grpc",
+                "mcp",
+                "a2a"
+              ]
+            },
+            "audience": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 512
+            },
+            "actions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true,
+              "maxItems": 128
+            },
+            "accepted_profiles": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "uniqueItems": true,
+              "maxItems": 64
+            },
+            "priority": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 65535
+            },
+            "regions": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Z]{2}$"
+              },
+              "uniqueItems": true
+            }
+          }
+        }
+      },
+      "accepted_profiles": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uniqueItems": true,
+        "maxItems": 64
+      },
+      "status": {
+        "enum": [
+          "active",
+          "suspended",
+          "revoked"
+        ]
+      },
+      "issued_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "expires_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "proof": {
+        "$ref": "proof.schema.json"
+      }
+    }
+  },
+  "profileDiscovery": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://schemas.intelliger.ai/oati/v1/profile-discovery.schema.json",
+    "title": "OATI Profile Discovery Document",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "oati_version",
+      "id",
+      "organisation_id",
+      "issuer",
+      "name",
+      "version",
+      "schema_uri",
+      "digest",
+      "status",
+      "issued_at"
+    ],
+    "properties": {
+      "oati_version": {
+        "const": "1.0"
+      },
+      "id": {
+        "type": "string",
+        "pattern": "^oati:profile:[A-Za-z0-9._:-]+$"
+      },
+      "organisation_id": {
+        "type": "string",
+        "pattern": "^oati:org:[A-Za-z0-9._:-]+$"
+      },
+      "issuer": {
+        "type": "string",
+        "pattern": "^oati:issuer:[A-Za-z0-9._:-]+$"
+      },
+      "name": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 200
+      },
+      "version": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64
+      },
+      "schema_uri": {
+        "type": "string",
+        "format": "uri",
+        "pattern": "^https://"
+      },
+      "specification_uri": {
+        "type": "string",
+        "format": "uri",
+        "pattern": "^https://"
+      },
+      "digest": {
+        "type": "string",
+        "pattern": "^sha256:[a-f0-9]{64}$"
+      },
+      "compatible_with": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1
+        },
+        "uniqueItems": true,
+        "maxItems": 64
+      },
+      "status": {
+        "enum": [
+          "active",
+          "suspended",
+          "revoked"
+        ]
+      },
+      "issued_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "expires_at": {
+        "type": "string",
+        "format": "date-time"
+      },
+      "proof": {
+        "$ref": "proof.schema.json"
+      }
+    }
+  },
+  "wellKnown": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "https://schemas.intelliger.ai/oati/v1/well-known.schema.json",
+    "title": "OATI Federation Well-Known Document",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "oati_version",
+      "organisations",
+      "resolvers"
+    ],
+    "properties": {
+      "oati_version": {
+        "const": "1.0"
+      },
+      "organisations": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "pattern": "^oati:org:[A-Za-z0-9._:-]+$"
+        }
+      },
+      "resolvers": {
+        "type": "array",
+        "minItems": 1,
+        "uniqueItems": true,
+        "items": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://"
+        }
+      },
+      "expires_at": {
+        "type": "string",
+        "format": "date-time"
+      }
+    }
+  },
   "conformanceSuite": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "https://schemas.intelliger.ai/oati/conformance-suite.schema.json",
@@ -680,6 +948,10 @@ export const schemas = {
       },
       "standard_version": {
         "type": "string"
+      },
+      "extends": {
+        "type": "string",
+        "pattern": "^suite-v[0-9]+\\.[0-9]+\\.json$"
       },
       "cases": {
         "type": "array",
@@ -709,7 +981,8 @@ export const schemas = {
                 "replay-audience",
                 "privacy",
                 "commerce",
-                "rwa"
+                "rwa",
+                "discovery"
               ]
             },
             "operation": {
@@ -719,7 +992,8 @@ export const schemas = {
                 "verify",
                 "verify-replay",
                 "evaluate-suite",
-                "public-project"
+                "public-project",
+                "discover"
               ]
             },
             "schema": {

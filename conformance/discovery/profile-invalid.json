@@ -1,0 +1,14 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:service:wrong-kind",
+  "organisation_id": "oati:org:merchant-b",
+  "issuer": "oati:issuer:merchant-b",
+  "name": "Invalid Profile",
+  "version": "1.0.0",
+  "schema_uri": "http://schemas.example/profile.json",
+  "specification_uri": "not-a-uri",
+  "digest": "sha256:not-a-digest",
+  "status": "active",
+  "issued_at": "2026-07-28T12:00:00Z",
+  "secret": "must-not-be-published"
+}

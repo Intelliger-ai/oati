@@ -1,0 +1,6 @@
+{
+  "trust_anchors": ["oati:issuer:conformance-root"],
+  "keys": [{"id":"oati:key:conformance:ed25519-1","controller":"oati:agent:conformance:sender","issuer":"oati:issuer:conformance-root","algorithm":"EdDSA","public_key_jwk":{"kty":"OKP","crv":"Ed25519","x":"11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"},"status":"retired","valid_from":"2026-01-01T00:00:00Z","valid_until":"2026-07-27T11:00:00Z","proof_status":"verified"}],
+  "issuers": [],
+  "revocations": []
+}

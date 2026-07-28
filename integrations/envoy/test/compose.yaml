@@ -1,0 +1,122 @@
+name: oati-envoy-integration
+
+x-support: &support
+  image: oati-envoy-integration-support:test
+  pull_policy: never
+  restart: unless-stopped
+  networks: [integration]
+
+x-health: &health
+  interval: 1s
+  timeout: 2s
+  retries: 40
+  start_period: 1s
+
+services:
+  certgen:
+    image: oati-envoy-integration-certgen:test
+    build:
+      context: ../../..
+      dockerfile: integrations/envoy/test/Dockerfile
+      target: certgen
+    volumes: [gateway-tls:/tls]
+    restart: "no"
+
+  valkey:
+    image: valkey/valkey:8-alpine
+    command: ["valkey-server", "--save", "", "--appendonly", "no", "--maxmemory-policy", "noeviction"]
+    networks: [integration]
+    healthcheck: { <<: *health, test: ["CMD", "valkey-cli", "ping"] }
+
+  lookup:
+    <<: *support
+    build:
+      context: ../../..
+      dockerfile: integrations/envoy/test/Dockerfile
+      target: support
+    command: ["lookup"]
+    healthcheck: { <<: *health, test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"] }
+
+  transit-fixture:
+    <<: *support
+    command: ["transit"]
+    depends_on: { lookup: { condition: service_healthy } }
+    healthcheck: { <<: *health, test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8200/health"] }
+
+  application:
+    <<: *support
+    command: ["application"]
+    depends_on: { lookup: { condition: service_healthy } }
+    healthcheck: { <<: *health, test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"] }
+
+  oati-authz:
+    image: oati-envoy-authorizer:integration
+    build:
+      context: ../../..
+      dockerfile: services/envoy-authorizer/Dockerfile
+    environment:
+      PORT: "9001"
+      OATI_GATEWAY_EXTERNAL_ORIGIN: "http://envoy:8080"
+      OATI_GATEWAY_EXPECTED_AUDIENCE: "http://envoy:8080"
+      OATI_GATEWAY_RECEIPT_ISSUER: "oati:issuer:integration:gateway"
+      OATI_GATEWAY_RECEIPT_VERIFICATION_METHOD: "oati:key:integration:gateway-1"
+      OATI_GATEWAY_TRUST_ANCHORS: "oati:issuer:integration:buyer"
+      OATI_LOOKUP_RESOLVER_URLS: "http://lookup:8080/oati/v1"
+      OATI_GATEWAY_LOOKUP_CACHE_MS: "0"
+      VALKEY_URL: "redis://valkey:6379/0"
+      OATI_TRANSIT_ADDR: "http://transit-fixture:8200"
+      OATI_TRANSIT_MOUNT: "transit"
+      OATI_GATEWAY_TRANSIT_KEY_NAME: "oati-integration-receipts"
+      OATI_GATEWAY_TRANSIT_KEY_VERSION: "1"
+      OATI_TRANSIT_TOKEN_FILE: "/run/secrets/transit-token"
+      OATI_GATEWAY_TLS_CERT_FILE: "/etc/oati/gateway-tls/authorizer.crt"
+      OATI_GATEWAY_TLS_KEY_FILE: "/etc/oati/gateway-tls/authorizer.key"
+      OATI_GATEWAY_TLS_CLIENT_CA_FILE: "/etc/oati/gateway-tls/ca.crt"
+    volumes:
+      - gateway-tls:/etc/oati/gateway-tls:ro
+      - ./transit-token.txt:/run/secrets/transit-token:ro
+    networks: [integration]
+    depends_on:
+      certgen: { condition: service_completed_successfully }
+      valkey: { condition: service_healthy }
+      lookup: { condition: service_healthy }
+      transit-fixture: { condition: service_healthy }
+    healthcheck:
+      <<: *health
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          const fs=require('fs'),https=require('https');
+          const request=https.get({host:'127.0.0.1',port:9001,path:'/readyz',
+          cert:fs.readFileSync('/etc/oati/gateway-tls/envoy-client.crt'),
+          key:fs.readFileSync('/etc/oati/gateway-tls/envoy-client.key'),
+          ca:fs.readFileSync('/etc/oati/gateway-tls/ca.crt'),servername:'oati-authz'},
+          response=>process.exit(response.statusCode===200?0:1));request.on('error',()=>process.exit(1));
+
+  envoy:
+    image: envoyproxy/envoy:v1.33.0
+    command: ["envoy", "-c", "/etc/envoy/envoy.yaml", "--log-level", "warning"]
+    volumes:
+      - ../envoy.yaml:/etc/envoy/envoy.yaml:ro
+      - gateway-tls:/etc/oati/gateway-tls:ro
+    networks: [integration]
+    depends_on:
+      application: { condition: service_healthy }
+      oati-authz: { condition: service_healthy }
+
+  runner:
+    <<: *support
+    restart: "no"
+    command: ["runner"]
+    environment:
+      GATEWAY_ORIGIN: "http://envoy:8080"
+      LOOKUP_URL: "http://lookup:8080/oati/v1"
+    depends_on: { envoy: { condition: service_started } }
+
+volumes:
+  gateway-tls: {}
+
+networks:
+  integration: {}

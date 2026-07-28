@@ -1,0 +1,77 @@
+name: Fresh-project package installation
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: package-install-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typescript:
+    name: TypeScript / Node ${{ matrix.node }} / ${{ matrix.manager }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [20, 22, 24]
+        manager: [npm, pnpm]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with: { version: 10.14.0 }
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ matrix.node }}
+          cache: pnpm
+          cache-dependency-path: sdk/typescript/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: sdk/typescript
+      - run: pnpm test:package-install -- ${{ matrix.manager }}
+        working-directory: sdk/typescript
+
+  python:
+    name: Python ${{ matrix.python }} / ${{ matrix.format }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        python: ["3.11", "3.12", "3.13", "3.14"]
+        format: [wheel, sdist]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-python@v7
+        with: { python-version: "${{ matrix.python }}" }
+      - run: python -m pip install --disable-pip-version-check build
+      - run: python scripts/generate_schema_bundle.py
+        working-directory: sdk/python
+      - run: python scripts/test_package_install.py --format ${{ matrix.format }}
+        working-directory: sdk/python
+
+  go:
+    name: Go ${{ matrix.go }} / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ["1.25.12", "1.26.x"]
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version: ${{ matrix.go }}
+          cache-dependency-path: |
+            cli/go.sum
+            sdk/go/go.mod
+      - run: go run ./scripts/test-package-install.go
+        working-directory: sdk/go

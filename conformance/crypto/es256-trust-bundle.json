@@ -1,0 +1,23 @@
+{
+  "trust_anchors": ["oati:issuer:conformance-root"],
+  "keys": [
+    {
+      "id": "oati:key:conformance:es256-1",
+      "controller": "oati:agent:conformance:es256-sender",
+      "issuer": "oati:issuer:conformance-root",
+      "algorithm": "ES256",
+      "public_key_jwk": {
+        "kty": "EC",
+        "crv": "P-256",
+        "x": "x9EcQqUe6LBYzdD_wGpnvteb49WC3gmWNBCJ89IEuOM",
+        "y": "2p3pFFe1LbWQGx9_DurohcwLZlCp2TovWa_3x4zxrjs"
+      },
+      "status": "active",
+      "valid_from": "2026-01-01T00:00:00Z",
+      "valid_until": "2027-01-01T00:00:00Z",
+      "proof_status": "verified"
+    }
+  ],
+  "issuers": [],
+  "revocations": []
+}

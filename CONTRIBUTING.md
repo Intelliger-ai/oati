@@ -21,7 +21,7 @@ Run the checks affected by your change before opening a pull request:
 (cd sdk/typescript && pnpm test)
 
 # Python and Go SDKs
-(cd sdk/python && PYTHONDONTWRITEBYTECODE=1 python3 -m unittest -v test_sdk.py)
+(cd sdk/python && PYTHONDONTWRITEBYTECODE=1 python3 -m unittest discover -s . -p 'test*.py' -v)
 (cd sdk/go && go test ./...)
 
 # CLI
@@ -38,9 +38,34 @@ ruby scripts/validate-openapi.rb
 
 # Project and dependency licence policy
 node scripts/check-licenses.mjs
+
+# Review-state integrity (development mode; does not grant release eligibility)
+node --test scripts/check-independent-review.test.mjs
+node scripts/check-independent-review.mjs
+
+# Packed distributions in fresh consumer projects
+(cd sdk/typescript && pnpm test:package-install -- npm)
+(cd sdk/python && python -m pip install build && python scripts/test_package_install.py --format wheel)
+(cd sdk/go && go run ./scripts/test-package-install.go)
+
+# Six-service local sandbox and signed Commerce/RWA transactions
+./sandbox/oati-sandbox test
+./sandbox/oati-sandbox down
+
+# Real Envoy, authorizer, Valkey, and lookup container integration
+./integrations/envoy/test/integration.sh
+```
+
+After a reviewed production publication or lookup deployment, maintainers must also run the read-only hosted gate. It is deliberately excluded from pull-request checks because it tests external production state:
+
+```sh
+cd sdk/typescript
+pnpm smoke:production -- --output ../../production-lookup-smoke.json
 ```
 
 CI also runs Redocly OpenAPI linting, `pnpm audit`, `govulncheck`, Trivy filesystem scanning, GitHub dependency review, and CodeQL. High or critical dependency findings and incompatible dependency licences block a pull request.
+
+Release maintainers must separately run `node scripts/check-independent-review.mjs --require-completed`. It intentionally fails while the independent cryptographic and protocol review remains incomplete. See the [release-gate operations guide](security/independent-review/RELEASE_GATE.md).
 
 ## Generated files
 

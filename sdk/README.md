@@ -13,3 +13,5 @@ Every SDK must create and validate public OATI objects, request and present Mand
 The [`typescript/`](typescript/) package is the complete reference implementation. The [`python/`](python/) and [`go/`](go/) SDKs implement the shared portable core: builders, published-schema validation, canonical JSON, public projection, Ed25519 verification, replay protection, and deterministic core, Commerce, and RWA evaluation.
 
 All three execute the exact language-neutral case set through `./conformance/run-all.sh`. Java and .NET remain later milestones.
+
+Packed TypeScript, Python, and Go/CLI consumer installations are also tested outside the repository source tree. See the [fresh-project installation matrix](../docs/PACKAGE_INSTALLATION_COMPATIBILITY.md) for supported runtimes, distribution formats, and local reproduction commands.

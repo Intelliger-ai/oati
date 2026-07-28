@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/governance/independent-review-status-v2.schema.json",
+  "title": "OATI independent cryptographic and protocol review status",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["$schema", "schema_version", "status", "production_security_claim_eligible", "engagement", "scope", "reports", "open_findings", "verification", "approvals"],
+  "properties": {
+    "$schema": { "const": "./status.schema.json" },
+    "schema_version": { "const": 2 },
+    "status": { "enum": ["awaiting-independent-review", "in-review", "remediation", "completed", "expired"] },
+    "production_security_claim_eligible": { "type": "boolean" },
+    "engagement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "reviewer_organisation", "independence_attested", "conflicts_disclosed", "started_at", "completed_at", "valid_until"],
+      "properties": {
+        "id": { "type": ["string", "null"] },
+        "reviewer_organisation": { "type": ["string", "null"] },
+        "independence_attested": { "type": "boolean" },
+        "conflicts_disclosed": { "type": "boolean" },
+        "started_at": { "type": ["string", "null"], "format": "date-time" },
+        "completed_at": { "type": ["string", "null"], "format": "date-time" },
+        "valid_until": { "type": ["string", "null"], "format": "date-time" }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["review_commit", "remediation_commit", "platform_review_commit", "public_manifest_sha256", "required_areas"],
+      "properties": {
+        "review_commit": { "type": ["string", "null"] },
+        "remediation_commit": { "type": ["string", "null"] },
+        "platform_review_commit": { "type": ["string", "null"] },
+        "public_manifest_sha256": { "type": ["string", "null"] },
+        "required_areas": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    },
+    "reports": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["final", "retest", "finding_dispositions"],
+      "properties": {
+        "final": { "$ref": "#/$defs/evidence" },
+        "retest": { "$ref": "#/$defs/evidence" },
+        "finding_dispositions": { "$ref": "#/$defs/evidence" }
+      }
+    },
+    "open_findings": { "$ref": "#/$defs/findings" },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["retest_passed", "conformance_suite_version", "all_required_conformance_passed"],
+      "properties": {
+        "retest_passed": { "type": "boolean" },
+        "conformance_suite_version": { "type": ["string", "null"] },
+        "all_required_conformance_passed": { "type": "boolean" }
+      }
+    },
+    "approvals": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["security_maintainer", "release_maintainer", "approved_at"],
+      "properties": {
+        "security_maintainer": { "type": ["string", "null"] },
+        "release_maintainer": { "type": ["string", "null"] },
+        "approved_at": { "type": ["string", "null"], "format": "date-time" }
+      }
+    }
+  },
+  "$defs": {
+    "evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["url", "sha256"],
+      "properties": { "url": { "type": ["string", "null"] }, "sha256": { "type": ["string", "null"] } }
+    },
+    "findings": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["critical", "high", "medium", "low"],
+      "properties": {
+        "critical": { "type": ["integer", "null"], "minimum": 0 },
+        "high": { "type": ["integer", "null"], "minimum": 0 },
+        "medium": { "type": ["integer", "null"], "minimum": 0 },
+        "low": { "type": ["integer", "null"], "minimum": 0 }
+      }
+    }
+  }
+}

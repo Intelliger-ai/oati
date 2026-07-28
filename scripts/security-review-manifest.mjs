@@ -17,4 +17,5 @@ const files = execFileSync("git", ["ls-files"], { cwd: root, encoding: "utf8" })
     const content = fs.readFileSync(path.join(root, file))
     return { path: file, bytes: content.length, sha256: crypto.createHash("sha256").update(content).digest("hex") }
   })
-process.stdout.write(JSON.stringify({ format: "oati-security-review-manifest-v1", repository: "https://github.com/Intelliger-ai/oati", commit, files }, null, 2) + "\n")
+const contentSha256 = crypto.createHash("sha256").update(JSON.stringify(files)).digest("hex")
+process.stdout.write(JSON.stringify({ format: "oati-security-review-manifest-v2", repository: "https://github.com/Intelliger-ai/oati", commit, content_sha256: contentSha256, files }, null, 2) + "\n")

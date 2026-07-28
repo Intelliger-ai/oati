@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-var schemaFiles = map[string]string{"proof": "proof.schema.json", "verificationKey": "verification-key.schema.json", "issuer": "issuer.schema.json", "revocation": "revocation.schema.json", "evaluationRequest": "evaluation-request.schema.json", "evaluationResult": "evaluation-result.schema.json", "publicRecord": "public-record.schema.json", "conformanceSuite": "conformance-suite.schema.json", "conformanceReport": "conformance-report.schema.json", "passport": "passport.schema.json", "mandate": "mandate.schema.json", "envelope": "transaction-envelope.schema.json", "decision": "decision.schema.json", "receipt": "receipt.schema.json", "commerceOffer": "commerce/merchant-service-profile.schema.json", "commerceMandate": "commerce/purchase-mandate.schema.json", "commerceReceipt": "commerce/commerce-receipt.schema.json", "rwaAsset": "rwa/asset-profile.schema.json", "rwaStateClaim": "rwa/asset-state-claim.schema.json", "rwaMandate": "rwa/asset-mandate.schema.json", "rwaReceipt": "rwa/rwa-receipt.schema.json"}
+var schemaFiles = map[string]string{"proof": "proof.schema.json", "verificationKey": "verification-key.schema.json", "issuer": "issuer.schema.json", "revocation": "revocation.schema.json", "evaluationRequest": "evaluation-request.schema.json", "evaluationResult": "evaluation-result.schema.json", "publicRecord": "public-record.schema.json", "serviceDiscovery": "service-discovery.schema.json", "profileDiscovery": "profile-discovery.schema.json", "wellKnown": "well-known.schema.json", "conformanceSuite": "conformance-suite.schema.json", "conformanceReport": "conformance-report.schema.json", "passport": "passport.schema.json", "mandate": "mandate.schema.json", "envelope": "transaction-envelope.schema.json", "decision": "decision.schema.json", "receipt": "receipt.schema.json", "commerceOffer": "commerce/merchant-service-profile.schema.json", "commerceMandate": "commerce/purchase-mandate.schema.json", "commerceReceipt": "commerce/commerce-receipt.schema.json", "rwaAsset": "rwa/asset-profile.schema.json", "rwaStateClaim": "rwa/asset-state-claim.schema.json", "rwaMandate": "rwa/asset-mandate.schema.json", "rwaReceipt": "rwa/rwa-receipt.schema.json"}
 var publicFields = []string{"type", "id", "display_name", "status", "issuer", "organisation_id", "issued_at", "expires_at", "assurance_level", "proof_status", "public_attributes"}
 
 func CanonicalJSON(value any) (string, error) {
@@ -134,6 +134,15 @@ func validate(value any, schema, root map[string]any, codes map[string]bool, sch
 	case []any:
 		if len(typed) < integer(schema["minItems"]) {
 			codes["SCHEMA_MINITEMS"] = true
+		}
+		if unique, _ := schema["uniqueItems"].(bool); unique {
+			for index := range typed {
+				for previous := 0; previous < index; previous++ {
+					if equal(typed[index], typed[previous]) {
+						codes["SCHEMA_UNIQUEITEMS"] = true
+					}
+				}
+			}
 		}
 		if items := object(schema["items"]); items != nil {
 			for _, item := range typed {

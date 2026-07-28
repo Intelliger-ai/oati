@@ -225,7 +225,11 @@ export class StaticTrustResolver implements TrustResolver {
   ) {}
   async resolveKey(id: string): Promise<VerificationKey | null> { return this.keys.find((item) => item.id === id) ?? null }
   async resolveIssuer(id: string): Promise<TrustedIssuer | null> { return this.issuers.find((item) => item.id === id) ?? null }
-  async resolveRevocation(target: string): Promise<RevocationStatus | null> { return this.revocations.find((item) => item.target === target) ?? null }
+  async resolveRevocation(target: string): Promise<RevocationStatus | null> {
+    const matches = this.revocations.filter((item) => item.target === target)
+    if (matches.length > 1) throw new Error(`ambiguous revocation status for ${target}`)
+    return matches[0] ?? null
+  }
 }
 
 /** Resolve key, issuer, and revocation records through the public OATI lookup API. */
@@ -363,7 +367,7 @@ function instant(value: Date | string, name: string): Date { const date = value 
 function normalizeAudience(value: string | string[]): string[] { return (Array.isArray(value) ? value : [value]).filter((item) => typeof item === "string" && item !== "") }
 function issue(issues: VerificationIssue[], code: VerificationCode, message: string): void { if (!issues.some((item) => item.code === code && item.message === message)) issues.push({ code, message }) }
 function documentId(document: Record<string, unknown>): string { return typeof document.id === "string" ? document.id : "" }
-function required(record: Record<string, string>, key: string): string { const value = record[key]; if (!value) throw new Error(`missing ${key}`); return value }
+function required(record: Record<string, string | undefined>, key: string): string { const value = record[key]; if (!value) throw new Error(`missing ${key}`); return value }
 function algorithmFromJwk(jwk: Record<string, unknown>): OatiAlgorithm { if (jwk.kty === "OKP" && jwk.crv === "Ed25519") return "EdDSA"; if (jwk.kty === "EC" && jwk.crv === "P-256") return "ES256"; throw new Error("unsupported Passport JWK") }
 function jwkMatches(jwk: JsonWebKey, algorithm: OatiAlgorithm): boolean { return algorithm === "EdDSA" ? jwk.kty === "OKP" && jwk.crv === "Ed25519" : jwk.kty === "EC" && jwk.crv === "P-256" }
 function webCryptoImportAlgorithm(algorithm: OatiAlgorithm): EcKeyImportParams | AlgorithmIdentifier { return algorithm === "EdDSA" ? { name: "Ed25519" } : { name: "ECDSA", namedCurve: "P-256" } }

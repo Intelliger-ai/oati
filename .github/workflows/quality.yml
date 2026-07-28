@@ -40,7 +40,8 @@ jobs:
         working-directory: sdk/typescript
       - run: node --test services/envoy-authorizer/server.test.mjs
       - run: docker build -f services/envoy-authorizer/Dockerfile -t oati-envoy-authorizer:test .
-      - run: PYTHONDONTWRITEBYTECODE=1 python -m unittest -v test_sdk.py
+      - run: ./integrations/envoy/test/integration.sh
+      - run: PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s . -p 'test*.py' -v
         working-directory: sdk/python
       - run: go test ./...
         working-directory: sdk/go
@@ -48,7 +49,12 @@ jobs:
       - run: node scripts/check-docs.mjs
       - run: node scripts/build-schema-site.mjs
       - run: ./scripts/check-generated.sh
+      - run: node --test scripts/check-independent-review.test.mjs
       - run: node scripts/check-independent-review.mjs
+      - run: docker compose -f sandbox/compose.yaml config --quiet
+      - run: ./sandbox/oati-sandbox test
+      - if: always()
+        run: ./sandbox/oati-sandbox down
 
   cli:
     name: CLI tests

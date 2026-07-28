@@ -10,11 +10,12 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url))
 const args = parseArgs(process.argv.slice(2))
-const manifestPath = resolve(args.suite ?? resolve(here, "suite-v0.1.json"))
+const manifestPath = resolve(args.suite ?? resolve(here, "suite-v0.3.json"))
 const base = dirname(manifestPath)
-const suite = await json(manifestPath)
-const suiteCheck = validateSchema("conformanceSuite", suite)
+const suiteManifest = await json(manifestPath)
+const suiteCheck = validateSchema("conformanceSuite", suiteManifest)
 if (!suiteCheck.valid) throw new Error(`invalid conformance manifest: ${suiteCheck.issues.map((issue) => issue.code).join(", ")}`)
+const suite = await expandSuite(suiteManifest, manifestPath, new Set())
 const results = []
 
 for (const testCase of suite.cases) {
@@ -84,7 +85,34 @@ async function execute(testCase, baseDir) {
     if (!schema.valid) return { outcome: "fail", codes: schema.issues.map((issue) => issue.code) }
     return canonicalJson(projected) === canonicalJson(expected) ? ok() : failed("PUBLIC_PROJECTION_MISMATCH")
   }
+  if (testCase.operation === "discover") {
+    const federation = await json(resolve(baseDir, testCase.auxiliary))
+    return discoveryResult(input, federation, testCase.options)
+  }
   throw new Error(`unknown operation ${testCase.operation}`)
+}
+
+function discoveryResult(response, federation, options = {}) {
+  const organisationId = options.organisation_id
+  const now = Date.parse(options.now)
+  if (!Array.isArray(federation.organisations) || !federation.organisations.includes(organisationId)) return failed("FEDERATION_ORGANISATION_MISMATCH")
+  if (federation.expires_at && Date.parse(federation.expires_at) <= now) return failed("FEDERATION_EXPIRED")
+  if (response.organisation_id !== organisationId || !Array.isArray(response.services) || !Array.isArray(response.profiles)) return failed("DISCOVERY_ORGANISATION_MISMATCH")
+  const profiles = new Set(response.profiles.map((record) => record.id))
+  for (const [type, records] of [["service", response.services], ["profile", response.profiles]]) {
+    for (const record of records) {
+      if (record.type !== type || record.status !== "active" || record.proof_status !== "verified") return failed("DISCOVERY_UNTRUSTED_RECORD")
+      if (record.organisation_id !== organisationId) return failed("DISCOVERY_ORGANISATION_MISMATCH")
+      let document
+      try { document = JSON.parse(record.public_attributes?.document) } catch { return failed("DISCOVERY_DOCUMENT_INVALID") }
+      if (document.id !== record.id || document.organisation_id !== record.organisation_id || document.issuer !== record.issuer || document.status !== record.status) return failed("DISCOVERY_DOCUMENT_MISMATCH")
+      if ((record.expires_at && Date.parse(record.expires_at) <= now) || (document.expires_at && Date.parse(document.expires_at) <= now)) return failed("DISCOVERY_EXPIRED")
+      const checked = validateSchema(type === "service" ? "serviceDiscovery" : "profileDiscovery", document)
+      if (!checked.valid) return { outcome: "fail", codes: checked.issues.map((issue) => issue.code) }
+      if (type === "service") for (const profile of document.accepted_profiles) if (!profiles.has(profile)) return failed("DISCOVERY_PROFILE_NOT_FOUND")
+    }
+  }
+  return ok()
 }
 
 function verificationPolicy(bundle, options = {}, replayCache) {
@@ -98,7 +126,14 @@ function verificationPolicy(bundle, options = {}, replayCache) {
     id: issuer.id, status: issuer.status, ...(issuer.parent ? { parent: issuer.parent } : {}),
     ...(issuer.valid_from ? { validFrom: issuer.valid_from } : {}), ...(issuer.valid_until ? { validUntil: issuer.valid_until } : {}),
   }))
-  return { resolver: new StaticTrustResolver(keys, issuers, bundle.revocations), trustAnchors: bundle.trust_anchors,
+  const revocations = bundle.revocations.map((item) => ({ target: item.target, status: item.status, ...(item.effective_at ? { effectiveAt: item.effective_at } : {}) }))
+  const baseResolver = new StaticTrustResolver(keys, issuers, revocations)
+  const unavailable = new Set(bundle.unavailable_targets ?? [])
+  const resolver = {
+    resolveKey: (id) => baseResolver.resolveKey(id), resolveIssuer: (id) => baseResolver.resolveIssuer(id),
+    resolveRevocation: (target) => unavailable.has(target) ? Promise.reject(new Error("revocation unavailable")) : baseResolver.resolveRevocation(target),
+  }
+  return { resolver, trustAnchors: bundle.trust_anchors,
     expectedAudience: options.audience, now: new Date(options.now), replayCache }
 }
 
@@ -108,6 +143,18 @@ function result(testCase, status, observed, codes) {
 function ok() { return { outcome: "pass", codes: [] } }
 function failed(code) { return { outcome: "fail", codes: [code] } }
 async function json(path) { return JSON.parse(await readFile(path, "utf8")) }
+async function expandSuite(suite, path, visited) {
+  if (visited.has(path)) throw new Error(`cyclic conformance suite inheritance at ${path}`)
+  visited.add(path)
+  if (!suite.extends) return suite
+  const parentPath = resolve(dirname(path), suite.extends)
+  const parent = await json(parentPath); const checked = validateSchema("conformanceSuite", parent)
+  if (!checked.valid || parent.standard_version !== suite.standard_version) throw new Error(`invalid inherited conformance suite ${suite.extends}`)
+  const expanded = await expandSuite(parent, parentPath, visited)
+  const ids = new Set(expanded.cases.map((item) => item.id))
+  for (const item of suite.cases) if (ids.has(item.id)) throw new Error(`duplicate inherited conformance case ${item.id}`)
+  return { ...suite, cases: [...expanded.cases, ...suite.cases] }
+}
 function parseArgs(values) {
   const parsed = {}
   for (let index = 0; index < values.length; index += 2) {

@@ -1,0 +1,43 @@
+name: Hosted production smoke
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hosted-production-smoke
+  cancel-in-progress: true
+
+jobs:
+  lookup-and-discovery:
+    name: Ten-record lookup and discovery
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: sdk/typescript
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.1
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: sdk/typescript/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - name: Verify hosted lookup and discovery
+        run: pnpm smoke:production -- --output ../../production-lookup-smoke.json
+      - name: Upload machine-readable report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-lookup-smoke
+          path: production-lookup-smoke.json
+          if-no-files-found: error
+          retention-days: 30

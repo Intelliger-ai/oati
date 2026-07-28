@@ -39,6 +39,7 @@
 - [DevelopmentAgentInput](interfaces/DevelopmentAgentInput.md)
 - [DevelopmentMandateInput](interfaces/DevelopmentMandateInput.md)
 - [DevelopmentOrganisationInput](interfaces/DevelopmentOrganisationInput.md)
+- [DevelopmentReceiptInput](interfaces/DevelopmentReceiptInput.md)
 - [DevelopmentTransactionInput](interfaces/DevelopmentTransactionInput.md)
 - [DiscoveryAttributes](interfaces/DiscoveryAttributes.md)
 - [DpopReplayStore](interfaces/DpopReplayStore.md)

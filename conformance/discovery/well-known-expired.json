@@ -1,0 +1,6 @@
+{
+  "oati_version": "1.0",
+  "organisations": ["oati:org:merchant-b"],
+  "resolvers": ["https://resolver.merchant-b.example/oati/v1"],
+  "expires_at": "2026-07-28T11:59:59Z"
+}

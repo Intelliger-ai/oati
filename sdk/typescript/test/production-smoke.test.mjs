@@ -1,0 +1,83 @@
+import assert from "node:assert/strict"
+import test from "node:test"
+import { runProductionLookupSmoke } from "../scripts/production-lookup-smoke.mjs"
+
+const now = new Date("2026-07-28T12:00:00.000Z")
+const future = "2027-07-28T12:00:00.000Z"
+const organisationId = "oati:org:smoke"
+const issuer = "oati:issuer:smoke:production"
+const entries = [
+  ["organisation", organisationId],
+  ["agent", "oati:agent:smoke:buyer"],
+  ["passport", "oati:agent:smoke:buyer"],
+  ["mandate", "oati:mandate:smoke:purchase-001"],
+  ["receipt", "oati:receipt:smoke:purchase-001"],
+  ["issuer", issuer],
+  ["key", "oati:key:smoke:production-1"],
+  ["revocation", "oati:revocation:smoke:production"],
+  ["service", "oati:service:smoke:lookup"],
+  ["profile", "oati:profile:smoke:commerce-v1"],
+]
+
+function discoveryDocument(type, id) {
+  const common = { oati_version: "1.0", id, organisation_id: organisationId, issuer, status: "active", issued_at: now.toISOString(), expires_at: future }
+  if (type === "service") return { ...common, display_name: "Smoke lookup", endpoints: [{ id: "lookup", url: "https://lookup.example.test/oati/v1", protocol: "http", audience: "oati:smoke:lookup" }], accepted_profiles: ["oati:profile:smoke:commerce-v1"] }
+  return { ...common, name: "Smoke Commerce", version: "1.0", schema_uri: "https://schemas.example.test/commerce.json", digest: `sha256:${"0".repeat(64)}` }
+}
+
+function record(type, id) {
+  const publicAttributes = { signed_document: JSON.stringify({ id, proof: {} }) }
+  if (type === "key") Object.assign(publicAttributes, { controller: issuer, algorithm: "EdDSA", public_key_jwk: JSON.stringify({ kty: "OKP", crv: "Ed25519", x: "AA" }) })
+  if (type === "revocation") Object.assign(publicAttributes, { target: issuer, revocation_status: "good" })
+  if (type === "service" || type === "profile") publicAttributes.document = JSON.stringify(discoveryDocument(type, id))
+  return { type, id, display_name: `${type} smoke record`, status: "active", issuer, organisation_id: organisationId,
+    issued_at: now.toISOString(), expires_at: future, proof_status: "verified", public_attributes: publicAttributes }
+}
+
+const records = new Map(entries.map(([type, id]) => [`${type}\0${id}`, record(type, id)]))
+const manifest = {
+  schema_version: "1.0", resolver_url: "https://lookup.example.test/oati/v1", cors_origin: "https://intelliger.ai",
+  organisation_id: organisationId, trust_anchors: [issuer],
+  records: entries.map(([type, id]) => ({ type, id, statuses: ["active"], audience: `oati:smoke:${type}`,
+    ...(type === "revocation" ? { target: issuer, revocation_status: "good" } : {}),
+    ...(["organisation", "agent", "passport", "mandate", "issuer", "key", "service", "profile"].includes(type) ? { require_future_expiry: true } : {}) })),
+  discovery: { service_ids: ["oati:service:smoke:lookup"], profile_ids: ["oati:profile:smoke:commerce-v1"] },
+}
+
+function headers(cache = false) {
+  return { "content-type": "application/json", "oati-version": "1.0", "x-request-id": "request-smoke", "access-control-allow-origin": manifest.cors_origin,
+    ...(cache ? { "cache-control": "public, max-age=60", etag: '"smoke"', "x-ratelimit-limit": "60", "x-ratelimit-remaining": "59", "x-ratelimit-reset": "60" } : {}) }
+}
+function json(value, status = 200, cache = false) { return new Response(JSON.stringify(value), { status, headers: headers(cache) }) }
+function problem(status, code) { return json({ error: { status, code, message: code, request_id: "request-smoke", retryable: false } }, status) }
+
+async function fetcher(input, init = {}) {
+  const url = new URL(input)
+  if (url.pathname.endsWith("/status")) {
+    if (init.headers?.["OATI-Version"] === "999") return problem(406, "unsupported_version")
+    return json({ status: "operational", service: "oati-public-lookup", version: "test", checked_at: now.toISOString() })
+  }
+  if (url.pathname.endsWith("/discovery")) {
+    return json({ organisation_id: organisationId, services: [records.get("service\0oati:service:smoke:lookup")], profiles: [records.get("profile\0oati:profile:smoke:commerce-v1")] })
+  }
+  if (!url.pathname.endsWith("/lookup")) return problem(404, "not_found")
+  const type = url.searchParams.get("type")
+  if (!url.searchParams.get("id") && !url.searchParams.get("target")) return problem(400, "invalid_request")
+  const value = url.searchParams.get("target") === issuer
+    ? records.get("revocation\0oati:revocation:smoke:production")
+    : records.get(`${type}\0${url.searchParams.get("id")}`)
+  if (!value) return problem(404, "record_not_found")
+  if (init.headers?.["If-None-Match"] === '"smoke"') return new Response(null, { status: 304, headers: { etag: '"smoke"' } })
+  return json(value, 200, true)
+}
+
+test("hosted smoke covers the ten-record lookup and discovery contract", async () => {
+  const report = await runProductionLookupSmoke({ manifest, fetcher, now, verifySignedDocument: async () => ({ verified: true, issues: [] }) })
+  assert.deepEqual(report.inventory, { expected: 10, resolved: 10 })
+  assert.equal(report.summary.failed, 0, JSON.stringify(report.checks.filter((item) => item.status === "fail")))
+  assert.equal(report.checks.some((item) => item.name === "discovery.organisation"), true)
+})
+
+test("hosted smoke rejects an incomplete reviewed inventory", async () => {
+  await assert.rejects(() => runProductionLookupSmoke({ manifest: { ...manifest, records: manifest.records.slice(1) }, fetcher, now }), /exactly 10 records/)
+})

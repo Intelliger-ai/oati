@@ -91,7 +91,7 @@ func TestSignAndVerifyDocument(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	bundle := map[string]any{"trust_anchors": []any{"oati:issuer:test"}, "keys": []any{map[string]any{"id": "oati:key:test", "issuer": "oati:issuer:test", "status": "active", "public_key_jwk": map[string]any{"x": base64.RawURLEncoding.EncodeToString(public)}}}}
+	bundle := map[string]any{"trust_anchors": []any{"oati:issuer:test"}, "keys": []any{map[string]any{"id": "oati:key:test", "controller": "oati:agent:test", "issuer": "oati:issuer:test", "algorithm": "EdDSA", "status": "active", "valid_from": now.Add(-time.Hour).Format(time.RFC3339), "valid_until": now.Add(time.Hour).Format(time.RFC3339), "proof_status": "verified", "public_key_jwk": map[string]any{"kty": "OKP", "crv": "Ed25519", "x": base64.RawURLEncoding.EncodeToString(public)}}}}
 	if codes := VerifyDocument(signed, bundle, "https://example.test", now.Add(time.Minute), NewReplayCache()); len(codes) > 0 {
 		t.Fatalf("verification failed: %v", codes)
 	}

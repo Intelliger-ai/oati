@@ -28,7 +28,7 @@
 
 ### A
 
-`A` *extends* `Record`\<`string`, `string`\> = `Record`\<`string`, `string`\>
+`A` *extends* `Record`\<`string`, `string` \| `undefined`\> = `Record`\<`string`, `string` \| `undefined`\>
 
 ## Properties
 

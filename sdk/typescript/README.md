@@ -281,7 +281,7 @@ Generated API documentation is available in [`docs/api/`](docs/api/README.md).
 
 ### Test identity issuance
 
-`DevelopmentIssuer` runs the complete credential lifecycle locally with an ephemeral Ed25519 key. It creates a development organisation, registers an agent, issues signed Passport and Mandate objects, signs example transactions, produces strict public projections, and emits suspension or revocation records.
+`DevelopmentIssuer` runs the complete credential lifecycle locally with ephemeral Ed25519 keys. It creates a development organisation, registers an agent with an agent-bound transaction key, issues signed Passport and Mandate objects, signs example transactions and Receipts, produces strict public projections, and emits suspension or revocation records.
 
 ```ts
 import { DevelopmentIssuer } from "@intelliger/oati/development"
@@ -311,9 +311,11 @@ pnpm test
 pnpm typecheck
 pnpm run docs
 pnpm pack --dry-run
+pnpm test:package-install -- npm
+pnpm test:package-install -- pnpm
 ```
 
-`pnpm test` rebuilds the embedded schema bundle, compiles the package, runs the SDK tests, and verifies every published schema and example.
+`pnpm test` rebuilds the embedded schema bundle, compiles the package, runs the SDK tests, and verifies every published schema and example. The package-install checks pack the SDK and install it into an empty consumer project before compiling its declarations and exercising every documented export path.
 
 ## Security boundary
 

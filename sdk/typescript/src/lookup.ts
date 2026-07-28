@@ -6,7 +6,7 @@ export const OATI_RECORD_TYPES = [
 export type OatiRecordType = (typeof OATI_RECORD_TYPES)[number]
 export type ProofStatus = "verified" | "invalid" | "unavailable" | "unknown"
 
-export interface PublicOatiRecord<T extends OatiRecordType = OatiRecordType, A extends Record<string, string> = Record<string, string>> {
+export interface PublicOatiRecord<T extends OatiRecordType = OatiRecordType, A extends Record<string, string | undefined> = Record<string, string | undefined>> {
   type: T
   id: string
   display_name?: string
@@ -24,9 +24,9 @@ export interface AgentRecord extends PublicOatiRecord<"agent"> {}
 export interface PassportRecord extends PublicOatiRecord<"passport"> { status: "active" | "suspended" | "revoked" | "expired" | "unknown" }
 export interface MandateRecord extends PublicOatiRecord<"mandate"> { status: "active" | "suspended" | "revoked" | "expired" | "consumed" | "unknown" }
 export interface ReceiptRecord extends PublicOatiRecord<"receipt"> {}
-export interface IssuerAttributes extends Record<string, string> { parent?: string; revoked_at?: string }
+export interface IssuerAttributes extends Record<string, string | undefined> { parent?: string; revoked_at?: string }
 export interface IssuerRecord extends PublicOatiRecord<"issuer", IssuerAttributes> { status: "active" | "suspended" | "revoked" | "unknown" }
-export interface KeyAttributes extends Record<string, string> {
+export interface KeyAttributes extends Record<string, string | undefined> {
   controller: string; algorithm: "EdDSA" | "ES256"; public_key_jwk: string; revoked_at?: string
   /** @deprecated Key issuer is canonical at `record.issuer`. */ issuer?: string
   /** @deprecated Key activation is canonical at `record.issued_at`. */ valid_from?: string
@@ -35,7 +35,7 @@ export interface KeyAttributes extends Record<string, string> {
 export interface KeyRecord extends PublicOatiRecord<"key", KeyAttributes> {
   status: "active" | "retired" | "revoked" | "unknown"; issued_at: string; expires_at: string
 }
-export interface RevocationAttributes extends Record<string, string> { target?: string; revocation_status?: "good" | "suspended" | "revoked" | "unknown"; effective_at?: string; reason?: string }
+export interface RevocationAttributes extends Record<string, string | undefined> { target?: string; revocation_status?: "good" | "suspended" | "revoked" | "unknown"; effective_at?: string; reason?: string }
 export interface RevocationRecord extends PublicOatiRecord<"revocation", RevocationAttributes> { status: "active" | "suspended" | "revoked" | "unknown" }
 export interface ServiceEndpoint {
   id: string; url: string; protocol: "http" | "grpc" | "mcp" | "a2a"; audience: string

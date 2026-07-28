@@ -23,12 +23,12 @@ type result struct {
 }
 
 func main() {
-	suitePath := flag.String("suite", "../../conformance/suite-v0.1.json", "")
+	suitePath := flag.String("suite", "../../conformance/suite-v0.3.json", "")
 	output := flag.String("output", "", "")
 	version := flag.String("implementation-version", "0.1.0-dev.0", "")
 	flag.Parse()
 	absolute, _ := filepath.Abs(*suitePath)
-	suite := load(absolute).(map[string]any)
+	suite := expandSuite(load(absolute).(map[string]any), absolute, map[string]bool{})
 	base := filepath.Dir(absolute)
 	results := []result{}
 	for _, raw := range suite["cases"].([]any) {
@@ -127,8 +127,94 @@ func execute(c map[string]any, base string) (string, []string) {
 			return "pass", nil
 		}
 		return "fail", []string{"PUBLIC_PROJECTION_MISMATCH"}
+	case "discover":
+		federation := load(filepath.Join(base, fmt.Sprint(c["auxiliary"]))).(map[string]any)
+		return discover(value.(map[string]any), federation, c["options"].(map[string]any), filepath.Clean(filepath.Join(base, "../schemas")))
 	}
 	return "fail", []string{"RUNNER_ERROR"}
+}
+
+func discover(response, federation, options map[string]any, schemaRoot string) (string, []string) {
+	organisation := fmt.Sprint(options["organisation_id"])
+	if !has(stringsOf(federation["organisations"]), organisation) {
+		return "fail", []string{"FEDERATION_ORGANISATION_MISMATCH"}
+	}
+	now, err := time.Parse(time.RFC3339, fmt.Sprint(options["now"]))
+	if err != nil {
+		return "fail", []string{"RUNNER_ERROR"}
+	}
+	if raw, ok := federation["expires_at"].(string); ok {
+		expiry, parseErr := time.Parse(time.RFC3339, raw)
+		if parseErr != nil || !expiry.After(now) {
+			return "fail", []string{"FEDERATION_EXPIRED"}
+		}
+	}
+	services, servicesOK := response["services"].([]any)
+	profilesRaw, profilesOK := response["profiles"].([]any)
+	if fmt.Sprint(response["organisation_id"]) != organisation || !servicesOK || !profilesOK {
+		return "fail", []string{"DISCOVERY_ORGANISATION_MISMATCH"}
+	}
+	profiles := map[string]bool{}
+	for _, raw := range profilesRaw {
+		if record, ok := raw.(map[string]any); ok {
+			profiles[fmt.Sprint(record["id"])] = true
+		}
+	}
+	collections := []struct {
+		kind    string
+		records []any
+	}{{"service", services}, {"profile", profilesRaw}}
+	for _, collection := range collections {
+		for _, raw := range collection.records {
+			record, ok := raw.(map[string]any)
+			if !ok || fmt.Sprint(record["type"]) != collection.kind || fmt.Sprint(record["status"]) != "active" || fmt.Sprint(record["proof_status"]) != "verified" {
+				return "fail", []string{"DISCOVERY_UNTRUSTED_RECORD"}
+			}
+			if fmt.Sprint(record["organisation_id"]) != organisation {
+				return "fail", []string{"DISCOVERY_ORGANISATION_MISMATCH"}
+			}
+			attributes, ok := record["public_attributes"].(map[string]any)
+			if !ok {
+				return "fail", []string{"DISCOVERY_DOCUMENT_INVALID"}
+			}
+			var document map[string]any
+			decoder := json.NewDecoder(strings.NewReader(fmt.Sprint(attributes["document"])))
+			decoder.UseNumber()
+			if err := decoder.Decode(&document); err != nil {
+				return "fail", []string{"DISCOVERY_DOCUMENT_INVALID"}
+			}
+			if fmt.Sprint(document["id"]) != fmt.Sprint(record["id"]) || fmt.Sprint(document["organisation_id"]) != organisation || fmt.Sprint(document["issuer"]) != fmt.Sprint(record["issuer"]) || fmt.Sprint(document["status"]) != "active" {
+				return "fail", []string{"DISCOVERY_DOCUMENT_MISMATCH"}
+			}
+			for _, rawExpiry := range []any{record["expires_at"], document["expires_at"]} {
+				if text, ok := rawExpiry.(string); ok && text != "" {
+					expiry, parseErr := time.Parse(time.RFC3339, text)
+					if parseErr != nil || !expiry.After(now) {
+						return "fail", []string{"DISCOVERY_EXPIRED"}
+					}
+				}
+			}
+			schema := "profileDiscovery"
+			if collection.kind == "service" {
+				schema = "serviceDiscovery"
+			}
+			codes, validateErr := oati.ValidateSchema(schema, document, schemaRoot)
+			if validateErr != nil {
+				return "fail", []string{"RUNNER_ERROR", validateErr.Error()}
+			}
+			if len(codes) > 0 {
+				return "fail", codes
+			}
+			if collection.kind == "service" {
+				for _, profile := range stringsOf(document["accepted_profiles"]) {
+					if !profiles[profile] {
+						return "fail", []string{"DISCOVERY_PROFILE_NOT_FOUND"}
+					}
+				}
+			}
+		}
+	}
+	return "pass", nil
 }
 func load(path string) any {
 	data, err := os.ReadFile(path)
@@ -142,6 +228,34 @@ func load(path string) any {
 		panic(err)
 	}
 	return value
+}
+func expandSuite(suite map[string]any, path string, visited map[string]bool) map[string]any {
+	if visited[path] {
+		panic("cyclic conformance suite inheritance")
+	}
+	visited[path] = true
+	parentName := fmt.Sprint(suite["extends"])
+	if parentName == "<nil>" || parentName == "" {
+		return suite
+	}
+	parentPath := filepath.Join(filepath.Dir(path), parentName)
+	parent := expandSuite(load(parentPath).(map[string]any), parentPath, visited)
+	if fmt.Sprint(parent["standard_version"]) != fmt.Sprint(suite["standard_version"]) {
+		panic("inherited suite standard version mismatch")
+	}
+	ids := map[string]bool{}
+	combined := append([]any{}, parent["cases"].([]any)...)
+	for _, raw := range combined {
+		ids[fmt.Sprint(raw.(map[string]any)["id"])] = true
+	}
+	for _, raw := range suite["cases"].([]any) {
+		if ids[fmt.Sprint(raw.(map[string]any)["id"])] {
+			panic("duplicate inherited conformance case")
+		}
+		combined = append(combined, raw)
+	}
+	suite["cases"] = combined
+	return suite
 }
 func stringsOf(v any) []string {
 	items, _ := v.([]any)

@@ -1,0 +1,19 @@
+{
+  "organisation_id": "oati:org:merchant-b",
+  "services": [
+    {
+      "type": "service",
+      "id": "oati:service:merchant-b:checkout",
+      "display_name": "Merchant B checkout",
+      "status": "active",
+      "issuer": "oati:issuer:merchant-b",
+      "organisation_id": "oati:org:merchant-b",
+      "expires_at": "2026-07-28T11:59:59Z",
+      "proof_status": "verified",
+      "public_attributes": {
+        "document": "{\"accepted_profiles\":[],\"display_name\":\"Merchant B checkout\",\"endpoints\":[{\"audience\":\"https://merchant-b.example\",\"id\":\"purchase\",\"protocol\":\"http\",\"url\":\"https://merchant-b.example/oati/purchase\"}],\"expires_at\":\"2026-07-28T11:59:59Z\",\"id\":\"oati:service:merchant-b:checkout\",\"issued_at\":\"2026-07-28T11:00:00Z\",\"issuer\":\"oati:issuer:merchant-b\",\"oati_version\":\"1.0\",\"organisation_id\":\"oati:org:merchant-b\",\"status\":\"active\"}"
+      }
+    }
+  ],
+  "profiles": []
+}

@@ -11,7 +11,7 @@ An API credential can show that an agent may connect. OATI describes **who owns 
 - Machine API: `https://api.intelliger.ai/oati/v1`
 - Licence: [Apache 2.0](LICENSE)
 - Status: **developer preview**
-- Independent security review: **not yet completed** ([review gate and audit package](security/independent-review/README.md))
+- Independent security review: **not yet completed; security release gate closed** ([review gate and audit package](security/independent-review/README.md))
 
 ## Why OATI
 
@@ -63,7 +63,17 @@ The first RWA workflow permits bounded, one-time minting only against a current 
 
 ## Start in five minutes
 
-Requirement: Go 1.24+.
+Run the complete local sandbox with Docker Compose. It creates fresh test identities and starts a development issuer, control-plane façade, public lookup, buyer, Commerce seller, and RWA mint simulator before completing two signed transactions:
+
+```bash
+git clone git@github.com:Intelliger-ai/oati.git
+cd oati
+./sandbox/oati-sandbox
+```
+
+No Intelliger account, infrastructure, or credentials are required. See the [sandbox guide](sandbox/README.md).
+
+For the standalone CLI, the requirement is Go 1.24+.
 
 ```bash
 git clone git@github.com:Intelliger-ai/oati.git
@@ -122,6 +132,8 @@ The current CLI is ready for object validation, fixtures, deterministic JSON pro
 | [`api/lookup.openapi.yaml`](api/lookup.openapi.yaml) | public lookup API contract for client generation |
 | [`integrations/envoy/`](integrations/envoy/) | fail-closed Envoy ext_authz and OPA reference integration |
 | [`services/envoy-authorizer/`](services/envoy-authorizer/) | production-oriented HTTP authorizer with lookup, Valkey, mTLS, and external KMS signing |
+| [`sandbox/`](sandbox/) | one-command, six-service local environment for signed Commerce and RWA transactions |
+| [`smoke/`](smoke/) | reviewed ten-record inventory and read-only hosted lookup/discovery deployment gate |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | system boundaries and deployment model |
 
 ## Public lookup and privacy
@@ -130,7 +142,7 @@ The lookup service resolves organisations, agents, Passports, Mandates, Receipts
 
 Lookup is a **privacy-reviewed projection**, not an unrestricted view of OATI Platform records. Mandates and Receipts expose only approved metadata, status, digests, issuer information, timestamps, and verification material unless a selective-disclosure grant permits more.
 
-The production lookup UI and service are operated from the private OATI Platform repository. Developers can integrate against the published [`OpenAPI contract`](api/lookup.openapi.yaml), use the CLI lookup client, or implement a compatible resolver.
+The production lookup UI and service are operated from the private OATI Platform repository. Developers can integrate against the published [`OpenAPI contract`](api/lookup.openapi.yaml), use the CLI lookup client, or implement a compatible resolver. Maintainers continuously exercise the hosted ten-record lookup and discovery contract with the read-only [production smoke gate](smoke/README.md).
 
 ## Open-source boundary
 

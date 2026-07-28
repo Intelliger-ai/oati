@@ -1,18 +1,52 @@
 {
-  "schema_version": 1,
+  "$schema": "./status.schema.json",
+  "schema_version": 2,
   "status": "awaiting-independent-review",
   "production_security_claim_eligible": false,
-  "review_commit": null,
-  "platform_review_commit": null,
-  "reviewer": null,
-  "engagement_started_at": null,
-  "completed_at": null,
-  "public_report_url": null,
-  "retest_report_url": null,
+  "engagement": {
+    "id": null,
+    "reviewer_organisation": null,
+    "independence_attested": false,
+    "conflicts_disclosed": false,
+    "started_at": null,
+    "completed_at": null,
+    "valid_until": null
+  },
+  "scope": {
+    "review_commit": null,
+    "remediation_commit": null,
+    "platform_review_commit": null,
+    "public_manifest_sha256": null,
+    "required_areas": [
+      "protocol-design",
+      "typescript-sdk",
+      "go-sdk-and-cli",
+      "python-sdk",
+      "http-middleware",
+      "protocol-adapters",
+      "conformance",
+      "private-platform"
+    ]
+  },
+  "reports": {
+    "final": { "url": null, "sha256": null },
+    "retest": { "url": null, "sha256": null },
+    "finding_dispositions": { "url": null, "sha256": null }
+  },
   "open_findings": {
     "critical": null,
     "high": null,
     "medium": null,
     "low": null
+  },
+  "verification": {
+    "retest_passed": false,
+    "conformance_suite_version": null,
+    "all_required_conformance_passed": false
+  },
+  "approvals": {
+    "security_maintainer": null,
+    "release_maintainer": null,
+    "approved_at": null
   }
 }

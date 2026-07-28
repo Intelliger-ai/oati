@@ -4,9 +4,10 @@ These guides take a developer from a signed request to domain-specific integrati
 
 ## Start here
 
-1. [Verify your first OATI request](tutorials/verify-first-request.md)
-2. [Issue and consume a Mandate](tutorials/issue-and-consume-mandate.md)
-3. [Generate and verify a Receipt](tutorials/generate-and-verify-receipt.md)
+1. [Run the one-command local sandbox](../sandbox/README.md)
+2. [Verify your first OATI request](tutorials/verify-first-request.md)
+3. [Issue and consume a Mandate](tutorials/issue-and-consume-mandate.md)
+4. [Generate and verify a Receipt](tutorials/generate-and-verify-receipt.md)
 
 ## Integrate a workload
 
@@ -18,9 +19,11 @@ These guides take a developer from a signed request to domain-specific integrati
 ## Operate compatibility
 
 - [Versioning, migration, and compatibility policy](MIGRATION_AND_COMPATIBILITY.md)
+- [Fresh-project package installation compatibility](PACKAGE_INSTALLATION_COMPATIBILITY.md)
 - [TypeScript SDK](../sdk/typescript/README.md)
 - [CLI](../cli/README.md)
 - [Executable conformance suite](../conformance/README.md)
+- [Hosted ten-record lookup and discovery smoke](../smoke/README.md)
 - [Normative specification](../specification/README.md)
 
 Tutorial fixtures are educational and use development trust material. Never promote example keys, proofs, identifiers, or assurance claims into production.

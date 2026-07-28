@@ -1,6 +1,6 @@
 from __future__ import annotations
-import base64, json
-from datetime import datetime
+import base64, hashlib, json
+from datetime import datetime,timedelta
 from typing import Any
 from .core import canonical_json
 
@@ -38,6 +38,29 @@ def _ed25519_verify(public:bytes,message:bytes,signature:bytes)->bool:
     h=int.from_bytes(hashlib.sha512(signature[:32]+public+message).digest(),"little")%L
     return _equal(_scalar(B,s),_add(r,_scalar(a,h)))
 
+P256_P=0xffffffff00000001000000000000000000000000ffffffffffffffffffffffff
+P256_A=P256_P-3
+P256_N=0xffffffff00000000ffffffffffffffffbce6faada7179e84f3b9cac2fc632551
+P256_G=(0x6b17d1f2e12c4247f8bce6e563a440f277037d812deb33a0f4a13945d898c296,0x4fe342e2fe1a7f9b8ee7eb4a7c0f9e162bce33576b315ececbb6406837bf51f5)
+def _padd(p,q):
+    if p is None:return q
+    if q is None:return p
+    if p[0]==q[0] and (p[1]+q[1])%P256_P==0:return None
+    slope=((3*p[0]*p[0]+P256_A)*pow(2*p[1],P256_P-2,P256_P) if p==q else (q[1]-p[1])*pow((q[0]-p[0])%P256_P,P256_P-2,P256_P))%P256_P
+    x=(slope*slope-p[0]-q[0])%P256_P;return x,(slope*(p[0]-x)-p[1])%P256_P
+def _pmul(point,value):
+    result=None
+    while value:
+        if value&1:result=_padd(result,point)
+        point=_padd(point,point);value>>=1
+    return result
+def _es256_verify(jwk,message,signature):
+    if len(signature)!=64:return False
+    r=int.from_bytes(signature[:32],"big");s=int.from_bytes(signature[32:],"big")
+    if not 0<r<P256_N or not 0<s<P256_N:return False
+    public=(int.from_bytes(_b64(jwk["x"]),"big"),int.from_bytes(_b64(jwk["y"]),"big"));z=int.from_bytes(hashlib.sha256(message).digest(),"big");w=pow(s,-1,P256_N)
+    point=_padd(_pmul(P256_G,z*w%P256_N),_pmul(public,r*w%P256_N));return point is not None and point[0]%P256_N==r
+
 class ReplayCache:
     def __init__(self): self._values:set[str]=set()
     def accept(self,key:str)->bool:
@@ -56,25 +79,63 @@ def sign_document(document:dict[str,Any],private_jwk:dict[str,Any],verification_
     proof["signature"]=header+".."+_b64encode(r_encoded+((r+challenge*scalar)%L).to_bytes(32,"little"));return signed
 
 def verify_document(document:dict[str,Any],bundle:dict[str,Any],audience:str,now:str,replay:ReplayCache|None=None)->list[str]:
-    proof=document.get("proof",{}); codes:set[str]=set(); current=datetime.fromisoformat(now.replace("Z","+00:00"))
+    proof=document.get("proof",{}); codes:set[str]=set(); current=datetime.fromisoformat(now.replace("Z","+00:00"));skew=timedelta(seconds=30)
     created=_time(proof.get("created")); expires=_time(proof.get("expires"))
-    if expires and expires<=current: codes.add("PROOF_EXPIRED")
-    if created and (current-created).total_seconds()>300: codes.add("PROOF_TOO_OLD")
+    if expires and expires<=current-skew: codes.add("PROOF_EXPIRED")
+    if created and current-created>timedelta(minutes=5)+skew: codes.add("PROOF_TOO_OLD")
+    if created and created>current+skew:codes.add("PROOF_NOT_YET_VALID")
     audiences=proof.get("audience",[]); audiences=[audiences] if isinstance(audiences,str) else audiences
     if audience not in audiences: codes.add("AUDIENCE_MISMATCH")
     key=next((item for item in bundle.get("keys",[]) if item.get("id")==proof.get("verification_method")),None)
-    if key and key.get("status")=="revoked": codes.add("KEY_REVOKED")
     if not key: codes.add("KEY_NOT_FOUND")
-    if key and not ({key.get("issuer")} & set(bundle.get("trust_anchors",[]))): codes.add("ISSUER_NOT_TRUSTED")
-    if key and not codes.intersection({"KEY_REVOKED","KEY_NOT_FOUND"}):
+    if key:
+        _check_key(key,proof,created,current,skew,codes);_check_chain(key.get("issuer"),bundle,current,skew,codes);_check_revocations((key.get("id"),key.get("issuer"),document.get("id")),bundle,current,codes)
+        claimed=document.get("issuer",document.get("agent_id"))
+        if claimed and claimed not in (key.get("controller"),key.get("issuer")):codes.add("KEY_INVALID")
         try:
             signature_value=proof["signature"]; header,encoded=signature_value.split("..")
+            protected=json.loads(_b64(header));
+            if protected.get("alg")!=proof.get("algorithm") or protected.get("kid")!=proof.get("verification_method") or protected.get("b64") is not False or protected.get("typ")!="oati+jws":raise ValueError("header mismatch")
             unsigned=json.loads(json.dumps(document)); del unsigned["proof"]["signature"]
             message=header.encode()+b"."+canonical_json(unsigned).encode()
-            if not _ed25519_verify(_b64(key["public_key_jwk"]["x"]),message,_b64(encoded)): codes.add("SIGNATURE_INVALID")
+            signature=_b64(encoded);jwk=key["public_key_jwk"]
+            valid=_ed25519_verify(_b64(jwk["x"]),message,signature) if proof.get("algorithm")=="EdDSA" else _es256_verify(jwk,message,signature) if proof.get("algorithm")=="ES256" else False
+            if not valid: codes.add("SIGNATURE_INVALID")
         except Exception: codes.add("SIGNATURE_INVALID")
     if not codes and replay is not None and not replay.accept(f'{proof.get("verification_method")}\0{audience}\0{proof.get("nonce")}'): codes.add("REPLAY_DETECTED")
     return sorted(codes)
+def _check_key(key,proof,created,current,skew,codes):
+    algorithm=key.get("algorithm");jwk=key.get("public_key_jwk",{});status=key.get("status")
+    if algorithm!=proof.get("algorithm") or key.get("id")!=proof.get("verification_method") or key.get("proof_status") not in (None,"verified"):codes.add("KEY_INVALID")
+    if algorithm=="EdDSA" and (jwk.get("kty"),jwk.get("crv"))!=("OKP","Ed25519") or algorithm=="ES256" and (jwk.get("kty"),jwk.get("crv"))!=("EC","P-256") or algorithm not in ("EdDSA","ES256"):codes.add("KEY_INVALID")
+    if status not in ("active","retired","revoked"):codes.add("KEY_INVALID")
+    if status=="retired" and not key.get("valid_until"):codes.add("KEY_INVALID")
+    valid_from=_time(key.get("valid_from"));valid_until=_time(key.get("valid_until"))
+    if not valid_from or created and created<valid_from-skew or key.get("valid_until") and (not valid_until or created and created>=valid_until+skew):codes.add("KEY_INVALID")
+    if status=="revoked" or _time(key.get("revoked_at")) and _time(key.get("revoked_at"))<=current:codes.add("KEY_REVOKED")
+def _check_chain(start,bundle,current,skew,codes):
+    anchors=set(bundle.get("trust_anchors",[]));visited=set();issuer_id=start
+    for _ in range(9):
+        if issuer_id in anchors:return
+        if issuer_id in visited:break
+        visited.add(issuer_id);issuer=next((item for item in bundle.get("issuers",[]) if item.get("id")==issuer_id),None)
+        if not issuer or issuer.get("proof_status") not in (None,"verified"):break
+        valid_from=_time(issuer.get("valid_from"));valid_until=_time(issuer.get("valid_until"));revoked=_time(issuer.get("revoked_at"))
+        if issuer.get("status")!="active" or revoked and revoked<=current or valid_from and valid_from>current+skew or valid_until and valid_until<=current-skew:codes.add("ISSUER_REVOKED");return
+        issuer_id=issuer.get("parent")
+        if not issuer_id:break
+    codes.add("ISSUER_NOT_TRUSTED")
+def _check_revocations(targets,bundle,current,codes):
+    unavailable=set(bundle.get("unavailable_targets",[]));result=("KEY_REVOKED","ISSUER_REVOKED","DOCUMENT_REVOKED")
+    for index,target in enumerate(targets):
+        if not target:continue
+        if target in unavailable:codes.add("REVOCATION_UNAVAILABLE");continue
+        matches=[item for item in bundle.get("revocations",[]) if item.get("target")==target]
+        if len(matches)>1:codes.add("REVOCATION_UNAVAILABLE");continue
+        if not matches or matches[0].get("status")=="good":continue
+        effective=_time(matches[0].get("effective_at"))
+        if effective and effective>current:continue
+        codes.add(result[index])
 def _time(value):
     try:return datetime.fromisoformat(value.replace("Z","+00:00"))
     except (AttributeError,ValueError):return None

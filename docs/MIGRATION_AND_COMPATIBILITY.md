@@ -32,6 +32,8 @@ Servers support the current stable major and at least one documented migration w
 
 A public change is releasable only when schemas, examples, SDK types/builders, generated API docs, OpenAPI, valid and invalid conformance vectors, expected error codes, compatibility snapshot, and migration notes agree. CI must demonstrate that generated artifacts are current and the platform implements the public contract.
 
+No cryptographic or protocol implementation release may be represented as production-secure until the [independent-review release gate](../security/independent-review/RELEASE_GATE.md) passes for the exact security-sensitive source manifest. A manifest-covered change after review requires reviewer confirmation and, where applicable, focused retesting before another release.
+
 Compatibility claims use this form:
 
 ```text

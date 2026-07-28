@@ -1,0 +1,23 @@
+{
+  "action": "api.invoke",
+  "agent_id": "oati:agent:conformance:es256-sender",
+  "id": "oati:tx:conformance:es256-1",
+  "issued_at": "2026-07-27T12:00:00Z",
+  "mandate_id": "oati:mandate:conformance:es256-1",
+  "nonce": "document-nonce-es256-0001",
+  "oati_version": "1.0",
+  "organisation_id": "oati:org:conformance",
+  "resource": "oati:service:conformance:echo",
+  "proof": {
+    "type": "OatiJwsProof2026",
+    "cryptosuite": "ecdsa-jcs-2019",
+    "algorithm": "ES256",
+    "created": "2026-07-27T12:00:00.000Z",
+    "expires": "2026-07-27T12:05:00.000Z",
+    "verification_method": "oati:key:conformance:es256-1",
+    "proof_purpose": "assertionMethod",
+    "audience": "https://merchant.example",
+    "nonce": "proof-nonce-es256-0000001",
+    "signature": "eyJhbGciOiJFUzI1NiIsImI2NCI6ZmFsc2UsImNyaXQiOlsiYjY0Il0sImtpZCI6Im9hdGk6a2V5OmNvbmZvcm1hbmNlOmVzMjU2LTEiLCJ0eXAiOiJvYXRpK2p3cyJ9..JDHon7VWDYGn3uaeMAzGXfOKQHZe5Df8MDfhzLchG_Fe-L-OqrMFNbOWS7Oqk51bL_ClXwmp8tqJpmeum0DvMQ"
+  }
+}

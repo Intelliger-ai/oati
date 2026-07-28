@@ -4,6 +4,9 @@
   "description": "TypeScript SDK for OATI objects, trust verification, deterministic authority evaluation, Commerce, RWA, and lookup",
   "type": "module",
   "license": "Apache-2.0",
+  "engines": {
+    "node": ">=20"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -45,6 +48,8 @@
     "docs": "pnpm build && typedoc --options typedoc.json",
     "test": "pnpm build && node --test test/*.test.mjs && node scripts/smoke.mjs && node scripts/validate-schemas.mjs",
     "test:lookup-integration": "pnpm build && node scripts/lookup-integration.mjs",
+    "test:package-install": "pnpm build && node scripts/test-package-install.mjs",
+    "smoke:production": "pnpm build && node scripts/production-lookup-smoke.mjs",
     "conformance": "pnpm build && node ../../conformance/run.mjs",
     "validate:schemas": "node scripts/validate-schemas.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"

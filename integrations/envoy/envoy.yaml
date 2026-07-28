@@ -57,8 +57,6 @@ static_resources:
                       status_on_error: { code: ServiceUnavailable }
                       validate_mutations: true
                       enable_dynamic_metadata_ingestion: false
-                      max_denied_response_body_bytes: 16384
-                      enforce_response_header_limits: true
                       with_request_body:
                         max_request_bytes: 1048576
                         allow_partial_message: false

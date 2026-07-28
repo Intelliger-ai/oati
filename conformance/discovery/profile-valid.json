@@ -1,0 +1,15 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:profile:merchant-b:commerce-1",
+  "organisation_id": "oati:org:merchant-b",
+  "issuer": "oati:issuer:merchant-b",
+  "name": "Merchant B Commerce Profile",
+  "version": "1.0.0",
+  "schema_uri": "https://schemas.merchant-b.example/oati/commerce-1.json",
+  "specification_uri": "https://merchant-b.example/oati/profiles/commerce-1",
+  "digest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "compatible_with": ["https://schemas.intelliger.ai/oati/v1/commerce/merchant-service-profile.schema.json"],
+  "status": "active",
+  "issued_at": "2026-07-28T12:00:00Z",
+  "expires_at": "2027-07-28T12:00:00Z"
+}

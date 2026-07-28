@@ -1,0 +1,16 @@
+{
+  "organisation_id": "oati:org:merchant-b",
+  "services": [
+    {
+      "type": "service",
+      "id": "oati:service:merchant-b:checkout",
+      "display_name": "Merchant B checkout",
+      "status": "active",
+      "issuer": "oati:issuer:merchant-b",
+      "organisation_id": "oati:org:merchant-b",
+      "proof_status": "unknown",
+      "public_attributes": { "document": "{}" }
+    }
+  ],
+  "profiles": []
+}

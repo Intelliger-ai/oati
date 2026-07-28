@@ -4,6 +4,7 @@ import { dirname, resolve } from "node:path"
 
 const root = resolve(import.meta.dirname, "..")
 const required = [
+  "sandbox/README.md",
   "docs/tutorials/verify-first-request.md",
   "docs/tutorials/issue-and-consume-mandate.md",
   "docs/tutorials/generate-and-verify-receipt.md",
@@ -12,6 +13,7 @@ const required = [
   "docs/tutorials/mcp-and-a2a.md",
   "docs/tutorials/errors-and-revocation.md",
   "docs/MIGRATION_AND_COMPATIBILITY.md",
+  "docs/PACKAGE_INSTALLATION_COMPATIBILITY.md",
 ]
 
 const failures = []

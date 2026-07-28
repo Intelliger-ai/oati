@@ -1,0 +1,84 @@
+name: oati-sandbox
+
+x-service: &service
+  image: oati-sandbox:local
+  restart: unless-stopped
+  networks: [oati-sandbox]
+
+x-health: &health
+  interval: 2s
+  timeout: 2s
+  retries: 30
+  start_period: 2s
+
+services:
+  issuer:
+    <<: *service
+    build:
+      context: ..
+      dockerfile: sandbox/Dockerfile
+    command: ["issuer"]
+    ports: ["9082:8080"]
+    healthcheck: { <<: *health, test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"] }
+
+  control-plane:
+    <<: *service
+    command: ["control-plane"]
+    environment: { ISSUER_URL: "http://issuer:8080" }
+    ports: ["9081:8080"]
+    depends_on: { issuer: { condition: service_healthy } }
+    healthcheck: { <<: *health, test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"] }
+
+  lookup:
+    <<: *service
+    command: ["lookup"]
+    environment: { CONTROL_URL: "http://control-plane:8080" }
+    depends_on: { control-plane: { condition: service_healthy } }
+    ports: ["9080:8080"]
+    healthcheck: { <<: *health, test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"] }
+
+  commerce:
+    <<: *service
+    command: ["commerce"]
+    environment:
+      ISSUER_URL: "http://issuer:8080"
+      LOOKUP_URL: "http://lookup:8080/oati/v1"
+      COMMERCE_URL: "http://commerce:8080"
+    depends_on: { lookup: { condition: service_healthy } }
+    ports: ["9084:8080"]
+    healthcheck: { <<: *health, test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"] }
+
+  rwa:
+    <<: *service
+    command: ["rwa"]
+    environment:
+      ISSUER_URL: "http://issuer:8080"
+      LOOKUP_URL: "http://lookup:8080/oati/v1"
+      RWA_URL: "http://rwa:8080"
+    depends_on: { lookup: { condition: service_healthy } }
+    ports: ["9085:8080"]
+    healthcheck: { <<: *health, test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"] }
+
+  buyer:
+    <<: *service
+    command: ["buyer"]
+    environment:
+      ISSUER_URL: "http://issuer:8080"
+      LOOKUP_URL: "http://lookup:8080/oati/v1"
+      COMMERCE_URL: "http://commerce:8080"
+      RWA_URL: "http://rwa:8080"
+    depends_on:
+      commerce: { condition: service_healthy }
+      rwa: { condition: service_healthy }
+    ports: ["9083:8080"]
+    healthcheck: { <<: *health, test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"] }
+
+  demo:
+    <<: *service
+    restart: "no"
+    command: ["demo"]
+    environment: { BUYER_URL: "http://buyer:8080" }
+    depends_on: { buyer: { condition: service_healthy } }
+
+networks:
+  oati-sandbox: {}

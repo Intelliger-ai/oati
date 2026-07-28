@@ -1,0 +1,24 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:service:merchant-b:checkout",
+  "organisation_id": "oati:org:merchant-b",
+  "issuer": "oati:issuer:merchant-b",
+  "display_name": "Merchant B checkout",
+  "description": "Paid API checkout endpoint",
+  "endpoints": [
+    {
+      "id": "purchase",
+      "url": "https://merchant-b.example/oati/purchase",
+      "protocol": "http",
+      "audience": "https://merchant-b.example",
+      "actions": ["commerce.purchase"],
+      "accepted_profiles": ["oati:profile:merchant-b:commerce-1"],
+      "priority": 10,
+      "regions": ["DE"]
+    }
+  ],
+  "accepted_profiles": ["oati:profile:merchant-b:commerce-1"],
+  "status": "active",
+  "issued_at": "2026-07-28T12:00:00Z",
+  "expires_at": "2027-07-28T12:00:00Z"
+}

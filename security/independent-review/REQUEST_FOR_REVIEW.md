@@ -43,6 +43,6 @@ Assess whether the OATI 1.0 cryptographic profile and its reference implementati
 
 ## Deliverables and severity
 
-Use a recognized severity model such as CVSS 4.0 with an accompanying protocol-impact rationale. Each finding must include evidence, affected targets, exploit prerequisites, impact, and a concrete remediation. Separately list specification ambiguity, implementation defects, hardening opportunities, and test gaps. The final retest must identify the exact remediation commit and disposition of every finding.
+Use a recognized severity model such as CVSS 4.0 with an accompanying protocol-impact rationale. Each finding must include evidence, affected targets, exploit prerequisites, impact, and a concrete remediation. Separately list specification ambiguity, implementation defects, hardening opportunities, and test gaps. The final retest must identify the exact remediation commits, public source-manifest digest, conformance-suite version, and disposition of every finding. Deliverables must have stable URLs or controlled evidence identifiers and independently recorded SHA-256 hashes.
 
 Independence conflicts, subcontractors, use of automated or AI-assisted analysis, data handling, report publication, embargo, and intellectual-property terms must be declared before kickoff.

@@ -14,9 +14,45 @@
 
 ***
 
+### counterparties?
+
+> `optional` **counterparties?**: `string`[]
+
+***
+
+### dataUse?
+
+> `optional` **dataUse?**: `Record`\<`string`, `unknown`\>
+
+***
+
+### destinations?
+
+> `optional` **destinations?**: `string`[]
+
+***
+
 ### expiresInSeconds?
 
 > `optional` **expiresInSeconds?**: `number`
+
+***
+
+### extensions?
+
+> `optional` **extensions?**: `Record`\<`string`, `unknown`\>
+
+***
+
+### limits?
+
+> `optional` **limits?**: `Record`\<`string`, `unknown`\>
+
+***
+
+### profile?
+
+> `optional` **profile?**: `string`
 
 ***
 

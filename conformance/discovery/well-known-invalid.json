@@ -1,0 +1,7 @@
+{
+  "oati_version": "1.0",
+  "organisations": ["oati:org:merchant-b", "oati:org:merchant-b"],
+  "resolvers": ["http://internal.example/oati/v1"],
+  "expires_at": "not-a-date",
+  "credentials": "must-not-be-published"
+}

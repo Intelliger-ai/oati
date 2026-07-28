@@ -1,0 +1,36 @@
+#!/bin/sh
+set -eu
+
+ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+COMPOSE_FILE="$ROOT/sandbox/compose.yaml"
+ACTION=${1:-up}
+
+case "$ACTION" in
+  up)
+    docker compose -f "$COMPOSE_FILE" up -d --build --wait --force-recreate issuer control-plane lookup commerce rwa buyer
+    docker compose -f "$COMPOSE_FILE" run --rm demo
+    printf '%s\n' "OATI sandbox is ready:" \
+      "  Lookup API: http://localhost:9080/oati/v1/status" \
+      "  Control:    http://localhost:9081/inventory" \
+      "  Issuer:     http://localhost:9082/bootstrap" \
+      "  Buyer demo: POST http://localhost:9083/run" \
+      "  Commerce:   POST http://localhost:9084/purchase" \
+      "  RWA mint:   POST http://localhost:9085/mint" \
+      "Stop it with: ./sandbox/oati-sandbox down"
+    ;;
+  test)
+    docker compose -f "$COMPOSE_FILE" up -d --build --wait --force-recreate issuer control-plane lookup commerce rwa buyer
+    docker compose -f "$COMPOSE_FILE" run --rm demo
+    ;;
+  down)
+    docker compose -f "$COMPOSE_FILE" down --remove-orphans
+    ;;
+  logs|ps)
+    shift || true
+    docker compose -f "$COMPOSE_FILE" "$ACTION" "$@"
+    ;;
+  *)
+    printf '%s\n' "Usage: ./sandbox/oati-sandbox [up|test|down|logs|ps]" >&2
+    exit 2
+    ;;
+esac

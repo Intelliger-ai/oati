@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "resolver_url": "https://api.intelliger.ai/oati/v1",
+  "cors_origin": "https://intelliger.ai",
+  "organisation_id": "oati:org:intelliger",
+  "trust_anchors": ["oati:issuer:intelliger:production"],
+  "records": [
+    { "type": "organisation", "id": "oati:org:intelliger", "statuses": ["active"], "require_future_expiry": true, "audience": "oati:production:organisation" },
+    { "type": "agent", "id": "oati:agent:intelliger:commerce-demo", "statuses": ["active"], "require_future_expiry": true, "audience": "oati:production:agent" },
+    { "type": "passport", "id": "oati:agent:intelliger:commerce-demo", "statuses": ["active"], "require_future_expiry": true, "audience": "oati:production:passport" },
+    { "type": "mandate", "id": "oati:mandate:intelliger:weather-purchase-001", "statuses": ["active"], "require_future_expiry": true, "audience": "oati:production:mandate" },
+    { "type": "receipt", "id": "oati:receipt:intelliger:weather-purchase-001", "statuses": ["active"], "audience": "oati:production:receipt" },
+    { "type": "issuer", "id": "oati:issuer:intelliger:production", "statuses": ["active"], "require_future_expiry": true, "audience": "oati:production:issuer" },
+    { "type": "key", "id": "oati:key:intelliger:production-1", "statuses": ["active"], "require_future_expiry": true, "audience": "oati:production:key" },
+    { "type": "revocation", "id": "oati:revocation:intelliger:production", "statuses": ["active"], "target": "oati:issuer:intelliger:production", "revocation_status": "good", "audience": "oati:production:revocation" },
+    { "type": "service", "id": "oati:service:intelliger:public-lookup", "statuses": ["active"], "require_future_expiry": true, "audience": "oati:production:service" },
+    { "type": "profile", "id": "oati:profile:intelliger:commerce-v0.1", "statuses": ["active"], "require_future_expiry": true, "audience": "oati:production:profile" }
+  ],
+  "discovery": {
+    "service_ids": ["oati:service:intelliger:public-lookup"],
+    "profile_ids": ["oati:profile:intelliger:commerce-v0.1"]
+  }
+}

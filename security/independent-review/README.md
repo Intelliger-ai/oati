@@ -22,15 +22,26 @@ The reviewer must deliver:
 
 `production_security_claim_eligible` remains `false` until all of these are true:
 
-- `review_commit`, reviewer organization, dates, and stable report URLs are recorded;
+- the independent organization attests its independence and discloses conflicts and subcontractors;
+- initial-review, remediated-public, and private-platform commits are pinned;
+- the reproducible public source-manifest digest and SHA-256 hashes for every report are recorded;
 - no critical or high findings remain open;
 - every medium finding is fixed or has a documented, reviewer-accepted disposition;
 - remediation is independently retested;
 - cross-language conformance passes on the remediated commit;
+- the review has not expired and its validity period is no longer than 366 days;
 - the cryptographic profile and implementation limitations are updated from the actual report;
-- maintainers approve the claim change separately from the implementation author.
+- separate security and release maintainers approve the claim change after review completion.
 
-Run `node scripts/check-independent-review.mjs` to validate this gate. CI runs the same check. A passing gate only checks required evidence metadata; it does not independently validate the review’s quality.
+Ordinary development CI runs `node scripts/check-independent-review.mjs`. This permits an honest pre-review state only while the public developer-preview warnings and `production_security_claim_eligible: false` remain in place. Release automation runs:
+
+```sh
+node scripts/check-independent-review.mjs --require-completed
+```
+
+Release mode additionally reproduces the security-sensitive source manifest and requires it to match the independently reviewed digest. The dedicated reusable workflow is [`.github/workflows/release-security-gate.yml`](../../.github/workflows/release-security-gate.yml). Any package, container, tag, or GitHub Release publishing workflow must depend on that workflow. Repository administrators must also configure the `v*` tag ruleset/required workflow described in [`RELEASE_GATE.md`](RELEASE_GATE.md); CI files alone cannot prevent an administrator from manually bypassing GitHub.
+
+A passing gate verifies required evidence metadata and source identity. It does not independently prove the reviewer’s competence, report quality, organizational independence, or accuracy; those remain human governance responsibilities.
 
 ## Reproducible handoff
 
@@ -46,4 +57,4 @@ PYTHONDONTWRITEBYTECODE=1 python3 -m unittest -v sdk/python/test_sdk.py
 (cd cli && go test ./...)
 ```
 
-The manifest records the commit, file paths, byte sizes, and SHA-256 hashes for the in-scope public material. The handoff must also record the private platform commit separately; no private source or credentials belong in the public manifest.
+The manifest records the commit, file paths, byte sizes, individual SHA-256 hashes, and one stable `content_sha256` over the ordered file inventory. Store that content digest in `status.json` after remediation retest. The handoff must also record the private platform commit separately; no private source or credentials belong in the public manifest.

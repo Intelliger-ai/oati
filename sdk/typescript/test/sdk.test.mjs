@@ -59,6 +59,22 @@ test("development issuer runs the complete test credential lifecycle", async () 
   assert.equal(validateSchema("mandate", mandate).valid, true)
   const transaction = await issuer.signTransaction(passport.id, mandate, { action: "commerce.purchase", resource: "oati:service:test", protocol: "mcp" })
   assert.equal(validateSchema("envelope", transaction).valid, true)
+  assert.equal(transaction.proof.verification_method, passport.verification_methods[0].id)
+  const records = issuer.registryRecords()
+  const resolver = new StaticTrustResolver(
+    records.filter((record) => record.type === "key").map((record) => ({
+      id: record.id, controller: record.public_attributes.controller, issuer: record.issuer,
+      algorithm: record.public_attributes.algorithm, publicKeyJwk: JSON.parse(record.public_attributes.public_key_jwk),
+      status: record.status, validFrom: record.issued_at, validUntil: record.expires_at, proofStatus: record.proof_status,
+    })),
+    records.filter((record) => record.type === "issuer").map((record) => ({ id: record.id, status: record.status, proofStatus: record.proof_status })),
+  )
+  const verification = await verifyDocument(transaction, { resolver, trustAnchors: [issuer.issuerId], expectedAudience: "oati:development:transaction", replayCache: new MemoryReplayCache() })
+  assert.equal(verification.verified, true, JSON.stringify(verification.issues))
+  const receipt = await issuer.issueReceipt({ transaction, decision: "allow", outcome: "succeeded", audience: "oati:test:buyer" })
+  assert.equal(validateSchema("receipt", receipt).valid, true)
+  const receiptVerification = await verifyDocument(receipt, { resolver, trustAnchors: [issuer.issuerId], expectedAudience: "oati:test:buyer", replayCache: new MemoryReplayCache() })
+  assert.equal(receiptVerification.verified, true, JSON.stringify(receiptVerification.issues))
   const publicPassport = issuer.publish("passport", passport.id)
   assert.equal(publicPassport.type, "passport")
   assert.equal("private_attributes" in publicPassport, false)
@@ -72,7 +88,8 @@ const cryptoVector = async (path) => JSON.parse(await readFile(new URL(`../../..
 
 test("all published SDK schemas are bundled", () => {
   assert.deepEqual(schemaNames, [
-    "proof", "verificationKey", "issuer", "revocation", "evaluationRequest", "evaluationResult", "publicRecord", "conformanceSuite", "conformanceReport",
+    "proof", "verificationKey", "issuer", "revocation", "evaluationRequest", "evaluationResult", "publicRecord",
+    "serviceDiscovery", "profileDiscovery", "wellKnown", "conformanceSuite", "conformanceReport",
     "passport", "mandate", "envelope", "decision", "receipt", "commerceOffer",
     "commerceMandate", "commerceReceipt", "rwaAsset", "rwaStateClaim", "rwaMandate", "rwaReceipt",
   ])
