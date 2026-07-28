@@ -19,16 +19,16 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with: { version: 10.14.0 }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
           cache-dependency-path: sdk/typescript/pnpm-lock.yaml
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with: { python-version: "3.13" }
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.work
           cache-dependency-path: |
@@ -52,7 +52,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
           go-version-file: go.work
           cache-dependency-path: cli/go.sum
@@ -68,7 +68,7 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with: { ruby-version: "3.3" }
       - run: ruby scripts/validate-openapi.rb
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with: { node-version: 24 }
       - run: npx --yes @redocly/cli@1.34.5 lint api/lookup.openapi.yaml compatibility/platform-lookup.openapi.yaml
 
@@ -78,9 +78,9 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with: { version: 10.14.0 }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 24
           cache: pnpm
@@ -95,11 +95,11 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@v6
         with: { version: 10.14.0 }
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with: { node-version: 24 }
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with: { go-version-file: go.work }
       - run: pnpm install --frozen-lockfile
         working-directory: sdk/typescript
@@ -110,7 +110,7 @@ jobs:
         working-directory: cli
       - run: govulncheck ./...
         working-directory: sdk/go
-      - uses: aquasecurity/trivy-action@0.28.0
+      - uses: aquasecurity/trivy-action@0.36.0
         with:
           scan-type: fs
           scan-ref: .
