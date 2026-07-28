@@ -23,6 +23,18 @@ class SDKTest(unittest.TestCase):
         self.assertEqual(client.lookup_detailed("agent","oati:agent:test").cache,"miss")
         self.assertEqual(client.lookup_detailed("agent","oati:agent:test").cache,"hit")
         self.assertEqual(len(calls),1)
+    def test_lookup_revocation_by_target(self):
+        calls=[]
+        class Response:
+            status=200;headers={}
+            def __enter__(self):return self
+            def __exit__(self,*_):pass
+            def read(self,*_):return b'{"type":"revocation","id":"oati:revocation:test:1","status":"active","issuer":"oati:issuer:root","proof_status":"verified","public_attributes":{"target":"oati:issuer:test","revocation_status":"good"}}'
+        def opener(request,timeout):calls.append(request.full_url);return Response()
+        client=LookupClient(["https://resolver.test/oati/v1"],opener=opener)
+        record=client.lookup_revocation_by_target("oati:issuer:test")
+        self.assertEqual(record["id"],"oati:revocation:test:1")
+        self.assertIn("type=revocation&target=oati%3Aissuer%3Atest",calls[0])
     def test_all_profile_examples_validate(self):
         root=Path(__file__).resolve().parents[2]
         fixtures=(("commerceOffer","commerce/merchant-service-profile.json"),("commerceMandate","commerce/purchase-mandate.json"),("commerceReceipt","commerce/commerce-receipt.json"),("rwaAsset","rwa/asset-profile.json"),("rwaStateClaim","rwa/asset-state-claim.json"),("rwaMandate","rwa/mint-mandate.json"),("rwaReceipt","rwa/rwa-receipt.json"))

@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://schemas.intelliger.ai/oati/v1/profile-discovery.schema.json",
+  "title": "OATI Profile Discovery Document",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["oati_version", "id", "organisation_id", "issuer", "name", "version", "schema_uri", "digest", "status", "issued_at"],
+  "properties": {
+    "oati_version": { "const": "1.0" },
+    "id": { "type": "string", "pattern": "^oati:profile:[A-Za-z0-9._:-]+$" },
+    "organisation_id": { "type": "string", "pattern": "^oati:org:[A-Za-z0-9._:-]+$" },
+    "issuer": { "type": "string", "pattern": "^oati:issuer:[A-Za-z0-9._:-]+$" },
+    "name": { "type": "string", "minLength": 1, "maxLength": 200 },
+    "version": { "type": "string", "minLength": 1, "maxLength": 64 },
+    "schema_uri": { "type": "string", "format": "uri", "pattern": "^https://" },
+    "specification_uri": { "type": "string", "format": "uri", "pattern": "^https://" },
+    "digest": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" },
+    "compatible_with": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true, "maxItems": 64 },
+    "status": { "enum": ["active", "suspended", "revoked"] },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "expires_at": { "type": "string", "format": "date-time" },
+    "proof": { "$ref": "proof.schema.json" }
+  }
+}

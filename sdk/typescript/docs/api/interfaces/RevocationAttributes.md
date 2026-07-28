@@ -28,6 +28,12 @@
 
 ***
 
+### revocation\_status?
+
+> `optional` **revocation\_status?**: `"suspended"` \| `"revoked"` \| `"unknown"` \| `"good"`
+
+***
+
 ### target?
 
 > `optional` **target?**: `string`

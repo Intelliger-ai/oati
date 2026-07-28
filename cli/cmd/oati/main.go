@@ -52,6 +52,8 @@ func run(args []string, stdout, stderr io.Writer) error {
 		return runCanonicalize(args[1:], stdout, stderr)
 	case "lookup":
 		return runLookup(args[1:], stdout, stderr)
+	case "discover":
+		return runDiscover(args[1:], stdout, stderr)
 	case "sign":
 		return runSign(args[1:], stdout, stderr)
 	case "verify":
@@ -71,7 +73,8 @@ func printHelp(w io.Writer) {
 Usage:
   oati validate <passport|mandate|envelope|receipt> <file|->
   oati canonicalize <file|->
-  oati lookup --type <type> --id <identifier> [--api <base-url>]
+  oati lookup --type <type> (--id <record-id>|--target <revocation-target>) [--api <base-url>]
+  oati discover --organisation <oati:org:...> [--api <base-url>]
   oati sign --algorithm <EdDSA|ES256> --key <private.jwk> --verification-method <id> --audience <aud> --nonce <nonce> --expires <duration> <file|->
   oati verify --trust-bundle <bundle.json> --audience <aud> --replay-cache <file> <file|->
   oati evaluate <evaluation-request.json|->
@@ -83,6 +86,7 @@ Commands:
   validate      Check the structure and core semantics of an OATI object
   canonicalize  Emit compact JSON with recursively sorted object keys
   lookup        Query an OATI-compatible public resolver
+  discover      List an organisation's active verified Services and Profiles
   sign          Add an OATI detached JWS proof to a JSON object
   verify        Verify signature, trust, revocation, time, audience, and replay
   evaluate      Deterministically evaluate Mandate authority and proposed consumption
@@ -547,18 +551,25 @@ func runCanonicalize(args []string, stdout, stderr io.Writer) error {
 	return encoder.Encode(value)
 }
 
+var newLookupHTTPClient = func(timeout time.Duration) *http.Client {
+	return &http.Client{Timeout: timeout}
+}
+
 func runLookup(args []string, stdout, stderr io.Writer) error {
 	flags := flag.NewFlagSet("lookup", flag.ContinueOnError)
 	flags.SetOutput(stderr)
 	kind := flags.String("type", "", "record type")
 	id := flags.String("id", "", "OATI identifier")
+	target := flags.String("target", "", "revocation target identifier")
 	api := flags.String("api", "https://api.intelliger.ai/oati/v1", "lookup API base URL")
 	timeout := flags.Duration("timeout", 10*time.Second, "request timeout")
 	if err := flags.Parse(args); err != nil {
 		return err
 	}
-	if strings.TrimSpace(*kind) == "" || strings.TrimSpace(*id) == "" {
-		return errors.New("lookup requires --type and --id")
+	byID := strings.TrimSpace(*id) != "" && strings.TrimSpace(*target) == ""
+	byTarget := *kind == "revocation" && strings.TrimSpace(*target) != "" && strings.TrimSpace(*id) == ""
+	if strings.TrimSpace(*kind) == "" || (!byID && !byTarget) {
+		return errors.New("lookup requires --type and exactly one of --id, or --target with --type revocation")
 	}
 	base, err := url.Parse(strings.TrimRight(*api, "/") + "/lookup")
 	if err != nil {
@@ -566,10 +577,14 @@ func runLookup(args []string, stdout, stderr io.Writer) error {
 	}
 	query := base.Query()
 	query.Set("type", *kind)
-	query.Set("id", *id)
+	if byTarget {
+		query.Set("target", *target)
+	} else {
+		query.Set("id", *id)
+	}
 	base.RawQuery = query.Encode()
 
-	client := &http.Client{Timeout: *timeout}
+	client := newLookupHTTPClient(*timeout)
 	request, err := http.NewRequest(http.MethodGet, base.String(), nil)
 	if err != nil {
 		return err
@@ -591,6 +606,75 @@ func runLookup(args []string, stdout, stderr io.Writer) error {
 	var value any
 	if err := json.Unmarshal(body, &value); err != nil {
 		return fmt.Errorf("lookup returned invalid JSON: %w", err)
+	}
+	if byTarget {
+		object, ok := value.(map[string]any)
+		attributes, attributesOK := object["public_attributes"].(map[string]any)
+		status, statusOK := attributes["revocation_status"].(string)
+		validStatus := statusOK && (status == "good" || status == "suspended" || status == "revoked" || status == "unknown")
+		if !ok || object["type"] != "revocation" || !attributesOK || attributes["target"] != *target || !validStatus {
+			return errors.New("lookup returned an invalid or mismatched revocation record")
+		}
+	}
+	formatted, err := json.MarshalIndent(value, "", "  ")
+	if err != nil {
+		return err
+	}
+	_, err = fmt.Fprintf(stdout, "%s\n", formatted)
+	return err
+}
+
+func runDiscover(args []string, stdout, stderr io.Writer) error {
+	flags := flag.NewFlagSet("discover", flag.ContinueOnError)
+	flags.SetOutput(stderr)
+	organisation := flags.String("organisation", "", "OATI organisation identifier")
+	api := flags.String("api", "https://api.intelliger.ai/oati/v1", "discovery API base URL")
+	timeout := flags.Duration("timeout", 10*time.Second, "request timeout")
+	if err := flags.Parse(args); err != nil {
+		return err
+	}
+	if !strings.HasPrefix(*organisation, "oati:org:") {
+		return errors.New("discover requires --organisation oati:org:...")
+	}
+	endpoint, err := url.Parse(strings.TrimRight(*api, "/") + "/discovery")
+	if err != nil {
+		return fmt.Errorf("invalid API URL: %w", err)
+	}
+	query := endpoint.Query()
+	query.Set("organisation_id", *organisation)
+	endpoint.RawQuery = query.Encode()
+	request, err := http.NewRequest(http.MethodGet, endpoint.String(), nil)
+	if err != nil {
+		return err
+	}
+	request.Header.Set("Accept", "application/json")
+	request.Header.Set("User-Agent", "oati-cli/"+version)
+	response, err := newLookupHTTPClient(*timeout).Do(request)
+	if err != nil {
+		return fmt.Errorf("discovery request failed: %w", err)
+	}
+	defer response.Body.Close()
+	body, err := io.ReadAll(io.LimitReader(response.Body, 2<<20))
+	if err != nil {
+		return fmt.Errorf("read discovery response: %w", err)
+	}
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return fmt.Errorf("discovery returned %s: %s", response.Status, strings.TrimSpace(string(body)))
+	}
+	var value map[string]any
+	if err := json.Unmarshal(body, &value); err != nil {
+		return fmt.Errorf("discovery returned invalid JSON: %w", err)
+	}
+	services, servicesOK := value["services"].([]any)
+	profiles, profilesOK := value["profiles"].([]any)
+	if value["organisation_id"] != *organisation || !servicesOK || !profilesOK {
+		return errors.New("discovery returned an invalid or mismatched response")
+	}
+	for _, candidate := range append(services, profiles...) {
+		item, ok := candidate.(map[string]any)
+		if !ok || item["organisation_id"] != *organisation || item["status"] != "active" || item["proof_status"] != "verified" {
+			return errors.New("discovery returned an untrusted record")
+		}
 	}
 	formatted, err := json.MarshalIndent(value, "", "  ")
 	if err != nil {

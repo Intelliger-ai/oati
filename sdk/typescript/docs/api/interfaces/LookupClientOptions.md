@@ -34,7 +34,7 @@ Use resolverUrls.
 
 ##### input
 
-`URL` \| `RequestInfo`
+`RequestInfo` \| `URL`
 
 ##### init?
 

@@ -1,7 +1,7 @@
 import { OatiLookupError } from "./errors.js"
 
 export const OATI_RECORD_TYPES = [
-  "organisation", "agent", "passport", "mandate", "receipt", "issuer", "key", "revocation",
+  "organisation", "agent", "passport", "mandate", "receipt", "issuer", "key", "revocation", "service", "profile",
 ] as const
 export type OatiRecordType = (typeof OATI_RECORD_TYPES)[number]
 export type ProofStatus = "verified" | "invalid" | "unavailable" | "unknown"
@@ -27,15 +27,42 @@ export interface ReceiptRecord extends PublicOatiRecord<"receipt"> {}
 export interface IssuerAttributes extends Record<string, string> { parent?: string; revoked_at?: string }
 export interface IssuerRecord extends PublicOatiRecord<"issuer", IssuerAttributes> { status: "active" | "suspended" | "revoked" | "unknown" }
 export interface KeyAttributes extends Record<string, string> {
-  controller: string; issuer: string; algorithm: "EdDSA" | "ES256"; public_key_jwk: string
-  valid_from: string; valid_until?: string; revoked_at?: string
+  controller: string; algorithm: "EdDSA" | "ES256"; public_key_jwk: string; revoked_at?: string
+  /** @deprecated Key issuer is canonical at `record.issuer`. */ issuer?: string
+  /** @deprecated Key activation is canonical at `record.issued_at`. */ valid_from?: string
+  /** @deprecated Key expiry is canonical at `record.expires_at`. */ valid_until?: string
 }
-export interface KeyRecord extends PublicOatiRecord<"key", KeyAttributes> { status: "active" | "retired" | "revoked" | "unknown" }
-export interface RevocationAttributes extends Record<string, string> { target?: string; effective_at?: string; reason?: string }
-export interface RevocationRecord extends PublicOatiRecord<"revocation", RevocationAttributes> { status: "good" | "suspended" | "revoked" | "unknown" }
+export interface KeyRecord extends PublicOatiRecord<"key", KeyAttributes> {
+  status: "active" | "retired" | "revoked" | "unknown"; issued_at: string; expires_at: string
+}
+export interface RevocationAttributes extends Record<string, string> { target?: string; revocation_status?: "good" | "suspended" | "revoked" | "unknown"; effective_at?: string; reason?: string }
+export interface RevocationRecord extends PublicOatiRecord<"revocation", RevocationAttributes> { status: "active" | "suspended" | "revoked" | "unknown" }
+export interface ServiceEndpoint {
+  id: string; url: string; protocol: "http" | "grpc" | "mcp" | "a2a"; audience: string
+  actions?: string[]; accepted_profiles?: string[]; priority?: number; regions?: string[]
+}
+export interface ServiceDiscoveryDocument {
+  oati_version: "1.0"; id: string; organisation_id: string; issuer: string; display_name: string
+  description?: string; endpoints: ServiceEndpoint[]; accepted_profiles: string[]
+  status: "active" | "suspended" | "revoked"; issued_at: string; expires_at?: string; proof?: unknown
+}
+export interface ProfileDiscoveryDocument {
+  oati_version: "1.0"; id: string; organisation_id: string; issuer: string; name: string; version: string
+  schema_uri: string; specification_uri?: string; digest: string; compatible_with?: string[]
+  status: "active" | "suspended" | "revoked"; issued_at: string; expires_at?: string; proof?: unknown
+}
+export interface DiscoveryAttributes extends Record<string, string> { document: string }
+export interface ServiceRecord extends PublicOatiRecord<"service", DiscoveryAttributes> {}
+export interface ProfileRecord extends PublicOatiRecord<"profile", DiscoveryAttributes> {}
+export interface OrganisationDiscovery {
+  organisation_id: string; services: Array<{ record: ServiceRecord; document: ServiceDiscoveryDocument }>
+  profiles: Array<{ record: ProfileRecord; document: ProfileDiscoveryDocument }>
+}
+export interface FederationDocument { oati_version: "1.0"; organisations: string[]; resolvers: string[]; expires_at?: string }
 export interface OatiRecordByType {
   organisation: OrganisationRecord; agent: AgentRecord; passport: PassportRecord; mandate: MandateRecord
   receipt: ReceiptRecord; issuer: IssuerRecord; key: KeyRecord; revocation: RevocationRecord
+  service: ServiceRecord; profile: ProfileRecord
 }
 
 export interface RateLimitInfo { limit?: number; remaining?: number; resetAt?: string; retryAfter?: number }
@@ -73,6 +100,7 @@ export interface LookupOptions {
 }
 
 interface CacheEntry { record?: PublicOatiRecord; notFound?: true; expiresAt: number; etag?: string; resolverUrl: string; rateLimit: RateLimitInfo }
+type LookupSelector = "id" | "target"
 
 /** Production client for OATI-compatible public resolvers. */
 export class OatiLookupClient {
@@ -113,9 +141,67 @@ export class OatiLookupClient {
 
   /** Lookup with resolver, cache, and rate-limit metadata. */
   async lookupDetailed<T extends OatiRecordType>(type: T, id: string, options: LookupOptions = {}): Promise<LookupResponse<T>> {
-    validateInput(type, id)
+    return this.lookupSelectedDetailed(type, "id", id, options)
+  }
+
+  /** Resolve the authoritative published revocation record for a target identifier. */
+  async lookupRevocationByTarget(target: string, options: LookupOptions = {}): Promise<RevocationRecord> {
+    return (await this.lookupRevocationByTargetDetailed(target, options)).record
+  }
+
+  /** Target-based revocation lookup with resolver, cache, and rate-limit metadata. */
+  async lookupRevocationByTargetDetailed(target: string, options: LookupOptions = {}): Promise<LookupResponse<"revocation">> {
+    return this.lookupSelectedDetailed("revocation", "target", target, options)
+  }
+
+  /** Discover all active, verified services and profiles published by an organisation. */
+  async discoverOrganisation(organisationId: string, options: LookupOptions = {}): Promise<OrganisationDiscovery> {
+    if (!organisationId.startsWith("oati:org:")) throw new OatiLookupError("LOOKUP_BAD_REQUEST", "A valid OATI organisation id is required")
+    const payload = await this.fetchDiscovery(`${this.baseUrl}/discovery?organisation_id=${encodeURIComponent(organisationId)}`, options)
+    if (!isObject(payload) || payload.organisation_id !== organisationId || !Array.isArray(payload.services) || !Array.isArray(payload.profiles)) {
+      throw new OatiLookupError("LOOKUP_INVALID_RESPONSE", "Resolver returned an invalid discovery response", { details: payload })
+    }
+    return {
+      organisation_id: organisationId,
+      services: payload.services.map((value) => decodeDiscoveryRecord(value, "service") as unknown as { record: ServiceRecord; document: ServiceDiscoveryDocument }),
+      profiles: payload.profiles.map((value) => decodeDiscoveryRecord(value, "profile") as unknown as { record: ProfileRecord; document: ProfileDiscoveryDocument }),
+    }
+  }
+
+  /** Resolve a domain's `/.well-known/oati`, then use its advertised resolver. */
+  async discoverFederated(domain: string, organisationId: string, options: LookupOptions = {}): Promise<OrganisationDiscovery> {
+    const origin = federationOrigin(domain)
+    const document = await this.fetchDiscovery(`${origin}/.well-known/oati`, options)
+    if (!isFederationDocument(document) || !document.organisations.includes(organisationId)) {
+      throw new OatiLookupError("LOOKUP_INVALID_RESPONSE", "Domain returned an invalid or unrelated OATI federation document", { details: document })
+    }
+    if (document.expires_at && Date.parse(document.expires_at) <= Date.now()) {
+      throw new OatiLookupError("LOOKUP_INVALID_RESPONSE", "OATI federation document is expired", { details: document })
+    }
+    return new OatiLookupClient({ resolverUrls: document.resolvers, fetch: this.fetcher, timeoutMs: options.timeoutMs ?? this.timeoutMs, headers: this.headers, retry: this.retries, cache: this.cacheOptions }).discoverOrganisation(organisationId, options)
+  }
+
+  private async fetchDiscovery(url: string, options: LookupOptions): Promise<unknown> {
+    const controller = new AbortController(); const abort = () => controller.abort(options.signal?.reason)
+    options.signal?.addEventListener("abort", abort, { once: true })
+    const timeoutMs = options.timeoutMs ?? this.timeoutMs; const timeout = setTimeout(() => controller.abort(), timeoutMs)
+    try {
+      const response = await this.fetcher(url, { headers: { Accept: "application/json", ...this.headers }, signal: controller.signal })
+      const payload = await readPayload(response)
+      if (!response.ok) throw responseError(response, payload, rateLimitInfo(response))
+      return payload
+    } catch (error) {
+      if (error instanceof OatiLookupError) throw error
+      if (options.signal?.aborted) throw cancelled(options.signal.reason)
+      if (controller.signal.aborted) throw new OatiLookupError("LOOKUP_TIMEOUT", `Discovery exceeded ${timeoutMs}ms`, { cause: error })
+      throw new OatiLookupError("LOOKUP_UNAVAILABLE", "The OATI discovery resolver is unavailable", { cause: error })
+    } finally { clearTimeout(timeout); options.signal?.removeEventListener("abort", abort) }
+  }
+
+  private async lookupSelectedDetailed<T extends OatiRecordType>(type: T, selector: LookupSelector, value: string, options: LookupOptions): Promise<LookupResponse<T>> {
+    validateInput(type, value)
     if (options.signal?.aborted) throw cancelled(options.signal.reason)
-    const cacheKey = `${type}\u0000${id}`
+    const cacheKey = `${type}\u0000${selector}\u0000${value}`
     const cached = this.cacheEntries.get(cacheKey)
     if (options.cache !== "reload" && options.cache !== "no-store" && cached && cached.expiresAt > Date.now()) {
       touch(this.cacheEntries, cacheKey, cached)
@@ -127,7 +213,7 @@ export class OatiLookupClient {
     for (const resolverUrl of this.resolverUrls) {
       try {
         const reusable = options.cache !== "no-store" && cached?.resolverUrl === resolverUrl ? cached : undefined
-        const response = await this.requestWithRetry<T>(resolverUrl, type, id, options, reusable)
+        const response = await this.requestWithRetry<T>(resolverUrl, type, selector, value, options, reusable)
         if (options.cache !== "no-store" && response.cacheable) this.store(cacheKey, {
           record: response.record, expiresAt: response.expiresAt, ...(response.etag ? { etag: response.etag } : {}),
           resolverUrl, rateLimit: response.rateLimit,
@@ -166,15 +252,20 @@ export class OatiLookupClient {
 
   clearCache(type?: OatiRecordType, id?: string): void {
     if (type === undefined) this.cacheEntries.clear()
-    else if (id !== undefined) this.cacheEntries.delete(`${type}\u0000${id}`)
+    else if (id !== undefined) this.cacheEntries.delete(`${type}\u0000id\u0000${id}`)
     else for (const key of this.cacheEntries.keys()) if (key.startsWith(`${type}\u0000`)) this.cacheEntries.delete(key)
   }
 
-  private async requestWithRetry<T extends OatiRecordType>(resolverUrl: string, type: T, id: string, options: LookupOptions, cached?: CacheEntry) {
+  clearRevocationTargetCache(target?: string): void {
+    if (target !== undefined) this.cacheEntries.delete(`revocation\u0000target\u0000${target}`)
+    else for (const key of this.cacheEntries.keys()) if (key.startsWith("revocation\u0000target\u0000")) this.cacheEntries.delete(key)
+  }
+
+  private async requestWithRetry<T extends OatiRecordType>(resolverUrl: string, type: T, selector: LookupSelector, value: string, options: LookupOptions, cached?: CacheEntry) {
     let lastError: OatiLookupError | undefined
     for (let attempt = 0; attempt <= this.retries.maxRetries; attempt++) {
       if (attempt > 0) await delay(retryDelay(lastError, attempt, this.retries), options.signal)
-      try { return await this.requestOnce(resolverUrl, type, id, options, cached) }
+      try { return await this.requestOnce(resolverUrl, type, selector, value, options, cached) }
       catch (error) {
         if (!(error instanceof OatiLookupError) || !retryable(error) || attempt === this.retries.maxRetries) throw error
         lastError = error
@@ -183,9 +274,9 @@ export class OatiLookupClient {
     throw lastError
   }
 
-  private async requestOnce<T extends OatiRecordType>(resolverUrl: string, type: T, id: string, options: LookupOptions, cached?: CacheEntry) {
+  private async requestOnce<T extends OatiRecordType>(resolverUrl: string, type: T, selector: LookupSelector, value: string, options: LookupOptions, cached?: CacheEntry) {
     const url = new URL(`${resolverUrl}/lookup`)
-    url.searchParams.set("type", type); url.searchParams.set("id", id)
+    url.searchParams.set("type", type); url.searchParams.set(selector, value)
     const controller = new AbortController()
     const abort = () => controller.abort(options.signal?.reason)
     options.signal?.addEventListener("abort", abort, { once: true })
@@ -202,10 +293,16 @@ export class OatiLookupClient {
       }
       const payload = await readPayload(response)
       if (!response.ok) throw responseError(response, payload, rateLimit)
-      if (!isPublicRecord(payload) || payload.type !== type || payload.id !== id) throw new OatiLookupError(
+      if (!isPublicRecord(payload)) throw new OatiLookupError(
         "LOOKUP_INVALID_RESPONSE", "Resolver returned an invalid or mismatched public record", { status: response.status, details: payload, rateLimit },
       )
-      return { record: payload as OatiRecordByType[T], expiresAt: expiry(response, this.cacheOptions, false), etag: response.headers.get("ETag") ?? undefined, rateLimit, revalidated: false, cacheable: isCacheable(response) }
+      const selectorMatches = selector === "id" ? payload.id === value : payload.type === "revocation"
+        && payload.public_attributes.target === value && validRevocationStatus(payload.public_attributes.revocation_status)
+      if (!selectorMatches || payload.type !== type) throw new OatiLookupError(
+        "LOOKUP_INVALID_RESPONSE", "Resolver returned an invalid or mismatched public record", { status: response.status, details: payload, rateLimit },
+      )
+      const record = normalizePublicRecord(payload as PublicOatiRecord) as OatiRecordByType[T]
+      return { record, expiresAt: expiry(response, this.cacheOptions, false), etag: response.headers.get("ETag") ?? undefined, rateLimit, revalidated: false, cacheable: isCacheable(response) }
     } catch (error) {
       if (error instanceof OatiLookupError) throw error
       if (options.signal?.aborted) throw cancelled(options.signal.reason)
@@ -281,10 +378,45 @@ function isPublicRecord(value: unknown): value is PublicOatiRecord {
     && typeof item.issuer === "string" && ["verified", "invalid", "unavailable", "unknown"].includes(String(item.proof_status))
     && typeof item.public_attributes === "object" && item.public_attributes !== null && !Array.isArray(item.public_attributes)
     && Object.values(item.public_attributes as Record<string, unknown>).every((entry) => typeof entry === "string")
-    && validTypedAttributes(item.type as OatiRecordType, item.public_attributes as Record<string, string>)
+    && validTypedRecord(item)
 }
-function validTypedAttributes(type: OatiRecordType, attributes: Record<string, string>): boolean {
-  if (type !== "key") return true
-  return ["controller", "issuer", "algorithm", "public_key_jwk", "valid_from"].every((field) => typeof attributes[field] === "string" && attributes[field] !== "")
+function validTypedRecord(item: Record<string, unknown>): boolean {
+  if (item.type === "service" || item.type === "profile") {
+    const attributes = item.public_attributes as Record<string, string>
+    if (!nonEmpty(attributes.document)) return false
+    try { const document = JSON.parse(attributes.document) as Record<string, unknown>; return document.id === item.id && document.organisation_id === item.organisation_id }
+    catch { return false }
+  }
+  if (item.type !== "key") return true
+  const attributes = item.public_attributes as Record<string, string>
+  return ["controller", "algorithm", "public_key_jwk"].every((field) => typeof attributes[field] === "string" && attributes[field] !== "")
     && ["EdDSA", "ES256"].includes(attributes.algorithm!)
+    && nonEmpty(item.issued_at ?? attributes.valid_from) && nonEmpty(item.expires_at ?? attributes.valid_until)
+}
+function normalizePublicRecord(record: PublicOatiRecord): PublicOatiRecord {
+  if (record.type !== "key") return record
+  const attributes = record.public_attributes
+  return {
+    ...record,
+    issued_at: record.issued_at ?? attributes.valid_from!,
+    expires_at: record.expires_at ?? attributes.valid_until!,
+  }
+}
+function nonEmpty(value: unknown): value is string { return typeof value === "string" && value !== "" }
+function validRevocationStatus(value: unknown): boolean { return typeof value === "string" && ["good", "suspended", "revoked", "unknown"].includes(value) }
+function isObject(value: unknown): value is Record<string, any> { return typeof value === "object" && value !== null && !Array.isArray(value) }
+function decodeDiscoveryRecord(value: unknown, type: "service" | "profile") {
+  if (!isPublicRecord(value) || value.type !== type || value.status !== "active" || value.proof_status !== "verified") throw new OatiLookupError("LOOKUP_INVALID_RESPONSE", "Discovery contains an untrusted record", { details: value })
+  const document = JSON.parse(value.public_attributes.document!) as Record<string, unknown>
+  if (!isObject(document) || document.id !== value.id || document.organisation_id !== value.organisation_id || document.issuer !== value.issuer || document.status !== "active") throw new OatiLookupError("LOOKUP_INVALID_RESPONSE", "Discovery document does not match its public record", { details: value })
+  return { record: value, document }
+}
+function federationOrigin(domain: string): string {
+  const candidate = domain.includes("://") ? domain : `https://${domain}`; const url = new URL(candidate)
+  if (url.protocol !== "https:" || url.username || url.password || url.pathname !== "/" || url.search || url.hash) throw new OatiLookupError("LOOKUP_BAD_REQUEST", "Federation requires a bare HTTPS domain")
+  return url.origin
+}
+function isFederationDocument(value: unknown): value is FederationDocument {
+  return isObject(value) && value.oati_version === "1.0" && Array.isArray(value.organisations) && value.organisations.every((item) => typeof item === "string" && item.startsWith("oati:org:"))
+    && Array.isArray(value.resolvers) && value.resolvers.length > 0 && value.resolvers.every((item) => { try { return new URL(item).protocol === "https:" } catch { return false } })
 }

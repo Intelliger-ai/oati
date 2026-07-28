@@ -16,6 +16,8 @@
 - [`IssuerRecord`](IssuerRecord.md)
 - [`KeyRecord`](KeyRecord.md)
 - [`RevocationRecord`](RevocationRecord.md)
+- [`ServiceRecord`](ServiceRecord.md)
+- [`ProfileRecord`](ProfileRecord.md)
 - [`RegistryProjectionSource`](RegistryProjectionSource.md)
 
 ## Type Parameters

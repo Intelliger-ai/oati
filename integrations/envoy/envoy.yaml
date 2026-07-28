@@ -1,6 +1,6 @@
 static_resources:
   listeners:
-    - name: public_http
+    - name: protected_http
       address:
         socket_address: { address: 0.0.0.0, port_value: 8080 }
       filter_chains:
@@ -9,6 +9,24 @@ static_resources:
               typed_config:
                 "@type": type.googleapis.com/envoy.extensions.filters.network.http_connection_manager.v3.HttpConnectionManager
                 stat_prefix: oati_gateway
+                max_request_headers_kb: 96
+                request_timeout: 15s
+                stream_idle_timeout: 30s
+                access_log:
+                  - name: envoy.access_loggers.stdout
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.access_loggers.stream.v3.StdoutAccessLog
+                      log_format:
+                        json_format:
+                          timestamp: "%START_TIME%"
+                          method: "%REQ(:METHOD)%"
+                          route_name: "%ROUTE_NAME%"
+                          protocol: "%PROTOCOL%"
+                          response_code: "%RESPONSE_CODE%"
+                          response_flags: "%RESPONSE_FLAGS%"
+                          duration_ms: "%DURATION%"
+                          upstream_cluster: "%UPSTREAM_CLUSTER%"
+                          request_id: "%REQ(X-REQUEST-ID)%"
                 route_config:
                   name: protected_routes
                   virtual_hosts:
@@ -16,31 +34,76 @@ static_resources:
                       domains: ["*"]
                       routes:
                         - match: { prefix: "/" }
-                          route: { cluster: application }
+                          route: { cluster: application, timeout: 15s }
                 http_filters:
+                  - name: envoy.filters.http.lua.sanitize_untrusted_decision_headers
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+                      default_source_code:
+                        inline_string: |
+                          function envoy_on_request(handle)
+                            local headers = handle:headers()
+                            headers:remove("x-oati-decision")
+                            headers:remove("x-oati-reason-codes")
+                            headers:remove("x-oati-receipt")
+                            headers:remove("x-oati-receipt-id")
+                            headers:remove("x-oati-transaction-id")
+                            headers:remove("x-oati-correlation-id")
+                          end
                   - name: envoy.filters.http.ext_authz
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
-                      transport_api_version: V3
                       failure_mode_allow: false
                       status_on_error: { code: ServiceUnavailable }
-                      grpc_service:
-                        envoy_grpc: { cluster_name: oati_authorizer }
-                        timeout: 2s
-                      authorization_request:
-                        allowed_headers:
-                          patterns:
-                            - { exact: authorization, ignore_case: true }
-                            - { exact: dpop, ignore_case: true }
-                            - { exact: oati-envelope, ignore_case: true }
-                            - { exact: oati-mandate, ignore_case: true }
-                            - { exact: oati-parent-mandate, ignore_case: true }
-                            - { exact: oati-transaction-id, ignore_case: true }
-                            - { exact: oati-correlation-id, ignore_case: true }
-                      authorization_response:
-                        allowed_upstream_headers:
-                          patterns:
-                            - { prefix: x-oati- }
+                      validate_mutations: true
+                      enable_dynamic_metadata_ingestion: false
+                      max_denied_response_body_bytes: 16384
+                      enforce_response_header_limits: true
+                      with_request_body:
+                        max_request_bytes: 1048576
+                        allow_partial_message: false
+                      allowed_headers:
+                        patterns:
+                          - { exact: dpop, ignore_case: true }
+                          - { exact: oati-envelope, ignore_case: true }
+                          - { exact: oati-mandate, ignore_case: true }
+                          - { exact: oati-parent-mandate, ignore_case: true }
+                          - { exact: oati-transaction-id, ignore_case: true }
+                          - { exact: oati-correlation-id, ignore_case: true }
+                      disallowed_headers:
+                        patterns:
+                          - { exact: authorization, ignore_case: true }
+                      http_service:
+                        server_uri:
+                          uri: https://oati-authz:9001
+                          cluster: oati_authorizer
+                          timeout: 2s
+                        path_prefix: /authorize
+                        authorization_response:
+                          allowed_upstream_headers:
+                            patterns:
+                              - { prefix: x-oati-, ignore_case: true }
+                          allowed_client_headers:
+                            patterns:
+                              - { exact: content-type, ignore_case: true }
+                              - { prefix: x-oati-, ignore_case: true }
+                          allowed_client_headers_on_success:
+                            patterns:
+                              - { prefix: x-oati-, ignore_case: true }
+                  - name: envoy.filters.http.lua.remove_verified_authority
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+                      default_source_code:
+                        inline_string: |
+                          function envoy_on_request(handle)
+                            local headers = handle:headers()
+                            headers:remove("oati-envelope")
+                            headers:remove("oati-mandate")
+                            headers:remove("oati-parent-mandate")
+                            headers:remove("oati-transaction-id")
+                            headers:remove("oati-correlation-id")
+                            headers:remove("dpop")
+                          end
                   - name: envoy.filters.http.router
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.router.v3.Router
@@ -54,10 +117,31 @@ static_resources:
     - name: oati_authorizer
       connect_timeout: 1s
       type: STRICT_DNS
-      typed_extension_protocol_options:
-        envoy.extensions.upstreams.http.v3.HttpProtocolOptions:
-          "@type": type.googleapis.com/envoy.extensions.upstreams.http.v3.HttpProtocolOptions
-          explicit_http_config: { http2_protocol_options: {} }
       load_assignment:
         cluster_name: oati_authorizer
         endpoints: [{ lb_endpoints: [{ endpoint: { address: { socket_address: { address: oati-authz, port_value: 9001 } } } }] }]
+      transport_socket:
+        name: envoy.transport_sockets.tls
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.transport_sockets.tls.v3.UpstreamTlsContext
+          sni: oati-authz
+          common_tls_context:
+            tls_certificates:
+              - certificate_chain: { filename: /etc/oati/gateway-tls/envoy-client.crt }
+                private_key: { filename: /etc/oati/gateway-tls/envoy-client.key }
+            validation_context:
+              trusted_ca: { filename: /etc/oati/gateway-tls/ca.crt }
+              match_typed_subject_alt_names:
+                - san_type: DNS
+                  matcher: { exact: oati-authz }
+
+overload_manager:
+  resource_monitors:
+    - name: envoy.resource_monitors.global_downstream_max_connections
+      typed_config:
+        "@type": type.googleapis.com/envoy.extensions.resource_monitors.downstream_connections.v3.DownstreamConnectionsConfig
+        max_active_downstream_connections: 10000
+
+admin:
+  address:
+    socket_address: { address: 0.0.0.0, port_value: 9901 }

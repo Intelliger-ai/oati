@@ -9,3 +9,5 @@ go run ./cmd/conformance --suite ../../conformance/suite-v0.1.json --implementat
 ```
 
 The conformance command reads the language-neutral suite directly; it does not maintain Go-specific vectors.
+
+Use `ResolverClient.LookupRevocationByTarget` when resolving current revocation state from a governed target ID rather than a revocation-record ID.

@@ -28,9 +28,13 @@
 
 ***
 
-### issuer
+### ~~issuer?~~
 
-> **issuer**: `string`
+> `optional` **issuer?**: `string`
+
+#### Deprecated
+
+Key issuer is canonical at `record.issuer`.
 
 ***
 
@@ -46,12 +50,20 @@
 
 ***
 
-### valid\_from
+### ~~valid\_from?~~
 
-> **valid\_from**: `string`
+> `optional` **valid\_from?**: `string`
+
+#### Deprecated
+
+Key activation is canonical at `record.issued_at`.
 
 ***
 
-### valid\_until?
+### ~~valid\_until?~~
 
 > `optional` **valid\_until?**: `string`
+
+#### Deprecated
+
+Key expiry is canonical at `record.expires_at`.

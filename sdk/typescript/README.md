@@ -85,7 +85,7 @@ const lookup = new OatiLookupClient({
 })
 
 try {
-  // The type argument selects AgentRecord here. All eight record types are discriminated.
+  // The type argument selects AgentRecord here. All ten record types are discriminated.
   const agent = await lookup.lookup("agent", "oati:agent:intelliger:commerce-demo", { signal })
   console.log(agent.proof_status, agent.public_attributes)
 } catch (error) {
@@ -96,6 +96,8 @@ try {
 ```
 
 `lookupDetailed()` additionally returns the resolver URL, cache disposition, and parsed rate-limit metadata. `lookupState()` provides a non-throwing union for `found`, `not_found`, `unavailable`, `invalid_proof`, and `unknown` states. Use `cache: "reload"` to revalidate with an ETag, `cache: "no-store"` to bypass storage, or `clearCache()` after an administrative state change.
+
+Use `lookupRevocationByTarget(target)` when the caller has the issuer, key, Passport, Mandate, or other governed target ID rather than the revocation record ID. It calls the resolver's explicit `type=revocation&target=...` contract and rejects a response whose public target does not match. `LookupTrustResolver.resolveRevocation()` uses this path automatically.
 
 Successful responses follow `Cache-Control`, `Expires`, and `ETag`; otherwise the configured TTL applies. HTTP 404 responses use the shorter negative TTL. Retries are bounded, use exponential backoff, honor `Retry-After`, and only apply to timeouts, rate limits, transport failures, and unavailable responses. Multiple `resolverUrls` fail over in order. Caller cancellation is distinct from timeout.
 
@@ -108,6 +110,8 @@ import { LookupTrustResolver } from "@intelliger/oati/crypto"
 
 const resolver = new LookupTrustResolver(lookup)
 ```
+
+For key lookup records, `issuer`, `issued_at`, and `expires_at` are canonical top-level fields. `public_attributes` contains key-specific material such as `controller`, `algorithm`, and `public_key_jwk`. The client normalizes the former legacy `issuer`, `valid_from`, and `valid_until` attributes during migration, but new resolvers and integrations should emit the top-level contract.
 
 To test the SDK against the platform service, start `oati-platform/services/lookup-api` and run `pnpm test:lookup-integration`. Override `OATI_LOOKUP_URL`, `OATI_LOOKUP_TYPE`, and `OATI_LOOKUP_ID` for a deployed resolver.
 

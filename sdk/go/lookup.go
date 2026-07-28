@@ -12,7 +12,13 @@ import (
 	"time"
 )
 
-var RecordTypes = []string{"organisation", "agent", "passport", "mandate", "receipt", "issuer", "key", "revocation"}
+var RecordTypes = []string{"organisation", "agent", "passport", "mandate", "receipt", "issuer", "key", "revocation", "service", "profile"}
+
+type OrganisationDiscovery struct {
+	OrganisationID string         `json:"organisation_id"`
+	Services       []PublicRecord `json:"services"`
+	Profiles       []PublicRecord `json:"profiles"`
+}
 
 type LookupError struct {
 	Code       string
@@ -69,10 +75,59 @@ func (c *ResolverClient) Lookup(ctx context.Context, kind, id string) (PublicRec
 	return result.Record, err
 }
 func (c *ResolverClient) LookupDetailed(ctx context.Context, kind, id string, reload bool) (LookupResult, error) {
-	if !containsString(RecordTypes, kind) || id == "" {
-		return LookupResult{}, fmt.Errorf("valid record type and id required")
+	return c.lookupSelectedDetailed(ctx, kind, "id", id, reload)
+}
+func (c *ResolverClient) LookupRevocationByTarget(ctx context.Context, target string) (PublicRecord, error) {
+	result, err := c.LookupRevocationByTargetDetailed(ctx, target, false)
+	return result.Record, err
+}
+func (c *ResolverClient) LookupRevocationByTargetDetailed(ctx context.Context, target string, reload bool) (LookupResult, error) {
+	return c.lookupSelectedDetailed(ctx, "revocation", "target", target, reload)
+}
+func (c *ResolverClient) DiscoverOrganisation(ctx context.Context, organisationID string) (OrganisationDiscovery, error) {
+	if !strings.HasPrefix(organisationID, "oati:org:") {
+		return OrganisationDiscovery{}, fmt.Errorf("valid organisation id required")
 	}
-	key := kind + "\x00" + id
+	var last error
+	for _, resolver := range c.ResolverURLs {
+		endpoint := strings.TrimSuffix(resolver, "/") + "/discovery?organisation_id=" + url.QueryEscape(organisationID)
+		request, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
+		if err != nil {
+			return OrganisationDiscovery{}, err
+		}
+		request.Header.Set("Accept", "application/json")
+		response, err := c.http().Do(request)
+		if err != nil {
+			last = &LookupError{Code: "LOOKUP_UNAVAILABLE", Err: err}
+			continue
+		}
+		var result OrganisationDiscovery
+		decodeErr := json.NewDecoder(response.Body).Decode(&result)
+		response.Body.Close()
+		if response.StatusCode == http.StatusNotFound {
+			return OrganisationDiscovery{}, &LookupError{Code: "LOOKUP_NOT_FOUND", Status: 404}
+		}
+		if response.StatusCode < 200 || response.StatusCode >= 300 {
+			last = &LookupError{Code: "LOOKUP_UNAVAILABLE", Status: response.StatusCode}
+			continue
+		}
+		if decodeErr != nil || result.OrganisationID != organisationID {
+			return OrganisationDiscovery{}, &LookupError{Code: "LOOKUP_INVALID_RESPONSE", Err: decodeErr}
+		}
+		for _, item := range append(append([]PublicRecord{}, result.Services...), result.Profiles...) {
+			if item.OrganisationID != organisationID || item.Status != "active" || item.ProofStatus != "verified" {
+				return OrganisationDiscovery{}, &LookupError{Code: "LOOKUP_INVALID_RESPONSE"}
+			}
+		}
+		return result, nil
+	}
+	return OrganisationDiscovery{}, last
+}
+func (c *ResolverClient) lookupSelectedDetailed(ctx context.Context, kind, selector, value string, reload bool) (LookupResult, error) {
+	if !containsString(RecordTypes, kind) || value == "" {
+		return LookupResult{}, fmt.Errorf("valid record type and selector value required")
+	}
+	key := kind + "\x00" + selector + "\x00" + value
 	c.mu.Lock()
 	cached, ok := c.cache[key]
 	c.mu.Unlock()
@@ -84,7 +139,7 @@ func (c *ResolverClient) LookupDetailed(ctx context.Context, kind, id string, re
 	}
 	var last error
 	for _, resolver := range c.ResolverURLs {
-		result, etag, rate, revalidated, err := c.retry(ctx, resolver, kind, id, cached)
+		result, etag, rate, revalidated, err := c.retry(ctx, resolver, kind, selector, value, cached)
 		if err == nil {
 			c.store(key, cacheEntry{record: &result, resolver: resolver, etag: etag, expires: time.Now().Add(c.ttl())})
 			cacheState := "miss"
@@ -123,7 +178,7 @@ func (c *ResolverClient) ClearCache() {
 	defer c.mu.Unlock()
 	c.cache = map[string]cacheEntry{}
 }
-func (c *ResolverClient) retry(ctx context.Context, resolver, kind, id string, cached cacheEntry) (PublicRecord, string, RateLimit, bool, error) {
+func (c *ResolverClient) retry(ctx context.Context, resolver, kind, selector, value string, cached cacheEntry) (PublicRecord, string, RateLimit, bool, error) {
 	var last error
 	for attempt := 0; attempt <= c.MaxRetries; attempt++ {
 		if attempt > 0 {
@@ -137,7 +192,7 @@ func (c *ResolverClient) retry(ctx context.Context, resolver, kind, id string, c
 			case <-time.After(delay):
 			}
 		}
-		record, etag, rate, revalidated, err := c.request(ctx, resolver, kind, id, cached)
+		record, etag, rate, revalidated, err := c.request(ctx, resolver, kind, selector, value, cached)
 		if err == nil {
 			return record, etag, rate, revalidated, nil
 		}
@@ -149,8 +204,8 @@ func (c *ResolverClient) retry(ctx context.Context, resolver, kind, id string, c
 	}
 	return PublicRecord{}, "", RateLimit{}, false, last
 }
-func (c *ResolverClient) request(ctx context.Context, resolver, kind, id string, cached cacheEntry) (PublicRecord, string, RateLimit, bool, error) {
-	endpoint := strings.TrimSuffix(resolver, "/") + "/lookup?type=" + url.QueryEscape(kind) + "&id=" + url.QueryEscape(id)
+func (c *ResolverClient) request(ctx context.Context, resolver, kind, selector, value string, cached cacheEntry) (PublicRecord, string, RateLimit, bool, error) {
+	endpoint := strings.TrimSuffix(resolver, "/") + "/lookup?type=" + url.QueryEscape(kind) + "&" + selector + "=" + url.QueryEscape(value)
 	request, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
 		return PublicRecord{}, "", RateLimit{}, false, err
@@ -185,7 +240,12 @@ func (c *ResolverClient) request(ctx context.Context, resolver, kind, id string,
 	if err := json.NewDecoder(response.Body).Decode(&record); err != nil {
 		return PublicRecord{}, "", rate, false, &LookupError{Code: "LOOKUP_INVALID_RESPONSE", Err: err}
 	}
-	if record.Type != kind || record.ID != id {
+	selectorMatches := record.ID == value
+	if selector == "target" {
+		status := record.PublicAttributes["revocation_status"]
+		selectorMatches = record.Type == "revocation" && record.PublicAttributes["target"] == value && containsString([]string{"good", "suspended", "revoked", "unknown"}, status)
+	}
+	if record.Type != kind || !selectorMatches {
 		return PublicRecord{}, "", rate, false, &LookupError{Code: "LOOKUP_INVALID_RESPONSE"}
 	}
 	return record, response.Header.Get("ETag"), rate, false, nil

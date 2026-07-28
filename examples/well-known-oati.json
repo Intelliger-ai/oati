@@ -1,0 +1,6 @@
+{
+  "oati_version": "1.0",
+  "organisations": ["oati:org:example"],
+  "resolvers": ["https://trust.example.com/oati/v1"],
+  "expires_at": "2027-01-01T00:00:00Z"
+}

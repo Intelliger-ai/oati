@@ -560,7 +560,9 @@ export const schemas = {
           "receipt",
           "issuer",
           "key",
-          "revocation"
+          "revocation",
+          "service",
+          "profile"
         ]
       },
       "id": {
@@ -604,7 +606,61 @@ export const schemas = {
           "type": "string"
         }
       }
-    }
+    },
+    "allOf": [
+      {
+        "if": {
+          "properties": {
+            "type": {
+              "const": "key"
+            }
+          },
+          "required": [
+            "type"
+          ]
+        },
+        "then": {
+          "required": [
+            "issued_at",
+            "expires_at"
+          ],
+          "properties": {
+            "issued_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "expires_at": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "public_attributes": {
+              "type": "object",
+              "required": [
+                "controller",
+                "algorithm",
+                "public_key_jwk"
+              ],
+              "properties": {
+                "controller": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "algorithm": {
+                  "enum": [
+                    "EdDSA",
+                    "ES256"
+                  ]
+                },
+                "public_key_jwk": {
+                  "type": "string",
+                  "minLength": 2
+                }
+              }
+            }
+          }
+        }
+      }
+    ]
   },
   "conformanceSuite": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",

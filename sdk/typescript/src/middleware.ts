@@ -58,6 +58,8 @@ export interface OatiMiddlewareOptions {
   /** Require Envelope.request_digest to bind method, target, and body. Defaults to true. */
   requireRequestDigest?: boolean
   maxBodyBytes?: number
+  /** Use `pending` when this middleware authorizes before a separate upstream executes. */
+  allowedReceiptOutcome?: "succeeded" | "pending"
 }
 
 export interface OatiMiddlewareContext {
@@ -152,7 +154,9 @@ export function createOatiMiddleware(options: OatiMiddlewareOptions): OatiMiddle
       let downstream: Response
       try { downstream = await next(request, context) }
       catch { return await receiptResponse(options, context, "failed", 500, now()) }
-      const outcome: ActionReceipt["outcome"] = downstream.status < 400 ? "succeeded" : downstream.status === 403 ? "denied" : "failed"
+      const outcome: ActionReceipt["outcome"] = downstream.status < 400
+        ? options.allowedReceiptOutcome ?? "succeeded"
+        : downstream.status === 403 ? "denied" : "failed"
       return attachReceipt(downstream, await issueReceipt(options, context, outcome, now()), context)
     } catch (error) {
       const code = error instanceof OatiError && error.code === "MIDDLEWARE_REPLAY" ? 401 : 503

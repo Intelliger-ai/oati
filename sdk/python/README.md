@@ -9,3 +9,5 @@ python3 sdk/python/conformance.py --implementation-version 0.2.0-dev.0 --output 
 ```
 
 The conformance command reads the language-neutral `conformance/suite-v0.1.json`; it does not maintain Python-specific vectors.
+
+Use `LookupClient.lookup_revocation_by_target()` when resolving current revocation state from a governed target ID rather than a revocation-record ID.

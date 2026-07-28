@@ -11,6 +11,7 @@ An API credential can show that an agent may connect. OATI describes **who owns 
 - Machine API: `https://api.intelliger.ai/oati/v1`
 - Licence: [Apache 2.0](LICENSE)
 - Status: **developer preview**
+- Independent security review: **not yet completed** ([review gate and audit package](security/independent-review/README.md))
 
 ## Why OATI
 
@@ -120,11 +121,12 @@ The current CLI is ready for object validation, fixtures, deterministic JSON pro
 | [`docs/`](docs/) | end-to-end tutorials, error handling, and migration policy |
 | [`api/lookup.openapi.yaml`](api/lookup.openapi.yaml) | public lookup API contract for client generation |
 | [`integrations/envoy/`](integrations/envoy/) | fail-closed Envoy ext_authz and OPA reference integration |
+| [`services/envoy-authorizer/`](services/envoy-authorizer/) | production-oriented HTTP authorizer with lookup, Valkey, mTLS, and external KMS signing |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | system boundaries and deployment model |
 
 ## Public lookup and privacy
 
-The lookup service resolves organisations, agents, Passports, Mandates, Receipts, issuers, keys, and revocation status. Public access is rate-limited.
+The lookup service resolves organisations, agents, Passports, Mandates, Receipts, issuers, keys, revocation status, Services, and Profiles. Its discovery endpoint returns an organisation's active proof-verified Service/Profile records; federated deployments advertise their resolver at `/.well-known/oati`. Public access is rate-limited. See [Service discovery](docs/SERVICE_DISCOVERY.md).
 
 Lookup is a **privacy-reviewed projection**, not an unrestricted view of OATI Platform records. Mandates and Receipts expose only approved metadata, status, digests, issuer information, timestamps, and verification material unless a selective-disclosure grant permits more.
 

@@ -43,6 +43,7 @@ import {
   validateOAuthBinding,
   verifyDpopProof,
   signDocument,
+  signDocumentWithSigner,
   StaticTrustResolver,
   verifyDocument,
   getSchema,
@@ -116,6 +117,23 @@ test("public projection uses a strict privacy allowlist", async () => {
   assert.equal("private_attributes" in projected, false)
   assert.equal("tenant_id" in projected, false)
   assert.equal(validateSchema("publicRecord", projected).valid, true)
+})
+
+test("public key schema uses top-level issuer and validity", () => {
+  const key = {
+    type: "key", id: "oati:key:test:projection-1", display_name: "Projection key", status: "active",
+    issuer: "oati:issuer:test", issued_at: "2026-01-01T00:00:00Z", expires_at: "2027-01-01T00:00:00Z",
+    proof_status: "verified", public_attributes: {
+      controller: "oati:issuer:test", algorithm: "EdDSA", public_key_jwk: '{"kty":"OKP"}',
+    },
+  }
+  assert.equal(validateSchema("publicRecord", key).valid, true)
+  const legacyOnly = structuredClone(key)
+  delete legacyOnly.issued_at
+  delete legacyOnly.expires_at
+  legacyOnly.public_attributes.valid_from = "2026-01-01T00:00:00Z"
+  legacyOnly.public_attributes.valid_until = "2027-01-01T00:00:00Z"
+  assert.equal(validateSchema("publicRecord", legacyOnly).valid, false)
 })
 
 test("core builders add the OATI version and preserve inputs", async () => {
@@ -250,8 +268,9 @@ test("lookup implements fresh cache hits, ETag revalidation, and cache bypass", 
 
 test("lookup exposes not-found, invalid-proof, unknown, and unavailable states", async () => {
   let calls = 0
-  const record = (id, proof_status) => ({ type: "key", id, status: "active", issuer: "oati:issuer:test", proof_status,
-    public_attributes: { controller: "oati:org:test", issuer: "oati:issuer:test", algorithm: "EdDSA", public_key_jwk: "{}", valid_from: "2026-01-01T00:00:00Z" } })
+  const record = (id, proof_status) => ({ type: "key", id, status: "active", issuer: "oati:issuer:test",
+    issued_at: "2026-01-01T00:00:00Z", expires_at: "2027-01-01T00:00:00Z", proof_status,
+    public_attributes: { controller: "oati:org:test", algorithm: "EdDSA", public_key_jwk: "{}" } })
   const client = new OatiLookupClient({ retry: { maxRetries: 0 }, fetch: async (url) => {
     calls++
     const id = new URL(url).searchParams.get("id")
@@ -272,17 +291,76 @@ test("lookup exposes not-found, invalid-proof, unknown, and unavailable states",
 
 test("lookup trust resolver maps typed key, issuer, and revocation records", async () => {
   const records = {
-    key: { type: "key", id: "oati:key:test:1", status: "active", issuer: "oati:issuer:test", proof_status: "verified", public_attributes: {
-      controller: "oati:org:test", issuer: "oati:issuer:test", algorithm: "EdDSA", public_key_jwk: '{"kty":"OKP","crv":"Ed25519","x":"abc"}', valid_from: "2026-01-01T00:00:00Z",
+    key: { type: "key", id: "oati:key:test:1", status: "active", issuer: "oati:issuer:test",
+      issued_at: "2026-01-01T00:00:00Z", expires_at: "2027-01-01T00:00:00Z", proof_status: "verified", public_attributes: {
+      controller: "oati:org:test", algorithm: "EdDSA", public_key_jwk: '{"kty":"OKP","crv":"Ed25519","x":"abc"}',
     } },
     issuer: { type: "issuer", id: "oati:issuer:test", status: "active", issuer: "oati:issuer:root", issued_at: "2026-01-01T00:00:00Z", proof_status: "verified", public_attributes: {} },
-    revocation: { type: "revocation", id: "oati:target:test", status: "good", issuer: "oati:issuer:test", proof_status: "verified", public_attributes: { effective_at: "2026-01-01T00:00:00Z" } },
+    revocation: { type: "revocation", id: "oati:revocation:test:1", status: "active", issuer: "oati:issuer:test", proof_status: "verified",
+      public_attributes: { target: "oati:target:test", revocation_status: "good", effective_at: "2026-01-01T00:00:00Z" } },
   }
-  const client = new OatiLookupClient({ fetch: async (url) => Response.json(records[new URL(url).searchParams.get("type")]) })
+  let revocationRequest
+  const client = new OatiLookupClient({ fetch: async (url) => {
+    const parsed = new URL(url)
+    if (parsed.searchParams.get("type") === "revocation") revocationRequest = parsed
+    return Response.json(records[parsed.searchParams.get("type")])
+  } })
   const resolver = new LookupTrustResolver(client)
-  assert.equal((await resolver.resolveKey("oati:key:test:1")).algorithm, "EdDSA")
+  const key = await resolver.resolveKey("oati:key:test:1")
+  assert.equal(key.algorithm, "EdDSA")
+  assert.equal(key.issuer, "oati:issuer:test")
+  assert.equal(key.validFrom, "2026-01-01T00:00:00Z")
+  assert.equal(key.validUntil, "2027-01-01T00:00:00Z")
   assert.equal((await resolver.resolveIssuer("oati:issuer:test")).status, "active")
   assert.equal((await resolver.resolveRevocation("oati:target:test")).status, "good")
+  assert.equal(revocationRequest.searchParams.get("target"), "oati:target:test")
+  assert.equal(revocationRequest.searchParams.has("id"), false)
+})
+
+test("target-based revocation lookup rejects a mismatched target projection", async () => {
+  const client = new OatiLookupClient({ fetch: async () => Response.json({
+    type: "revocation", id: "oati:revocation:test:wrong", status: "active", issuer: "oati:issuer:test", proof_status: "verified",
+    public_attributes: { target: "oati:target:different", revocation_status: "good" },
+  }) })
+  await assert.rejects(() => client.lookupRevocationByTarget("oati:target:expected"),
+    (error) => error instanceof OatiLookupError && error.code === "LOOKUP_INVALID_RESPONSE")
+})
+
+test("service discovery decodes trusted records and follows a federated resolver", async () => {
+  const organisation = "oati:org:merchant-b"
+  const document = { oati_version: "1.0", id: "oati:service:merchant-b:checkout", organisation_id: organisation,
+    issuer: "oati:issuer:merchant-b", display_name: "Checkout", endpoints: [{ id: "purchase", url: "https://merchant.example/purchase", protocol: "http", audience: "https://merchant.example" }],
+    accepted_profiles: ["oati:profile:commerce:1"], status: "active", issued_at: "2026-07-28T00:00:00Z" }
+  const service = { type: "service", id: document.id, organisation_id: organisation, issuer: document.issuer,
+    status: "active", proof_status: "verified", public_attributes: { document: JSON.stringify(document) } }
+  const calls = []
+  const client = new OatiLookupClient({ fetch: async (url) => {
+    calls.push(String(url))
+    if (String(url) === "https://merchant.example/.well-known/oati") return Response.json({ oati_version: "1.0", organisations: [organisation], resolvers: ["https://resolver.example/oati/v1"] })
+    return Response.json({ organisation_id: organisation, services: [service], profiles: [] })
+  } })
+  const direct = await client.discoverOrganisation(organisation)
+  assert.equal(direct.services[0].document.endpoints[0].audience, "https://merchant.example")
+  const federated = await client.discoverFederated("merchant.example", organisation)
+  assert.equal(federated.services[0].record.id, document.id)
+  assert.equal(calls[2], `https://resolver.example/oati/v1/discovery?organisation_id=${encodeURIComponent(organisation)}`)
+})
+
+test("lookup normalizes legacy key validity attributes to the top-level contract", async () => {
+  const client = new OatiLookupClient({ fetch: async () => Response.json({
+    type: "key", id: "oati:key:legacy:1", status: "active", issuer: "oati:issuer:legacy", proof_status: "verified",
+    public_attributes: {
+      controller: "oati:issuer:legacy", issuer: "oati:issuer:legacy", algorithm: "EdDSA", public_key_jwk: "{}",
+      valid_from: "2025-01-01T00:00:00Z", valid_until: "2026-01-01T00:00:00Z",
+    },
+  }) })
+  const record = await client.lookup("key", "oati:key:legacy:1")
+  assert.equal(record.issued_at, "2025-01-01T00:00:00Z")
+  assert.equal(record.expires_at, "2026-01-01T00:00:00Z")
+  const resolved = await new LookupTrustResolver(client).resolveKey("oati:key:legacy:1")
+  assert.equal(resolved.issuer, "oati:issuer:legacy")
+  assert.equal(resolved.validFrom, "2025-01-01T00:00:00Z")
+  assert.equal(resolved.validUntil, "2026-01-01T00:00:00Z")
 })
 
 const middlewareFixture = async () => {
@@ -339,6 +417,17 @@ test("reference middleware verifies, evaluates, correlates, and issues a signed 
   const replay = await middleware(fixture.request(), () => Response.json({ should_not_run: true }))
   assert.equal(replay.status, 401)
   assert.equal((await replay.json()).code, "MIDDLEWARE_REPLAY")
+})
+
+test("authorization-only middleware emits a pending Receipt before upstream execution", async () => {
+  const fixture = await middlewareFixture()
+  const response = await createOatiMiddleware({ ...fixture.options, allowedReceiptOutcome: "pending" })(
+    fixture.request(),
+    () => new Response(null, { status: 200 }),
+  )
+  assert.equal(response.status, 200)
+  const receipt = JSON.parse(Buffer.from(response.headers.get("OATI-Receipt"), "base64url").toString("utf8"))
+  assert.equal(receipt.outcome, "pending")
 })
 
 test("reference middleware binds the signed Envelope to the HTTP method, target, and body", async () => {
@@ -520,6 +609,27 @@ test("ES256 signing and verification uses the same canonical proof profile", asy
   const verified = await verifyDocument(signed, policyFor(key))
   assert.equal(verified.verified, true, JSON.stringify(verified.issues))
   assert.equal(signed.proof.signature.split(".")[1], "")
+})
+
+test("external KMS signer receives the exact detached-JWS signing input", async () => {
+  const generated = await crypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"])
+  const publicKeyJwk = await crypto.subtle.exportKey("jwk", generated.publicKey)
+  let observedInput
+  const signed = await signDocumentWithSigner(
+    { oati_version: "1.0", id: "oati:receipt:test:kms", issuer: "oati:org:test", occurred_at: "2026-07-27T12:00:00Z" },
+    {
+      algorithm: "EdDSA", verificationMethod: "oati:key:test:kms:1", audience: "https://merchant.example",
+      nonce: "external-kms-nonce-0001", created: "2026-07-27T12:00:00Z", expires: "2026-07-27T12:05:00Z",
+      sign: async (input) => {
+        observedInput = input
+        return new Uint8Array(await crypto.subtle.sign("Ed25519", generated.privateKey, input))
+      },
+    },
+  )
+  assert.ok(observedInput instanceof Uint8Array)
+  const key = { id: "oati:key:test:kms:1", controller: "oati:org:test", issuer: "oati:issuer:root", algorithm: "EdDSA", publicKeyJwk, status: "active", validFrom: "2026-07-27T11:00:00Z", proofStatus: "verified" }
+  const verified = await verifyDocument(signed, policyFor(key))
+  assert.equal(verified.verified, true, JSON.stringify(verified.issues))
 })
 
 test("verification detects tampering and audience mismatch", async () => {

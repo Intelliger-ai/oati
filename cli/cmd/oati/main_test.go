@@ -7,6 +7,8 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"io"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -32,6 +34,59 @@ func TestValidatePassport(t *testing.T) {
 	if !strings.Contains(stdout.String(), "valid passport") {
 		t.Fatalf("unexpected output: %s", stdout.String())
 	}
+}
+
+func TestLookupRevocationByTarget(t *testing.T) {
+	previousClientFactory := newLookupHTTPClient
+	newLookupHTTPClient = func(time.Duration) *http.Client {
+		return &http.Client{Transport: lookupRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+			if r.URL.Query().Get("type") != "revocation" || r.URL.Query().Get("target") != "oati:issuer:test" || r.URL.Query().Has("id") {
+				t.Fatalf("unexpected lookup query: %s", r.URL.RawQuery)
+			}
+			return &http.Response{
+				StatusCode: http.StatusOK,
+				Status:     "200 OK",
+				Header:     http.Header{"Content-Type": []string{"application/json"}},
+				Body:       io.NopCloser(strings.NewReader(`{"type":"revocation","id":"oati:revocation:test:1","status":"active","issuer":"oati:issuer:root","proof_status":"verified","public_attributes":{"target":"oati:issuer:test","revocation_status":"good"}}`)),
+				Request:    r,
+			}, nil
+		})}
+	}
+	defer func() { newLookupHTTPClient = previousClientFactory }()
+	var stdout, stderr bytes.Buffer
+	if err := runLookup([]string{"--api", "https://resolver.test/oati/v1", "--type", "revocation", "--target", "oati:issuer:test"}, &stdout, &stderr); err != nil {
+		t.Fatalf("lookup: %v\n%s", err, stderr.String())
+	}
+	if !strings.Contains(stdout.String(), "oati:revocation:test:1") {
+		t.Fatalf("unexpected lookup output: %s", stdout.String())
+	}
+}
+
+func TestDiscoverOrganisation(t *testing.T) {
+	previousClientFactory := newLookupHTTPClient
+	newLookupHTTPClient = func(time.Duration) *http.Client {
+		return &http.Client{Transport: lookupRoundTripFunc(func(r *http.Request) (*http.Response, error) {
+			if r.URL.Path != "/oati/v1/discovery" || r.URL.Query().Get("organisation_id") != "oati:org:merchant-b" {
+				t.Fatalf("unexpected discovery request: %s", r.URL.String())
+			}
+			body := `{"organisation_id":"oati:org:merchant-b","services":[{"type":"service","id":"oati:service:merchant-b:checkout","organisation_id":"oati:org:merchant-b","status":"active","issuer":"oati:issuer:merchant-b","proof_status":"verified","public_attributes":{"document":"{}"}}],"profiles":[]}`
+			return &http.Response{StatusCode: http.StatusOK, Status: "200 OK", Header: http.Header{"Content-Type": []string{"application/json"}}, Body: io.NopCloser(strings.NewReader(body)), Request: r}, nil
+		})}
+	}
+	defer func() { newLookupHTTPClient = previousClientFactory }()
+	var stdout, stderr bytes.Buffer
+	if err := runDiscover([]string{"--api", "https://resolver.test/oati/v1", "--organisation", "oati:org:merchant-b"}, &stdout, &stderr); err != nil {
+		t.Fatalf("discover: %v", err)
+	}
+	if !strings.Contains(stdout.String(), "oati:service:merchant-b:checkout") {
+		t.Fatalf("unexpected output: %s", stdout.String())
+	}
+}
+
+type lookupRoundTripFunc func(*http.Request) (*http.Response, error)
+
+func (fn lookupRoundTripFunc) RoundTrip(request *http.Request) (*http.Response, error) {
+	return fn(request)
 }
 
 func TestRejectsAmplifiedShapeBasics(t *testing.T) {

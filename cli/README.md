@@ -31,6 +31,12 @@ oati lookup \
 # Use another compatible resolver
 oati lookup --api http://localhost:8080/oati/v1 --type agent --id oati:agent:intelliger:commerce-demo
 
+# Resolve the authoritative revocation record from the governed target ID
+oati lookup --type revocation --target oati:issuer:intelliger:production
+
+# Discover an organisation's active verified Services and Profiles
+oati discover --organisation oati:org:merchant-b
+
 # Add an audience-bound, expiring detached JWS proof
 oati sign \
   --algorithm EdDSA \

@@ -8,6 +8,14 @@
 
 ## Properties
 
+### allowedReceiptOutcome?
+
+> `optional` **allowedReceiptOutcome?**: `"succeeded"` \| `"pending"`
+
+Use `pending` when this middleware authorizes before a separate upstream executes.
+
+***
+
 ### generateCorrelationId?
 
 > `optional` **generateCorrelationId?**: () => `string`

@@ -33,6 +33,11 @@ export interface SigningOptions {
   expires: Date | string
 }
 
+export interface ExternalSigningOptions extends Omit<SigningOptions, "privateKey"> {
+  /** Sign the exact RFC 7797 detached-JWS signing input inside a KMS/HSM boundary. */
+  sign(input: Uint8Array, algorithm: OatiAlgorithm, verificationMethod: string): Promise<Uint8Array>
+}
+
 export interface VerificationKey {
   id: string
   controller: string
@@ -106,6 +111,22 @@ export interface VerificationResult {
 
 /** Sign an OATI object using an RFC 7797 detached JWS over its canonical JSON form. */
 export async function signDocument<T extends Record<string, unknown>>(document: T, options: SigningOptions): Promise<T & { proof: OatiJwsProof }> {
+  return signPreparedDocument(document, options, async (input) => {
+    const key = await importSigningKey(options.privateKey, options.algorithm)
+    return new Uint8Array(await cryptoProvider().subtle.sign(webCryptoAlgorithm(options.algorithm), key, toArrayBuffer(input)))
+  })
+}
+
+/** Sign through a caller-supplied KMS/HSM operation without importing private key material. */
+export async function signDocumentWithSigner<T extends Record<string, unknown>>(document: T, options: ExternalSigningOptions): Promise<T & { proof: OatiJwsProof }> {
+  return signPreparedDocument(document, options, (input) => options.sign(input, options.algorithm, options.verificationMethod))
+}
+
+async function signPreparedDocument<T extends Record<string, unknown>>(
+  document: T,
+  options: Omit<SigningOptions, "privateKey">,
+  signer: (input: Uint8Array) => Promise<Uint8Array>,
+): Promise<T & { proof: OatiJwsProof }> {
   if (!OATI_SUPPORTED_ALGORITHMS.includes(options.algorithm)) throw new RangeError(`Unsupported algorithm ${options.algorithm}`)
   if (options.verificationMethod.trim() === "") throw new TypeError("verificationMethod is required")
   if (options.nonce.length < 16) throw new TypeError("nonce must contain at least 16 characters")
@@ -128,9 +149,9 @@ export async function signDocument<T extends Record<string, unknown>>(document: 
   const unsigned = { ...document, proof: proofWithoutSignature }
   const protectedHeader = base64url(encoder.encode(canonicalJson({ alg: options.algorithm, b64: false, crit: ["b64"], kid: options.verificationMethod, typ: "oati+jws" })))
   const signingInput = joinSigningInput(protectedHeader, encoder.encode(canonicalJson(unsigned)))
-  const key = await importSigningKey(options.privateKey, options.algorithm)
-  const signature = await cryptoProvider().subtle.sign(webCryptoAlgorithm(options.algorithm), key, toArrayBuffer(signingInput))
-  return { ...unsigned, proof: { ...proofWithoutSignature, signature: `${protectedHeader}..${base64url(new Uint8Array(signature))}` } }
+  const signature = await signer(signingInput)
+  if (!(signature instanceof Uint8Array) || signature.byteLength !== 64) throw new TypeError(`${options.algorithm} signer must return a 64-byte JWS signature`)
+  return { ...unsigned, proof: { ...proofWithoutSignature, signature: `${protectedHeader}..${base64url(signature)}` } }
 }
 
 /** Verify signature, trust chain, key lifecycle, revocation, time, audience, and replay in one operation. */
@@ -215,11 +236,10 @@ export class LookupTrustResolver implements TrustResolver {
       const record = await this.lookup.lookup("key", id)
       const attributes = record.public_attributes
       return {
-        id: record.id, controller: required(attributes, "controller"), issuer: required(attributes, "issuer"),
+        id: record.id, controller: required(attributes, "controller"), issuer: record.issuer,
         algorithm: required(attributes, "algorithm") as OatiAlgorithm,
         publicKeyJwk: JSON.parse(required(attributes, "public_key_jwk")) as JsonWebKey,
-        status: record.status as VerificationKey["status"], validFrom: required(attributes, "valid_from"),
-        ...(attributes.valid_until ? { validUntil: attributes.valid_until } : {}),
+        status: record.status as VerificationKey["status"], validFrom: record.issued_at, validUntil: record.expires_at,
         ...(attributes.revoked_at ? { revokedAt: attributes.revoked_at } : {}), proofStatus: record.proof_status,
       }
     } catch (error) { if (error instanceof OatiLookupError && error.code === "LOOKUP_NOT_FOUND") return null; throw error }
@@ -237,8 +257,8 @@ export class LookupTrustResolver implements TrustResolver {
   }
   async resolveRevocation(target: string): Promise<RevocationStatus | null> {
     try {
-      const record = await this.lookup.lookup("revocation", target)
-      return { target, status: record.status as RevocationStatus["status"], ...(record.public_attributes.effective_at ? { effectiveAt: record.public_attributes.effective_at } : {}) }
+      const record = await this.lookup.lookupRevocationByTarget(target)
+      return { target, status: required(record.public_attributes, "revocation_status") as RevocationStatus["status"], ...(record.public_attributes.effective_at ? { effectiveAt: record.public_attributes.effective_at } : {}) }
     } catch (error) { if (error instanceof OatiLookupError && error.code === "LOOKUP_NOT_FOUND") return null; throw error }
   }
 }

@@ -6,7 +6,7 @@
   "additionalProperties": false,
   "required": ["type", "id", "display_name", "status", "issuer", "proof_status", "public_attributes"],
   "properties": {
-    "type": { "enum": ["organisation", "agent", "passport", "mandate", "receipt", "issuer", "key", "revocation"] },
+    "type": { "enum": ["organisation", "agent", "passport", "mandate", "receipt", "issuer", "key", "revocation", "service", "profile"] },
     "id": { "type": "string", "minLength": 1 },
     "display_name": { "type": "string" },
     "status": { "type": "string" },
@@ -17,5 +17,26 @@
     "assurance_level": { "type": "string" },
     "proof_status": { "enum": ["verified", "invalid", "unavailable", "unknown"] },
     "public_attributes": { "type": "object", "additionalProperties": { "type": "string" } }
-  }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "type": { "const": "key" } }, "required": ["type"] },
+      "then": {
+        "required": ["issued_at", "expires_at"],
+        "properties": {
+          "issued_at": { "type": "string", "format": "date-time" },
+          "expires_at": { "type": "string", "format": "date-time" },
+          "public_attributes": {
+            "type": "object",
+            "required": ["controller", "algorithm", "public_key_jwk"],
+            "properties": {
+              "controller": { "type": "string", "minLength": 1 },
+              "algorithm": { "enum": ["EdDSA", "ES256"] },
+              "public_key_jwk": { "type": "string", "minLength": 2 }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

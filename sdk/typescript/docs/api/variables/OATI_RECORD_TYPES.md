@@ -6,4 +6,4 @@
 
 # Variable: OATI\_RECORD\_TYPES
 
-> `const` **OATI\_RECORD\_TYPES**: readonly \[`"organisation"`, `"agent"`, `"passport"`, `"mandate"`, `"receipt"`, `"issuer"`, `"key"`, `"revocation"`\]
+> `const` **OATI\_RECORD\_TYPES**: readonly \[`"organisation"`, `"agent"`, `"passport"`, `"mandate"`, `"receipt"`, `"issuer"`, `"key"`, `"revocation"`, `"service"`, `"profile"`\]

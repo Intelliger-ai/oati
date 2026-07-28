@@ -44,6 +44,12 @@
 
 ***
 
+### profile
+
+> **profile**: [`ProfileRecord`](ProfileRecord.md)
+
+***
+
 ### receipt
 
 > **receipt**: [`ReceiptRecord`](ReceiptRecord.md)
@@ -53,3 +59,9 @@
 ### revocation
 
 > **revocation**: [`RevocationRecord`](RevocationRecord.md)
+
+***
+
+### service
+
+> **service**: [`ServiceRecord`](ServiceRecord.md)

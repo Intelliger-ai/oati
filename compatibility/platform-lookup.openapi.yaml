@@ -21,7 +21,7 @@ paths:
           required: true
           schema:
             type: string
-            enum: [organisation, agent, passport, mandate, receipt, issuer, key, revocation]
+            enum: [organisation, agent, passport, mandate, receipt, issuer, key, revocation, service, profile]
         - name: id
           in: query
           required: true
@@ -70,6 +70,33 @@ paths:
               schema: { $ref: "#/components/schemas/Problem" }
         "503":
           $ref: "#/components/responses/Unavailable"
+  /discovery:
+    get:
+      summary: Discover active verified Services and Profiles for an organisation
+      operationId: discoverOatiOrganisation
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/OatiVersion"
+        - name: organisation_id
+          in: query
+          required: true
+          schema: { type: string, pattern: "^oati:org:" }
+      responses:
+        "200":
+          description: Public discovery records.
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [organisation_id, services, profiles]
+                properties:
+                  organisation_id: { type: string }
+                  services: { type: array, items: { $ref: "#/components/schemas/PublicRecord" } }
+                  profiles: { type: array, items: { $ref: "#/components/schemas/PublicRecord" } }
+        "400": { $ref: "#/components/responses/InvalidRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "406": { $ref: "#/components/responses/UnsupportedVersion" }
+        "503": { $ref: "#/components/responses/Unavailable" }
   /status:
     get:
       summary: Get public lookup dependency status

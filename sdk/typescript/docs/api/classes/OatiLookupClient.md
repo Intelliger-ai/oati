@@ -48,7 +48,7 @@ First configured resolver, retained for source compatibility.
 
 ##### type?
 
-`"issuer"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"mandate"` \| `"receipt"` \| `"key"` \| `"revocation"`
+`"issuer"` \| `"profile"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"mandate"` \| `"receipt"` \| `"key"` \| `"revocation"` \| `"service"`
 
 ##### id?
 
@@ -60,6 +60,70 @@ First configured resolver, retained for source compatibility.
 
 ***
 
+### clearRevocationTargetCache()
+
+> **clearRevocationTargetCache**(`target?`): `void`
+
+#### Parameters
+
+##### target?
+
+`string`
+
+#### Returns
+
+`void`
+
+***
+
+### discoverFederated()
+
+> **discoverFederated**(`domain`, `organisationId`, `options?`): `Promise`\<[`OrganisationDiscovery`](../interfaces/OrganisationDiscovery.md)\>
+
+Resolve a domain's `/.well-known/oati`, then use its advertised resolver.
+
+#### Parameters
+
+##### domain
+
+`string`
+
+##### organisationId
+
+`string`
+
+##### options?
+
+[`LookupOptions`](../interfaces/LookupOptions.md) = `{}`
+
+#### Returns
+
+`Promise`\<[`OrganisationDiscovery`](../interfaces/OrganisationDiscovery.md)\>
+
+***
+
+### discoverOrganisation()
+
+> **discoverOrganisation**(`organisationId`, `options?`): `Promise`\<[`OrganisationDiscovery`](../interfaces/OrganisationDiscovery.md)\>
+
+Discover all active, verified services and profiles published by an organisation.
+
+#### Parameters
+
+##### organisationId
+
+`string`
+
+##### options?
+
+[`LookupOptions`](../interfaces/LookupOptions.md) = `{}`
+
+#### Returns
+
+`Promise`\<[`OrganisationDiscovery`](../interfaces/OrganisationDiscovery.md)\>
+
+***
+
 ### lookup()
 
 > **lookup**\<`T`\>(`type`, `id`, `options?`): `Promise`\<[`OatiRecordByType`](../interfaces/OatiRecordByType.md)\[`T`\]\>
@@ -68,7 +132,7 @@ First configured resolver, retained for source compatibility.
 
 ##### T
 
-`T` *extends* `"issuer"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"mandate"` \| `"receipt"` \| `"key"` \| `"revocation"`
+`T` *extends* `"issuer"` \| `"profile"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"mandate"` \| `"receipt"` \| `"key"` \| `"revocation"` \| `"service"`
 
 #### Parameters
 
@@ -100,7 +164,7 @@ Lookup with resolver, cache, and rate-limit metadata.
 
 ##### T
 
-`T` *extends* `"issuer"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"mandate"` \| `"receipt"` \| `"key"` \| `"revocation"`
+`T` *extends* `"issuer"` \| `"profile"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"mandate"` \| `"receipt"` \| `"key"` \| `"revocation"` \| `"service"`
 
 #### Parameters
 
@@ -122,6 +186,50 @@ Lookup with resolver, cache, and rate-limit metadata.
 
 ***
 
+### lookupRevocationByTarget()
+
+> **lookupRevocationByTarget**(`target`, `options?`): `Promise`\<[`RevocationRecord`](../interfaces/RevocationRecord.md)\>
+
+Resolve the authoritative published revocation record for a target identifier.
+
+#### Parameters
+
+##### target
+
+`string`
+
+##### options?
+
+[`LookupOptions`](../interfaces/LookupOptions.md) = `{}`
+
+#### Returns
+
+`Promise`\<[`RevocationRecord`](../interfaces/RevocationRecord.md)\>
+
+***
+
+### lookupRevocationByTargetDetailed()
+
+> **lookupRevocationByTargetDetailed**(`target`, `options?`): `Promise`\<[`LookupResponse`](../interfaces/LookupResponse.md)\<`"revocation"`\>\>
+
+Target-based revocation lookup with resolver, cache, and rate-limit metadata.
+
+#### Parameters
+
+##### target
+
+`string`
+
+##### options?
+
+[`LookupOptions`](../interfaces/LookupOptions.md) = `{}`
+
+#### Returns
+
+`Promise`\<[`LookupResponse`](../interfaces/LookupResponse.md)\<`"revocation"`\>\>
+
+***
+
 ### lookupState()
 
 > **lookupState**\<`T`\>(`type`, `id`, `options?`): `Promise`\<[`LookupState`](../type-aliases/LookupState.md)\<`T`\>\>
@@ -132,7 +240,7 @@ Resolve expected absence and proof-state failures without exception-based contro
 
 ##### T
 
-`T` *extends* `"issuer"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"mandate"` \| `"receipt"` \| `"key"` \| `"revocation"`
+`T` *extends* `"issuer"` \| `"profile"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"mandate"` \| `"receipt"` \| `"key"` \| `"revocation"` \| `"service"`
 
 #### Parameters
 

@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: OATI Public Lookup API
-  version: 1.1.0-draft
+  version: 1.2.0-draft
   license:
     name: Apache License 2.0
     identifier: Apache-2.0
@@ -13,6 +13,7 @@ paths:
     get:
       summary: Look up a public OATI record
       operationId: lookupOatiRecord
+      description: Supply `id` for every record type, or supply `target` instead of `id` when resolving the authoritative revocation record for an OATI target. Supplying both is invalid.
       security: []
       parameters:
         - $ref: "#/components/parameters/OatiVersion"
@@ -21,10 +22,17 @@ paths:
           required: true
           schema:
             type: string
-            enum: [organisation, agent, passport, mandate, receipt, issuer, key, revocation]
+            enum: [organisation, agent, passport, mandate, receipt, issuer, key, revocation, service, profile]
         - name: id
           in: query
-          required: true
+          required: false
+          schema:
+            type: string
+            minLength: 1
+        - name: target
+          in: query
+          required: false
+          description: OATI identifier whose published revocation state is requested; valid only when `type=revocation` and `id` is omitted.
           schema:
             type: string
             minLength: 1
@@ -70,6 +78,28 @@ paths:
               schema: { $ref: "#/components/schemas/Problem" }
         "503":
           $ref: "#/components/responses/Unavailable"
+  /discovery:
+    get:
+      summary: Discover an organisation's published services and profiles
+      operationId: discoverOatiOrganisation
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/OatiVersion"
+        - name: organisation_id
+          in: query
+          required: true
+          schema: { type: string, pattern: "^oati:org:" }
+      responses:
+        "200":
+          description: Active, proof-verified discovery records owned by the organisation.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OrganisationDiscovery" }
+        "400": { $ref: "#/components/responses/InvalidRequest" }
+        "404": { $ref: "#/components/responses/NotFound" }
+        "406": { $ref: "#/components/responses/UnsupportedVersion" }
+        "429": { description: Rate limit exceeded. }
+        "503": { $ref: "#/components/responses/Unavailable" }
   /status:
     get:
       summary: Get public lookup dependency status
@@ -158,3 +188,41 @@ components:
         public_attributes:
           type: object
           additionalProperties: { type: string }
+      allOf:
+        - if:
+            properties: { type: { const: key } }
+            required: [type]
+          then:
+            required: [issued_at, expires_at]
+            properties:
+              issued_at: { type: string, format: date-time }
+              expires_at: { type: string, format: date-time }
+              public_attributes:
+                type: object
+                required: [controller, algorithm, public_key_jwk]
+                properties:
+                  controller: { type: string, minLength: 1 }
+                  algorithm: { type: string, enum: [EdDSA, ES256] }
+                  public_key_jwk: { type: string, minLength: 2 }
+        - if:
+            properties: { type: { const: revocation } }
+            required: [type]
+          then:
+            properties:
+              public_attributes:
+                type: object
+                required: [target, revocation_status]
+                properties:
+                  target: { type: string, minLength: 1 }
+                  revocation_status: { type: string, enum: [good, suspended, revoked, unknown] }
+    OrganisationDiscovery:
+      type: object
+      required: [organisation_id, services, profiles]
+      properties:
+        organisation_id: { type: string }
+        services:
+          type: array
+          items: { $ref: "#/components/schemas/PublicRecord" }
+        profiles:
+          type: array
+          items: { $ref: "#/components/schemas/PublicRecord" }

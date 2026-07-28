@@ -64,6 +64,22 @@ func TestResolverClientCachesTypedRecord(t *testing.T) {
 	}
 }
 
+func TestResolverClientLooksUpRevocationByTarget(t *testing.T) {
+	transport := roundTripFunc(func(request *http.Request) (*http.Response, error) {
+		if request.URL.Query().Get("type") != "revocation" || request.URL.Query().Get("target") != "oati:issuer:test" || request.URL.Query().Has("id") {
+			t.Fatalf("unexpected revocation target request: %s", request.URL)
+		}
+		body := `{"type":"revocation","id":"oati:revocation:test:1","status":"active","issuer":"oati:issuer:root","proof_status":"verified","public_attributes":{"target":"oati:issuer:test","revocation_status":"good"}}`
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{}}, nil
+	})
+	client := NewResolverClient("https://resolver.test/oati/v1")
+	client.HTTPClient = &http.Client{Transport: transport}
+	record, err := client.LookupRevocationByTarget(t.Context(), "oati:issuer:test")
+	if err != nil || record.ID != "oati:revocation:test:1" || record.PublicAttributes["target"] != "oati:issuer:test" {
+		t.Fatalf("target lookup: %#v %v", record, err)
+	}
+}
+
 func TestSignAndVerifyDocument(t *testing.T) {
 	public, private, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {

@@ -104,7 +104,7 @@
 
 ### status
 
-> **status**: `"suspended"` \| `"revoked"` \| `"unknown"` \| `"good"`
+> **status**: `"active"` \| `"suspended"` \| `"revoked"` \| `"unknown"`
 
 #### Overrides
 

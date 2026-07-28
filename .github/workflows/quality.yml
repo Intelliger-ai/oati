@@ -38,13 +38,17 @@ jobs:
         working-directory: sdk/typescript
       - run: pnpm test
         working-directory: sdk/typescript
+      - run: node --test services/envoy-authorizer/server.test.mjs
+      - run: docker build -f services/envoy-authorizer/Dockerfile -t oati-envoy-authorizer:test .
       - run: PYTHONDONTWRITEBYTECODE=1 python -m unittest -v test_sdk.py
         working-directory: sdk/python
       - run: go test ./...
         working-directory: sdk/go
       - run: ./conformance/run-all.sh
       - run: node scripts/check-docs.mjs
+      - run: node scripts/build-schema-site.mjs
       - run: ./scripts/check-generated.sh
+      - run: node scripts/check-independent-review.mjs
 
   cli:
     name: CLI tests

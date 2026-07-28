@@ -32,11 +32,11 @@
 
 ***
 
-### expires\_at?
+### expires\_at
 
-> `optional` **expires\_at?**: `string`
+> **expires\_at**: `string`
 
-#### Inherited from
+#### Overrides
 
 [`PublicOatiRecord`](PublicOatiRecord.md).[`expires_at`](PublicOatiRecord.md#expires_at)
 
@@ -52,11 +52,11 @@
 
 ***
 
-### issued\_at?
+### issued\_at
 
-> `optional` **issued\_at?**: `string`
+> **issued\_at**: `string`
 
-#### Inherited from
+#### Overrides
 
 [`PublicOatiRecord`](PublicOatiRecord.md).[`issued_at`](PublicOatiRecord.md#issued_at)
 
