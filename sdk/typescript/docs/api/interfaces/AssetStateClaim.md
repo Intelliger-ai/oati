@@ -6,15 +6,11 @@
 
 # Interface: AssetStateClaim
 
-Defined in: [src/index.ts:162](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L162)
-
 ## Properties
 
 ### asset\_id
 
 > **asset\_id**: `` `oati:asset:${string}` ``
-
-Defined in: [src/index.ts:166](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L166)
 
 ***
 
@@ -22,15 +18,11 @@ Defined in: [src/index.ts:166](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > **claim\_type**: `"reserve_balance"` \| `"nav"` \| `"eligibility"` \| `"covenant"` \| `"custody"` \| `"collateral"`
 
-Defined in: [src/index.ts:167](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L167)
-
 ***
 
 ### evidence
 
 > **evidence**: `object`
-
-Defined in: [src/index.ts:180](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L180)
 
 #### digest
 
@@ -50,15 +42,11 @@ Defined in: [src/index.ts:180](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > **id**: `` `oati:claim:${string}` ``
 
-Defined in: [src/index.ts:165](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L165)
-
 ***
 
 ### issuer
 
 > **issuer**: `string`
-
-Defined in: [src/index.ts:178](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L178)
 
 ***
 
@@ -66,15 +54,11 @@ Defined in: [src/index.ts:178](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > **issuer\_role**: `"custodian"` \| `"administrator"` \| `"oracle"` \| `"auditor"`
 
-Defined in: [src/index.ts:179](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L179)
-
 ***
 
 ### oati\_version
 
 > **oati\_version**: `"1.0"`
-
-Defined in: [src/index.ts:163](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L163)
 
 ***
 
@@ -82,15 +66,11 @@ Defined in: [src/index.ts:163](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > **observed\_at**: `string`
 
-Defined in: [src/index.ts:176](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L176)
-
 ***
 
 ### profile
 
 > **profile**: `"https://specs.intelliger.ai/oati/profiles/rwa/v0.1"`
-
-Defined in: [src/index.ts:164](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L164)
 
 ***
 
@@ -98,15 +78,11 @@ Defined in: [src/index.ts:164](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > **proof**: [`Proof`](Proof.md)
 
-Defined in: [src/index.ts:181](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L181)
-
 ***
 
 ### unit
 
 > **unit**: `string`
-
-Defined in: [src/index.ts:175](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L175)
 
 ***
 
@@ -114,12 +90,8 @@ Defined in: [src/index.ts:175](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > **valid\_until**: `string`
 
-Defined in: [src/index.ts:177](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L177)
-
 ***
 
 ### value
 
 > **value**: `` `${number}` ``
-
-Defined in: [src/index.ts:174](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L174)

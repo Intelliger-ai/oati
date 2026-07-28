@@ -6,8 +6,6 @@
 
 # Class: LookupTrustResolver
 
-Defined in: [src/crypto.ts:211](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L211)
-
 Resolve key, issuer, and revocation records through the public OATI lookup API.
 
 ## Implements
@@ -19,8 +17,6 @@ Resolve key, issuer, and revocation records through the public OATI lookup API.
 ### Constructor
 
 > **new LookupTrustResolver**(`lookup`): `LookupTrustResolver`
-
-Defined in: [src/crypto.ts:212](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L212)
 
 #### Parameters
 
@@ -37,8 +33,6 @@ Defined in: [src/crypto.ts:212](https://github.com/Intelliger-ai/oati/blob/52f9f
 ### resolveIssuer()
 
 > **resolveIssuer**(`id`): `Promise`\<[`TrustedIssuer`](../interfaces/TrustedIssuer.md) \| `null`\>
-
-Defined in: [src/crypto.ts:227](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L227)
 
 #### Parameters
 
@@ -60,8 +54,6 @@ Defined in: [src/crypto.ts:227](https://github.com/Intelliger-ai/oati/blob/52f9f
 
 > **resolveKey**(`id`): `Promise`\<[`VerificationKey`](../interfaces/VerificationKey.md) \| `null`\>
 
-Defined in: [src/crypto.ts:213](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L213)
-
 #### Parameters
 
 ##### id
@@ -81,8 +73,6 @@ Defined in: [src/crypto.ts:213](https://github.com/Intelliger-ai/oati/blob/52f9f
 ### resolveRevocation()
 
 > **resolveRevocation**(`target`): `Promise`\<[`RevocationStatus`](../interfaces/RevocationStatus.md) \| `null`\>
-
-Defined in: [src/crypto.ts:238](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L238)
 
 #### Parameters
 

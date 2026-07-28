@@ -6,15 +6,11 @@
 
 # Interface: TrustedIssuer
 
-Defined in: [src/crypto.ts:49](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L49)
-
 ## Properties
 
 ### id
 
 > **id**: `string`
-
-Defined in: [src/crypto.ts:50](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L50)
 
 ***
 
@@ -22,15 +18,11 @@ Defined in: [src/crypto.ts:50](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > `optional` **parent?**: `string`
 
-Defined in: [src/crypto.ts:51](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L51)
-
 ***
 
 ### proofStatus?
 
 > `optional` **proofStatus?**: `"unknown"` \| `"verified"` \| `"invalid"` \| `"unavailable"`
-
-Defined in: [src/crypto.ts:56](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L56)
 
 ***
 
@@ -38,15 +30,11 @@ Defined in: [src/crypto.ts:56](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > `optional` **revokedAt?**: `string`
 
-Defined in: [src/crypto.ts:55](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L55)
-
 ***
 
 ### status
 
 > **status**: `"active"` \| `"suspended"` \| `"revoked"`
-
-Defined in: [src/crypto.ts:52](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L52)
 
 ***
 
@@ -54,12 +42,8 @@ Defined in: [src/crypto.ts:52](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > `optional` **validFrom?**: `string`
 
-Defined in: [src/crypto.ts:53](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L53)
-
 ***
 
 ### validUntil?
 
 > `optional` **validUntil?**: `string`
-
-Defined in: [src/crypto.ts:54](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/crypto.ts#L54)

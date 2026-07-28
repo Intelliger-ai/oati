@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /sdk/typescript
+    schedule: { interval: weekly }
+    groups:
+      typescript-sdk:
+        patterns: ["*"]
+  - package-ecosystem: gomod
+    directory: /cli
+    schedule: { interval: weekly }
+  - package-ecosystem: gomod
+    directory: /sdk/go
+    schedule: { interval: weekly }
+  - package-ecosystem: pip
+    directory: /sdk/python
+    schedule: { interval: weekly }
+  - package-ecosystem: github-actions
+    directory: /
+    schedule: { interval: weekly }

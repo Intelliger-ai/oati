@@ -1,0 +1,131 @@
+name: Quality gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  sdk-and-conformance:
+    name: SDKs, schemas, examples, conformance, generated files
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.14.0 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: sdk/typescript/pnpm-lock.yaml
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.13" }
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+          cache-dependency-path: |
+            cli/go.sum
+            sdk/go/go.mod
+      - run: pnpm install --frozen-lockfile
+        working-directory: sdk/typescript
+      - run: pnpm test
+        working-directory: sdk/typescript
+      - run: PYTHONDONTWRITEBYTECODE=1 python -m unittest -v test_sdk.py
+        working-directory: sdk/python
+      - run: go test ./...
+        working-directory: sdk/go
+      - run: ./conformance/run-all.sh
+      - run: ./scripts/check-generated.sh
+
+  cli:
+    name: CLI tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.work
+          cache-dependency-path: cli/go.sum
+      - run: go test ./...
+        working-directory: cli
+
+  api-contracts:
+    name: OpenAPI and platform compatibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ruby/setup-ruby@v1
+        with: { ruby-version: "3.3" }
+      - run: ruby scripts/validate-openapi.rb
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - run: npx --yes @redocly/cli@1.34.5 lint api/lookup.openapi.yaml compatibility/platform-lookup.openapi.yaml
+
+  licence:
+    name: Apache-2.0 licence compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.14.0 }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: sdk/typescript/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+        working-directory: sdk/typescript
+      - run: node scripts/check-licenses.mjs
+
+  dependency-security:
+    name: Dependency vulnerability audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with: { version: 10.14.0 }
+      - uses: actions/setup-node@v4
+        with: { node-version: 24 }
+      - uses: actions/setup-go@v5
+        with: { go-version-file: go.work }
+      - run: pnpm install --frozen-lockfile
+        working-directory: sdk/typescript
+      - run: pnpm audit --prod --audit-level high
+        working-directory: sdk/typescript
+      - run: go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
+      - run: govulncheck ./...
+        working-directory: cli
+      - run: govulncheck ./...
+        working-directory: sdk/go
+      - uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
+          exit-code: "1"
+
+  dependency-review:
+    name: Pull-request dependency review
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          deny-licenses: AGPL-1.0-only, AGPL-1.0-or-later, GPL-2.0-only, GPL-3.0-only, SSPL-1.0

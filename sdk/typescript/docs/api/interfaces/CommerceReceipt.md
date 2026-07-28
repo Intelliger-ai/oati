@@ -6,8 +6,6 @@
 
 # Interface: CommerceReceipt
 
-Defined in: [src/index.ts:157](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L157)
-
 ## Extends
 
 - [`ActionReceipt`](ActionReceipt.md)
@@ -22,8 +20,6 @@ Defined in: [src/index.ts:157](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > **agent\_id**: `` `oati:agent:${string}` ``
 
-Defined in: [src/index.ts:110](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L110)
-
 #### Inherited from
 
 [`ActionReceipt`](ActionReceipt.md).[`agent_id`](ActionReceipt.md#agent_id)
@@ -33,8 +29,6 @@ Defined in: [src/index.ts:110](https://github.com/Intelliger-ai/oati/blob/52f9fa
 ### commercial\_profile?
 
 > `optional` **commercial\_profile?**: `string`
-
-Defined in: [src/index.ts:123](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L123)
 
 #### Inherited from
 
@@ -46,8 +40,6 @@ Defined in: [src/index.ts:123](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > **decision**: `"allow"` \| `"deny"` \| `"transform"` \| `"approval_required"`
 
-Defined in: [src/index.ts:113](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L113)
-
 #### Inherited from
 
 [`ActionReceipt`](ActionReceipt.md).[`decision`](ActionReceipt.md#decision)
@@ -57,8 +49,6 @@ Defined in: [src/index.ts:113](https://github.com/Intelliger-ai/oati/blob/52f9fa
 ### extensions
 
 > **extensions**: `object`
-
-Defined in: [src/index.ts:159](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L159)
 
 #### commerce
 
@@ -74,8 +64,6 @@ Defined in: [src/index.ts:159](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > **id**: `` `oati:receipt:${string}` ``
 
-Defined in: [src/index.ts:108](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L108)
-
 #### Inherited from
 
 [`ActionReceipt`](ActionReceipt.md).[`id`](ActionReceipt.md#id)
@@ -85,8 +73,6 @@ Defined in: [src/index.ts:108](https://github.com/Intelliger-ai/oati/blob/52f9fa
 ### issuer
 
 > **issuer**: `string`
-
-Defined in: [src/index.ts:116](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L116)
 
 #### Inherited from
 
@@ -98,8 +84,6 @@ Defined in: [src/index.ts:116](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > **mandate\_id**: `` `oati:mandate:${string}` ``
 
-Defined in: [src/index.ts:112](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L112)
-
 #### Inherited from
 
 [`ActionReceipt`](ActionReceipt.md).[`mandate_id`](ActionReceipt.md#mandate_id)
@@ -109,8 +93,6 @@ Defined in: [src/index.ts:112](https://github.com/Intelliger-ai/oati/blob/52f9fa
 ### oati\_version
 
 > **oati\_version**: `"1.0"`
-
-Defined in: [src/index.ts:107](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L107)
 
 #### Inherited from
 
@@ -122,8 +104,6 @@ Defined in: [src/index.ts:107](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > **occurred\_at**: `string`
 
-Defined in: [src/index.ts:115](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L115)
-
 #### Inherited from
 
 [`ActionReceipt`](ActionReceipt.md).[`occurred_at`](ActionReceipt.md#occurred_at)
@@ -133,8 +113,6 @@ Defined in: [src/index.ts:115](https://github.com/Intelliger-ai/oati/blob/52f9fa
 ### organisation\_id
 
 > **organisation\_id**: `` `oati:org:${string}` ``
-
-Defined in: [src/index.ts:111](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L111)
 
 #### Inherited from
 
@@ -146,8 +124,6 @@ Defined in: [src/index.ts:111](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > **outcome**: `"succeeded"` \| `"failed"` \| `"denied"` \| `"pending"` \| `"unknown"`
 
-Defined in: [src/index.ts:114](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L114)
-
 #### Inherited from
 
 [`ActionReceipt`](ActionReceipt.md).[`outcome`](ActionReceipt.md#outcome)
@@ -157,8 +133,6 @@ Defined in: [src/index.ts:114](https://github.com/Intelliger-ai/oati/blob/52f9fa
 ### policy\_digest?
 
 > `optional` **policy\_digest?**: `string`
-
-Defined in: [src/index.ts:120](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L120)
 
 #### Inherited from
 
@@ -170,8 +144,6 @@ Defined in: [src/index.ts:120](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > **profile**: `"https://specs.intelliger.ai/oati/profiles/commerce/v0.1"`
 
-Defined in: [src/index.ts:158](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L158)
-
 #### Overrides
 
 [`ActionReceipt`](ActionReceipt.md).[`profile`](ActionReceipt.md#profile)
@@ -181,8 +153,6 @@ Defined in: [src/index.ts:158](https://github.com/Intelliger-ai/oati/blob/52f9fa
 ### proof
 
 > **proof**: [`Proof`](Proof.md)
-
-Defined in: [src/index.ts:119](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L119)
 
 #### Inherited from
 
@@ -194,8 +164,6 @@ Defined in: [src/index.ts:119](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > `optional` **request\_digest?**: `string`
 
-Defined in: [src/index.ts:121](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L121)
-
 #### Inherited from
 
 [`ActionReceipt`](ActionReceipt.md).[`request_digest`](ActionReceipt.md#request_digest)
@@ -206,8 +174,6 @@ Defined in: [src/index.ts:121](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > `optional` **response\_digest?**: `string`
 
-Defined in: [src/index.ts:122](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L122)
-
 #### Inherited from
 
 [`ActionReceipt`](ActionReceipt.md).[`response_digest`](ActionReceipt.md#response_digest)
@@ -217,8 +183,6 @@ Defined in: [src/index.ts:122](https://github.com/Intelliger-ai/oati/blob/52f9fa
 ### transaction\_id
 
 > **transaction\_id**: `string`
-
-Defined in: [src/index.ts:109](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L109)
 
 #### Inherited from
 

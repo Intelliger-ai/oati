@@ -6,8 +6,6 @@
 
 # Interface: AssetMandate
 
-Defined in: [src/index.ts:197](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L197)
-
 ## Extends
 
 - [`AgentMandate`](AgentMandate.md)
@@ -17,8 +15,6 @@ Defined in: [src/index.ts:197](https://github.com/Intelliger-ai/oati/blob/52f9fa
 ### actions
 
 > **actions**: `string`[]
-
-Defined in: [src/index.ts:56](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L56)
 
 #### Inherited from
 
@@ -30,8 +26,6 @@ Defined in: [src/index.ts:56](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 
 > `optional` **counterparties?**: `string`[]
 
-Defined in: [src/index.ts:58](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L58)
-
 #### Inherited from
 
 [`AgentMandate`](AgentMandate.md).[`counterparties`](AgentMandate.md#counterparties)
@@ -42,8 +36,6 @@ Defined in: [src/index.ts:58](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 
 > `optional` **data\_use?**: `Record`\<`string`, `unknown`\>
 
-Defined in: [src/index.ts:61](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L61)
-
 #### Inherited from
 
 [`AgentMandate`](AgentMandate.md).[`data_use`](AgentMandate.md#data_use)
@@ -53,8 +45,6 @@ Defined in: [src/index.ts:61](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 ### delegation?
 
 > `optional` **delegation?**: `object`
-
-Defined in: [src/index.ts:62](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L62)
 
 #### allowed
 
@@ -74,8 +64,6 @@ Defined in: [src/index.ts:62](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 
 > `optional` **destinations?**: `string`[]
 
-Defined in: [src/index.ts:59](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L59)
-
 #### Inherited from
 
 [`AgentMandate`](AgentMandate.md).[`destinations`](AgentMandate.md#destinations)
@@ -86,8 +74,6 @@ Defined in: [src/index.ts:59](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 
 > **expires\_at**: `string`
 
-Defined in: [src/index.ts:64](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L64)
-
 #### Inherited from
 
 [`AgentMandate`](AgentMandate.md).[`expires_at`](AgentMandate.md#expires_at)
@@ -97,8 +83,6 @@ Defined in: [src/index.ts:64](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 ### extensions
 
 > **extensions**: `object`
-
-Defined in: [src/index.ts:199](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L199)
 
 #### rwa
 
@@ -114,8 +98,6 @@ Defined in: [src/index.ts:199](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > **id**: `` `oati:mandate:${string}` ``
 
-Defined in: [src/index.ts:50](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L50)
-
 #### Inherited from
 
 [`AgentMandate`](AgentMandate.md).[`id`](AgentMandate.md#id)
@@ -125,8 +107,6 @@ Defined in: [src/index.ts:50](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 ### issuer
 
 > **issuer**: `string`
-
-Defined in: [src/index.ts:51](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L51)
 
 #### Inherited from
 
@@ -138,8 +118,6 @@ Defined in: [src/index.ts:51](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 
 > `optional` **limits?**: `Record`\<`string`, `unknown`\>
 
-Defined in: [src/index.ts:60](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L60)
-
 #### Inherited from
 
 [`AgentMandate`](AgentMandate.md).[`limits`](AgentMandate.md#limits)
@@ -149,8 +127,6 @@ Defined in: [src/index.ts:60](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 ### not\_before
 
 > **not\_before**: `string`
-
-Defined in: [src/index.ts:63](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L63)
 
 #### Inherited from
 
@@ -162,8 +138,6 @@ Defined in: [src/index.ts:63](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 
 > **oati\_version**: `"1.0"`
 
-Defined in: [src/index.ts:49](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L49)
-
 #### Inherited from
 
 [`AgentMandate`](AgentMandate.md).[`oati_version`](AgentMandate.md#oati_version)
@@ -173,8 +147,6 @@ Defined in: [src/index.ts:49](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 ### parent\_mandate?
 
 > `optional` **parent\_mandate?**: `string`
-
-Defined in: [src/index.ts:54](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L54)
 
 #### Inherited from
 
@@ -186,8 +158,6 @@ Defined in: [src/index.ts:54](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 
 > **profile**: `"https://specs.intelliger.ai/oati/profiles/rwa/v0.1"`
 
-Defined in: [src/index.ts:198](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L198)
-
 #### Overrides
 
 [`AgentMandate`](AgentMandate.md).[`profile`](AgentMandate.md#profile)
@@ -197,8 +167,6 @@ Defined in: [src/index.ts:198](https://github.com/Intelliger-ai/oati/blob/52f9fa
 ### proof?
 
 > `optional` **proof?**: [`Proof`](Proof.md)
-
-Defined in: [src/index.ts:68](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L68)
 
 #### Inherited from
 
@@ -210,8 +178,6 @@ Defined in: [src/index.ts:68](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 
 > **purpose**: `string`
 
-Defined in: [src/index.ts:55](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L55)
-
 #### Inherited from
 
 [`AgentMandate`](AgentMandate.md).[`purpose`](AgentMandate.md#purpose)
@@ -221,8 +187,6 @@ Defined in: [src/index.ts:55](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 ### resources?
 
 > `optional` **resources?**: `string`[]
-
-Defined in: [src/index.ts:57](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L57)
 
 #### Inherited from
 
@@ -234,8 +198,6 @@ Defined in: [src/index.ts:57](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 
 > `optional` **sponsor?**: `string`
 
-Defined in: [src/index.ts:53](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L53)
-
 #### Inherited from
 
 [`AgentMandate`](AgentMandate.md).[`sponsor`](AgentMandate.md#sponsor)
@@ -246,8 +208,6 @@ Defined in: [src/index.ts:53](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 
 > **status**: `"active"` \| `"suspended"` \| `"revoked"` \| `"expired"` \| `"consumed"`
 
-Defined in: [src/index.ts:65](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L65)
-
 #### Inherited from
 
 [`AgentMandate`](AgentMandate.md).[`status`](AgentMandate.md#status)
@@ -257,8 +217,6 @@ Defined in: [src/index.ts:65](https://github.com/Intelliger-ai/oati/blob/52f9fa9
 ### subject
 
 > **subject**: `` `oati:agent:${string}` ``
-
-Defined in: [src/index.ts:52](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/index.ts#L52)
 
 #### Inherited from
 

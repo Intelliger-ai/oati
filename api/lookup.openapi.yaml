@@ -2,13 +2,18 @@ openapi: 3.1.0
 info:
   title: OATI Public Lookup API
   version: 1.1.0-draft
+  license:
+    name: Apache License 2.0
+    identifier: Apache-2.0
   description: Rate-limited public resolution and verification of OATI records.
 servers:
   - url: https://api.intelliger.ai/oati/v1
 paths:
   /lookup:
     get:
+      summary: Look up a public OATI record
       operationId: lookupOatiRecord
+      security: []
       parameters:
         - name: type
           in: query

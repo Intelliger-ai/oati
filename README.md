@@ -160,6 +160,8 @@ Compatibility claims must reference a published OATI version and conformance-sui
 
 Issues and design discussions should identify the affected object, interoperability consequence, and proposed conformance test. Changes to a public object require a schema update and corresponding fixture.
 
+See the [contributor guide](CONTRIBUTING.md) for the complete local quality-gate commands, generated-file policy, and platform API compatibility process.
+
 By contributing, you agree that your contribution is licensed under Apache 2.0.
 
 ## Licence and stewardship

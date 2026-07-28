@@ -6,15 +6,11 @@
 
 # Interface: DevelopmentTransactionInput
 
-Defined in: src/development.ts:10
-
 ## Properties
 
 ### action
 
 > **action**: `string`
-
-Defined in: src/development.ts:10
 
 ***
 
@@ -22,15 +18,11 @@ Defined in: src/development.ts:10
 
 > `optional` **counterparty?**: `string`
 
-Defined in: src/development.ts:10
-
 ***
 
 ### destination?
 
 > `optional` **destination?**: `string`
-
-Defined in: src/development.ts:10
 
 ***
 
@@ -38,20 +30,14 @@ Defined in: src/development.ts:10
 
 > `optional` **protocol?**: `"http"` \| `"grpc"` \| `"mcp"` \| `"a2a"`
 
-Defined in: src/development.ts:10
-
 ***
 
 ### purpose?
 
 > `optional` **purpose?**: `string`
 
-Defined in: src/development.ts:10
-
 ***
 
 ### resource
 
 > **resource**: `string`
-
-Defined in: src/development.ts:10

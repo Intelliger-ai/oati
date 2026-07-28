@@ -6,8 +6,6 @@
 
 # Class: OatiError
 
-Defined in: [src/errors.ts:30](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L30)
-
 Base error for failures produced by the OATI SDK.
 
 ## Extends
@@ -24,8 +22,6 @@ Base error for failures produced by the OATI SDK.
 ### Constructor
 
 > **new OatiError**(`code`, `message`, `options?`): `OatiError`
-
-Defined in: [src/errors.ts:38](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L38)
 
 #### Parameters
 
@@ -55,15 +51,11 @@ Defined in: [src/errors.ts:38](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > `readonly` `optional` **cache?**: `"hit"` \| `"miss"` \| `"revalidated"`
 
-Defined in: [src/errors.ts:36](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L36)
-
 ***
 
 ### cause?
 
 > `optional` **cause?**: `unknown`
-
-Defined in: node\_modules/.pnpm/typescript@5.9.3/node\_modules/typescript/lib/lib.es2022.error.d.ts:26
 
 #### Inherited from
 
@@ -75,23 +67,17 @@ Defined in: node\_modules/.pnpm/typescript@5.9.3/node\_modules/typescript/lib/li
 
 > `readonly` **code**: [`OatiErrorCode`](../type-aliases/OatiErrorCode.md)
 
-Defined in: [src/errors.ts:31](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L31)
-
 ***
 
 ### details?
 
 > `readonly` `optional` **details?**: `unknown`
 
-Defined in: [src/errors.ts:32](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L32)
-
 ***
 
 ### message
 
 > **message**: `string`
-
-Defined in: node\_modules/.pnpm/typescript@5.9.3/node\_modules/typescript/lib/lib.es5.d.ts:1077
 
 #### Inherited from
 
@@ -103,8 +89,6 @@ Defined in: node\_modules/.pnpm/typescript@5.9.3/node\_modules/typescript/lib/li
 
 > **name**: `string`
 
-Defined in: node\_modules/.pnpm/typescript@5.9.3/node\_modules/typescript/lib/lib.es5.d.ts:1076
-
 #### Inherited from
 
 `Error.name`
@@ -114,8 +98,6 @@ Defined in: node\_modules/.pnpm/typescript@5.9.3/node\_modules/typescript/lib/li
 ### rateLimit?
 
 > `readonly` `optional` **rateLimit?**: `object`
-
-Defined in: [src/errors.ts:35](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L35)
 
 #### limit?
 
@@ -139,15 +121,11 @@ Defined in: [src/errors.ts:35](https://github.com/Intelliger-ai/oati/blob/52f9fa
 
 > `readonly` `optional` **retryAfter?**: `number`
 
-Defined in: [src/errors.ts:34](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L34)
-
 ***
 
 ### stack?
 
 > `optional` **stack?**: `string`
-
-Defined in: node\_modules/.pnpm/typescript@5.9.3/node\_modules/typescript/lib/lib.es5.d.ts:1078
 
 #### Inherited from
 
@@ -158,5 +136,3 @@ Defined in: node\_modules/.pnpm/typescript@5.9.3/node\_modules/typescript/lib/li
 ### status?
 
 > `readonly` `optional` **status?**: `number`
-
-Defined in: [src/errors.ts:33](https://github.com/Intelliger-ai/oati/blob/52f9fa955eeb6d95556b249267d471d080b5825c/sdk/typescript/src/errors.ts#L33)
