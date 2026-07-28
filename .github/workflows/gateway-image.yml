@@ -1,7 +1,6 @@
 name: Publish gateway authorizer image
 
 on:
-  workflow_dispatch:
   push:
     tags: ["v*"]
 
@@ -15,8 +14,22 @@ env:
   IMAGE_NAME: ghcr.io/intelliger-ai/oati-envoy-authorizer
 
 jobs:
+  security-gate:
+    name: Require completed independent review
+    uses: ./.github/workflows/release-security-gate.yml
+
+  production-smoke:
+    name: Require healthy hosted trust service
+    uses: ./.github/workflows/production-smoke.yml
+
   publish:
+    name: Publish approved immutable image
+    needs: [security-gate, production-smoke]
     runs-on: ubuntu-latest
+    environment: release
+    concurrency:
+      group: gateway-release-${{ github.ref }}
+      cancel-in-progress: false
     steps:
       - uses: actions/checkout@v7
       - uses: docker/setup-buildx-action@v3

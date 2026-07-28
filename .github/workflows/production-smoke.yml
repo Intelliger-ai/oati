@@ -1,6 +1,7 @@
 name: Hosted production smoke
 
 on:
+  workflow_call:
   schedule:
     - cron: "17 * * * *"
   workflow_dispatch:
