@@ -49,8 +49,10 @@ def compatible!(public_contract, platform_contract)
   public_schema = public_contract.dig("components", "schemas", "PublicRecord")
   platform_schema.fetch("required").each { |field| assert(public_schema.fetch("required").include?(field), "public record no longer requires platform field #{field}") }
   platform_schema.fetch("properties").each_key { |field| assert(public_schema.fetch("properties").key?(field), "public record removed platform field #{field}") }
-  platform_types = platform_contract.dig("paths", "/lookup", "get", "parameters", 0, "schema", "enum")
-  public_types = public_contract.dig("paths", "/lookup", "get", "parameters", 0, "schema", "enum")
+  platform_type_parameter = platform_contract.dig("paths", "/lookup", "get", "parameters").find { |item| item["name"] == "type" }
+  public_type_parameter = public_contract.dig("paths", "/lookup", "get", "parameters").find { |item| item["name"] == "type" }
+  platform_types = platform_type_parameter.dig("schema", "enum")
+  public_types = public_type_parameter.dig("schema", "enum")
   platform_types.each { |type| assert(public_types.include?(type), "public lookup removed platform record type #{type}") }
 end
 

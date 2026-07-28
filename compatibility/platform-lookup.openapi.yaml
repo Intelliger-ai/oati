@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: OATI Public Lookup API
-  version: 1.0.0-draft
+  version: 1.1.0-draft
   license:
     name: Apache License 2.0
     identifier: Apache-2.0
@@ -15,6 +15,7 @@ paths:
       operationId: lookupOatiRecord
       security: []
       parameters:
+        - $ref: "#/components/parameters/OatiVersion"
         - name: type
           in: query
           required: true
@@ -24,21 +25,122 @@ paths:
         - name: id
           in: query
           required: true
-          schema: { type: string, minLength: 1 }
+          schema:
+            type: string
+            minLength: 1
       responses:
         "200":
           description: Privacy-filtered public record and current verification state.
           headers:
-            X-RateLimit-Limit: { schema: { type: integer } }
-            X-RateLimit-Remaining: { schema: { type: integer } }
+            X-RateLimit-Limit:
+              schema: { type: integer }
+            X-RateLimit-Remaining:
+              schema: { type: integer }
+            X-RateLimit-Reset:
+              description: Unix timestamp or HTTP date for the current window reset.
+              schema: { oneOf: [{ type: integer }, { type: string }] }
+            Cache-Control:
+              schema: { type: string }
+            ETag:
+              schema: { type: string }
+            X-Request-ID:
+              schema: { type: string }
           content:
             application/json:
-              schema: { $ref: "#/components/schemas/PublicRecord" }
-        "400": { description: Invalid lookup request }
-        "404": { description: No public record found }
-        "429": { description: Rate limit exceeded }
+              schema:
+                $ref: "#/components/schemas/PublicRecord"
+        "304": { description: The cached representation is current. }
+        "400":
+          $ref: "#/components/responses/InvalidRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "406":
+          $ref: "#/components/responses/UnsupportedVersion"
+        "429":
+          description: Rate limit exceeded.
+          headers:
+            Retry-After:
+              schema: { oneOf: [{ type: integer }, { type: string }] }
+            X-RateLimit-Limit:
+              schema: { type: integer }
+            X-RateLimit-Remaining:
+              schema: { type: integer }
+          content:
+            application/problem+json:
+              schema: { $ref: "#/components/schemas/Problem" }
+        "503":
+          $ref: "#/components/responses/Unavailable"
+  /status:
+    get:
+      summary: Get public lookup dependency status
+      operationId: getLookupStatus
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/OatiVersion"
+      responses:
+        "200":
+          description: All required dependencies are operational.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceStatus" }
+        "406":
+          $ref: "#/components/responses/UnsupportedVersion"
+        "503":
+          description: One or more required dependencies are degraded.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ServiceStatus" }
 components:
+  parameters:
+    OatiVersion:
+      name: OATI-Version
+      in: header
+      required: false
+      description: Requested API contract version. Omitted and `1.0` select v1.
+      schema: { type: string, enum: ["1", "1.0"] }
+  responses:
+    InvalidRequest:
+      description: Invalid lookup request.
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+    NotFound:
+      description: No public record found; clients may cache briefly according to Cache-Control.
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+    UnsupportedVersion:
+      description: Requested API version is unsupported.
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
+    Unavailable:
+      description: Resolver or a mandatory safety dependency is temporarily unavailable.
+      content:
+        application/problem+json:
+          schema: { $ref: "#/components/schemas/Problem" }
   schemas:
+    Problem:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message, status, request_id, retryable]
+          properties:
+            code: { type: string }
+            message: { type: string }
+            status: { type: integer }
+            request_id: { type: string }
+            retryable: { type: boolean }
+    ServiceStatus:
+      type: object
+      required: [status, service, version, checked_at]
+      properties:
+        status: { type: string, enum: [operational, degraded] }
+        service: { type: string, const: oati-public-lookup }
+        version: { type: string }
+        checked_at: { type: string, format: date-time }
     PublicRecord:
       type: object
       required: [type, id, status, issuer, proof_status, public_attributes]
@@ -53,4 +155,6 @@ components:
         expires_at: { type: string, format: date-time }
         assurance_level: { type: string }
         proof_status: { type: string, enum: [verified, invalid, unavailable, unknown] }
-        public_attributes: { type: object, additionalProperties: { type: string } }
+        public_attributes:
+          type: object
+          additionalProperties: { type: string }
