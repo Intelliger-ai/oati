@@ -117,6 +117,7 @@ The current CLI is ready for object validation, fixtures, deterministic JSON pro
 | [`cli/`](cli/) | developer CLI |
 | [`sdk/`](sdk/) | TypeScript reference SDK plus Python and Go SDKs sharing one conformance suite |
 | [`conformance/`](conformance/) | shared fixtures, test vectors, and compatibility tests |
+| [`docs/`](docs/) | end-to-end tutorials, error handling, and migration policy |
 | [`api/lookup.openapi.yaml`](api/lookup.openapi.yaml) | public lookup API contract for client generation |
 | [`integrations/envoy/`](integrations/envoy/) | fail-closed Envoy ext_authz and OPA reference integration |
 | [`ARCHITECTURE.md`](ARCHITECTURE.md) | system boundaries and deployment model |
@@ -155,6 +156,8 @@ Do not report security vulnerabilities in a public issue. Until a dedicated secu
 The repository is an early developer preview. Core and profile schemas, Commerce and RWA flows, a functional CLI, and a tested TypeScript SDK now cover schema validation, lookup, signing, trust verification, deterministic authority evaluation, reference middleware, and MCP, A2A, OAuth/DPoP, AuthZEN, Cedar/OPA, and Envoy adapters. A versioned executable conformance suite covers core objects, canonicalization, cryptography, authority evaluation, and privacy projection. The cryptographic and protocol profiles require independent review and additional SDK languages remain under active development. Production lookup operations are deliberately outside this repository.
 
 Compatibility claims must reference a published OATI version and conformance-suite version.
+
+Start with [Verify your first OATI request](docs/tutorials/verify-first-request.md), then use the [developer documentation index](docs/README.md) to issue Mandates, generate Receipts, and integrate Commerce, RWA, MCP, or A2A.
 
 ## Contributing
 

@@ -43,6 +43,7 @@ jobs:
       - run: go test ./...
         working-directory: sdk/go
       - run: ./conformance/run-all.sh
+      - run: node scripts/check-docs.mjs
       - run: ./scripts/check-generated.sh
 
   cli:
