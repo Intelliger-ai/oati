@@ -5,7 +5,7 @@ Standard-library Go implementation of OATI canonical JSON, core builders, publis
 ```bash
 cd sdk/go
 go test ./...
-go run ./cmd/conformance --suite ../../conformance/suite-v0.1.json --output ../../conformance/reports/go-sdk-0.1.0-dev.0.json
+go run ./cmd/conformance --suite ../../conformance/suite-v0.1.json --implementation-version 0.2.0-dev.0 --output ../../conformance/reports/go-sdk-0.2.0-dev.0.json
 ```
 
 The conformance command reads the language-neutral suite directly; it does not maintain Go-specific vectors.

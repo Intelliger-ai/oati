@@ -15,7 +15,7 @@ import (
 	"time"
 )
 
-var schemaFiles = map[string]string{"passport": "passport.schema.json", "mandate": "mandate.schema.json", "envelope": "transaction-envelope.schema.json", "decision": "decision.schema.json", "receipt": "receipt.schema.json", "publicRecord": "public-record.schema.json"}
+var schemaFiles = map[string]string{"proof": "proof.schema.json", "verificationKey": "verification-key.schema.json", "issuer": "issuer.schema.json", "revocation": "revocation.schema.json", "evaluationRequest": "evaluation-request.schema.json", "evaluationResult": "evaluation-result.schema.json", "publicRecord": "public-record.schema.json", "conformanceSuite": "conformance-suite.schema.json", "conformanceReport": "conformance-report.schema.json", "passport": "passport.schema.json", "mandate": "mandate.schema.json", "envelope": "transaction-envelope.schema.json", "decision": "decision.schema.json", "receipt": "receipt.schema.json", "commerceOffer": "commerce/merchant-service-profile.schema.json", "commerceMandate": "commerce/purchase-mandate.schema.json", "commerceReceipt": "commerce/commerce-receipt.schema.json", "rwaAsset": "rwa/asset-profile.schema.json", "rwaStateClaim": "rwa/asset-state-claim.schema.json", "rwaMandate": "rwa/asset-mandate.schema.json", "rwaReceipt": "rwa/rwa-receipt.schema.json"}
 var publicFields = []string{"type", "id", "display_name", "status", "issuer", "organisation_id", "issued_at", "expires_at", "assurance_level", "proof_status", "public_attributes"}
 
 func CanonicalJSON(value any) (string, error) {
@@ -68,7 +68,7 @@ func ValidateSchema(name string, value any, schemaRoot string) ([]string, error)
 		return nil, err
 	}
 	codes := map[string]bool{}
-	validate(value, schema, schema, codes)
+	validate(value, schema, schema, codes, schemaRoot)
 	result := make([]string, 0, len(codes))
 	for code := range codes {
 		result = append(result, code)
@@ -76,17 +76,31 @@ func ValidateSchema(name string, value any, schemaRoot string) ([]string, error)
 	sort.Strings(result)
 	return result, nil
 }
-func validate(value any, schema, root map[string]any, codes map[string]bool) {
+func validate(value any, schema, root map[string]any, codes map[string]bool, schemaRoot string) {
 	if reference := str(schema["$ref"]); reference != "" {
-		target := any(root)
-		for _, part := range strings.Split(strings.TrimPrefix(reference, "#/"), "/") {
-			target = target.(map[string]any)[part]
+		if strings.HasPrefix(reference, "#/") {
+			target := any(root)
+			for _, part := range strings.Split(strings.TrimPrefix(reference, "#/"), "/") {
+				target = target.(map[string]any)[part]
+			}
+			validate(value, target.(map[string]any), root, codes, schemaRoot)
+		} else {
+			data, err := os.ReadFile(schemaRoot + "/" + reference[strings.LastIndex(reference, "/")+1:])
+			if err != nil {
+				codes["SCHEMA_REFERENCE"] = true
+				return
+			}
+			var external map[string]any
+			if decode(data, &external) != nil {
+				codes["SCHEMA_REFERENCE"] = true
+				return
+			}
+			validate(value, external, external, codes, schemaRoot)
 		}
-		validate(value, target.(map[string]any), root, codes)
 		return
 	}
 	for _, branch := range list(schema["allOf"]) {
-		validate(value, object(branch), root, codes)
+		validate(value, object(branch), root, codes, schemaRoot)
 	}
 	if kind := str(schema["type"]); kind != "" && !matchesType(value, kind) {
 		codes["SCHEMA_TYPE"] = true
@@ -123,7 +137,7 @@ func validate(value any, schema, root map[string]any, codes map[string]bool) {
 		}
 		if items := object(schema["items"]); items != nil {
 			for _, item := range typed {
-				validate(item, items, root, codes)
+				validate(item, items, root, codes, schemaRoot)
 			}
 		}
 	case map[string]any:
@@ -142,9 +156,9 @@ func validate(value any, schema, root map[string]any, codes map[string]bool) {
 		}
 		for key, item := range typed {
 			if child := object(properties[key]); child != nil {
-				validate(item, child, root, codes)
+				validate(item, child, root, codes, schemaRoot)
 			} else if child := object(schema["additionalProperties"]); child != nil {
-				validate(item, child, root, codes)
+				validate(item, child, root, codes, schemaRoot)
 			}
 		}
 	}

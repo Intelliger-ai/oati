@@ -5,7 +5,10 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
+	"io"
+	"net/http"
 	"os"
+	"strings"
 	"testing"
 	"time"
 )
@@ -37,6 +40,30 @@ func TestCommerceReplayVector(t *testing.T) {
 	t.Fatal("vector missing")
 }
 
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (function roundTripFunc) RoundTrip(request *http.Request) (*http.Response, error) {
+	return function(request)
+}
+func TestResolverClientCachesTypedRecord(t *testing.T) {
+	calls := 0
+	transport := roundTripFunc(func(request *http.Request) (*http.Response, error) {
+		calls++
+		body := `{"type":"agent","id":"oati:agent:test","display_name":"Test","status":"active","issuer":"oati:issuer:test","proof_status":"verified","public_attributes":{}}`
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{"ETag": []string{"test-v1"}}}, nil
+	})
+	client := NewResolverClient("https://resolver.test/oati/v1")
+	client.HTTPClient = &http.Client{Transport: transport}
+	first, err := client.LookupDetailed(t.Context(), "agent", "oati:agent:test", false)
+	if err != nil || first.Cache != "miss" {
+		t.Fatalf("first lookup: %#v %v", first, err)
+	}
+	second, err := client.LookupDetailed(t.Context(), "agent", "oati:agent:test", false)
+	if err != nil || second.Cache != "hit" || calls != 1 {
+		t.Fatalf("cached lookup: %#v %v calls=%d", second, err, calls)
+	}
+}
+
 func TestSignAndVerifyDocument(t *testing.T) {
 	public, private, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
@@ -51,5 +78,23 @@ func TestSignAndVerifyDocument(t *testing.T) {
 	bundle := map[string]any{"trust_anchors": []any{"oati:issuer:test"}, "keys": []any{map[string]any{"id": "oati:key:test", "issuer": "oati:issuer:test", "status": "active", "public_key_jwk": map[string]any{"x": base64.RawURLEncoding.EncodeToString(public)}}}}
 	if codes := VerifyDocument(signed, bundle, "https://example.test", now.Add(time.Minute), NewReplayCache()); len(codes) > 0 {
 		t.Fatalf("verification failed: %v", codes)
+	}
+}
+
+func TestProfileSchemasResolveSharedCoreReferences(t *testing.T) {
+	fixtures := map[string]string{"commerceMandate": "../../examples/commerce/purchase-mandate.json", "rwaReceipt": "../../examples/rwa/rwa-receipt.json"}
+	for schema, path := range fixtures {
+		data, err := os.ReadFile(path)
+		if err != nil {
+			t.Fatal(err)
+		}
+		var value any
+		if err := decode(data, &value); err != nil {
+			t.Fatal(err)
+		}
+		codes, err := ValidateSchema(schema, value, "../../schemas")
+		if err != nil || len(codes) > 0 {
+			t.Fatalf("%s: %v %v", schema, codes, err)
+		}
 	}
 }

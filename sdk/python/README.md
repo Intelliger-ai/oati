@@ -5,7 +5,7 @@ Dependency-free Python 3.11+ implementation of OATI canonical JSON, core builder
 ```bash
 python3 -m pip install -e sdk/python
 PYTHONDONTWRITEBYTECODE=1 python3 -m unittest -v sdk/python/test_sdk.py
-python3 sdk/python/conformance.py --output conformance/reports/python-sdk-0.1.0-dev.0.json
+python3 sdk/python/conformance.py --implementation-version 0.2.0-dev.0 --output conformance/reports/python-sdk-0.2.0-dev.0.json
 ```
 
 The conformance command reads the language-neutral `conformance/suite-v0.1.json`; it does not maintain Python-specific vectors.
