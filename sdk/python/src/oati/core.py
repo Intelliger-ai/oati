@@ -1,0 +1,82 @@
+from __future__ import annotations
+import json, math, re
+from copy import deepcopy
+from datetime import datetime
+from pathlib import Path
+from typing import Any
+
+SCHEMAS = {"passport":"passport.schema.json","mandate":"mandate.schema.json","envelope":"transaction-envelope.schema.json","decision":"decision.schema.json","receipt":"receipt.schema.json","publicRecord":"public-record.schema.json"}
+PUBLIC_FIELDS = ("type","id","display_name","status","issuer","organisation_id","issued_at","expires_at","assurance_level","proof_status","public_attributes")
+
+def canonical_json(value: Any) -> str:
+    def check(item: Any) -> None:
+        if item is None or isinstance(item,(str,bool,int)): return
+        if isinstance(item,float):
+            if not math.isfinite(item): raise ValueError("canonical JSON rejects non-finite numbers")
+            return
+        if isinstance(item,list):
+            for child in item: check(child)
+            return
+        if isinstance(item,dict):
+            if not all(isinstance(key,str) for key in item): raise TypeError("JSON object keys must be strings")
+            for child in item.values(): check(child)
+            return
+        raise TypeError(f"not a JSON value: {type(item).__name__}")
+    check(value)
+    return json.dumps(value,ensure_ascii=False,separators=(",",":"),sort_keys=True)
+
+def _builder(value: dict[str,Any], arrays: tuple[str,...]=()) -> dict[str,Any]:
+    result=deepcopy(value); result["oati_version"]="1.0"
+    for key in arrays:
+        if key in result: result[key]=list(result[key])
+    return result
+def create_passport(value): return _builder(value,("verification_methods",))
+def create_mandate(value): return _builder(value,("actions","resources","counterparties","destinations"))
+def create_envelope(value): return _builder(value)
+def create_decision(value): return _builder(value,("reason_codes","obligations"))
+def create_receipt(value): return _builder(value)
+
+def project_public_record(source: dict[str,Any]) -> dict[str,Any]:
+    projected={key:deepcopy(source[key]) for key in PUBLIC_FIELDS if key in source}
+    required=("type","id","display_name","status","issuer","proof_status","public_attributes")
+    if any(key not in projected for key in required): raise ValueError("registry source cannot produce a public record")
+    return projected
+
+def validate_schema(name: str, value: Any, schema_root: Path|None=None) -> list[str]:
+    root=schema_root or Path(__file__).resolve().parents[4]/"schemas"
+    if name not in SCHEMAS: raise KeyError(name)
+    schema=json.loads((root/SCHEMAS[name]).read_text())
+    codes:set[str]=set(); _validate(value,schema,schema,codes)
+    return sorted(codes)
+
+def _validate(value:Any,schema:dict[str,Any],root:dict[str,Any],codes:set[str])->None:
+    if "$ref" in schema:
+        target=root
+        for part in schema["$ref"].removeprefix("#/").split("/"): target=target[part]
+        _validate(value,target,root,codes); return
+    for branch in schema.get("allOf",[]): _validate(value,branch,root,codes)
+    expected=schema.get("type")
+    valid_type = expected is None or (expected=="object" and isinstance(value,dict)) or (expected=="array" and isinstance(value,list)) or (expected=="string" and isinstance(value,str)) or (expected=="integer" and isinstance(value,int) and not isinstance(value,bool)) or (expected=="number" and isinstance(value,(int,float)) and not isinstance(value,bool)) or (expected=="boolean" and isinstance(value,bool))
+    if not valid_type: codes.add("SCHEMA_TYPE"); return
+    if "const" in schema and value!=schema["const"]: codes.add("SCHEMA_CONST")
+    if "enum" in schema and value not in schema["enum"]: codes.add("SCHEMA_ENUM")
+    if isinstance(value,str):
+        if len(value)<schema.get("minLength",0): codes.add("SCHEMA_MINLENGTH")
+        if "pattern" in schema and re.search(schema["pattern"],value) is None: codes.add("SCHEMA_PATTERN")
+        if schema.get("format")=="date-time":
+            try: datetime.fromisoformat(value.replace("Z","+00:00"))
+            except ValueError: codes.add("SCHEMA_FORMAT")
+        if schema.get("format")=="uri" and ":" not in value: codes.add("SCHEMA_FORMAT")
+    if isinstance(value,list):
+        if len(value)<schema.get("minItems",0): codes.add("SCHEMA_MINITEMS")
+        if schema.get("uniqueItems") and len({canonical_json(item) for item in value})!=len(value): codes.add("SCHEMA_UNIQUEITEMS")
+        if "items" in schema:
+            for item in value: _validate(item,schema["items"],root,codes)
+    if isinstance(value,dict):
+        for required in schema.get("required",[]):
+            if required not in value: codes.add("SCHEMA_REQUIRED")
+        properties=schema.get("properties",{})
+        if schema.get("additionalProperties") is False and any(key not in properties for key in value): codes.add("SCHEMA_ADDITIONALPROPERTIES")
+        for key,item in value.items():
+            if key in properties: _validate(item,properties[key],root,codes)
+            elif isinstance(schema.get("additionalProperties"),dict): _validate(item,schema["additionalProperties"],root,codes)

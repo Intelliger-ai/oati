@@ -1,5 +1,7 @@
 # OATI executable conformance suite
 
+Run TypeScript, Python, and Go against the exact same manifest with `./conformance/run-all.sh`. The harness also rejects omitted, added, or reordered case IDs.
+
 This directory is the portable compatibility contract for OATI 1.0. The suite manifest, fixtures, expected codes, and report format are JSON so any language can implement an adapter without depending on TypeScript. The included reference runner executes the published TypeScript SDK.
 
 ## Run it

@@ -115,7 +115,7 @@ The current CLI is ready for object validation, fixtures, deterministic JSON pro
 | [`schemas/`](schemas/) | versioned JSON Schemas |
 | [`examples/`](examples/) | valid example objects and transactions |
 | [`cli/`](cli/) | developer CLI |
-| [`sdk/typescript/`](sdk/typescript/) | builders, schemas, crypto/trust verification, deterministic authority evaluator, lookup, reference HTTP middleware, and typed errors |
+| [`sdk/`](sdk/) | TypeScript reference SDK plus Python and Go SDKs sharing one conformance suite |
 | [`conformance/`](conformance/) | shared fixtures, test vectors, and compatibility tests |
 | [`api/lookup.openapi.yaml`](api/lookup.openapi.yaml) | public lookup API contract for client generation |
 | [`integrations/envoy/`](integrations/envoy/) | fail-closed Envoy ext_authz and OPA reference integration |
