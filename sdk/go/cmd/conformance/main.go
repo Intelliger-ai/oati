@@ -23,13 +23,18 @@ type result struct {
 }
 
 func main() {
-	suitePath := flag.String("suite", "../../conformance/suite-v0.3.json", "")
+	suitePath := flag.String("suite", "../../conformance/suite-v0.4.json", "")
 	output := flag.String("output", "", "")
-	version := flag.String("implementation-version", "0.1.0-dev.0", "")
+	version := flag.String("implementation-version", "0.2.0-dev.0", "")
 	flag.Parse()
 	absolute, _ := filepath.Abs(*suitePath)
-	suite := expandSuite(load(absolute).(map[string]any), absolute, map[string]bool{})
 	base := filepath.Dir(absolute)
+	schemaRoot := filepath.Clean(filepath.Join(base, "../schemas"))
+	manifest := load(absolute).(map[string]any)
+	if codes, err := oati.ValidateSchema("conformanceSuite", manifest, schemaRoot); err != nil || len(codes) > 0 {
+		panic(fmt.Sprintf("invalid conformance suite: %v %v", codes, err))
+	}
+	suite := expandSuite(manifest, absolute, map[string]bool{}, schemaRoot)
 	results := []result{}
 	for _, raw := range suite["cases"].([]any) {
 		c := raw.(map[string]any)
@@ -54,6 +59,14 @@ func main() {
 		}
 	}
 	report := map[string]any{"report_version": "1.0", "suite_version": suite["suite_version"], "standard_version": suite["standard_version"], "implementation": map[string]any{"name": "github.com/Intelliger-ai/oati/sdk/go", "version": *version, "language": "go"}, "summary": map[string]any{"total": len(results), "passed": passed, "failed": len(results) - passed}, "results": results}
+	reportEncoded, _ := json.Marshal(report)
+	var genericReport any
+	reportDecoder := json.NewDecoder(bytes.NewReader(reportEncoded))
+	reportDecoder.UseNumber()
+	_ = reportDecoder.Decode(&genericReport)
+	if codes, err := oati.ValidateSchema("conformanceReport", genericReport, schemaRoot); err != nil || len(codes) > 0 {
+		panic(fmt.Sprintf("invalid conformance report: %v %v", codes, err))
+	}
 	encoded, _ := json.MarshalIndent(report, "", "  ")
 	encoded = append(encoded, '\n')
 	if *output != "" {
@@ -229,7 +242,7 @@ func load(path string) any {
 	}
 	return value
 }
-func expandSuite(suite map[string]any, path string, visited map[string]bool) map[string]any {
+func expandSuite(suite map[string]any, path string, visited map[string]bool, schemaRoot string) map[string]any {
 	if visited[path] {
 		panic("cyclic conformance suite inheritance")
 	}
@@ -239,7 +252,11 @@ func expandSuite(suite map[string]any, path string, visited map[string]bool) map
 		return suite
 	}
 	parentPath := filepath.Join(filepath.Dir(path), parentName)
-	parent := expandSuite(load(parentPath).(map[string]any), parentPath, visited)
+	parentManifest := load(parentPath).(map[string]any)
+	if codes, err := oati.ValidateSchema("conformanceSuite", parentManifest, schemaRoot); err != nil || len(codes) > 0 {
+		panic(fmt.Sprintf("invalid inherited conformance suite: %v %v", codes, err))
+	}
+	parent := expandSuite(parentManifest, parentPath, visited, schemaRoot)
 	if fmt.Sprint(parent["standard_version"]) != fmt.Sprint(suite["standard_version"]) {
 		panic("inherited suite standard version mismatch")
 	}

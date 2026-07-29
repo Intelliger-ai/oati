@@ -46,13 +46,15 @@ const manifest = {
 
 function headers(cache = false) {
   return { "content-type": "application/json", "oati-version": "1.0", "x-request-id": "request-smoke", "access-control-allow-origin": manifest.cors_origin,
+    "access-control-allow-methods": "GET, OPTIONS", "access-control-allow-headers": "OATI-Version, Accept",
     ...(cache ? { "cache-control": "public, max-age=60", etag: '"smoke"', "x-ratelimit-limit": "60", "x-ratelimit-remaining": "59", "x-ratelimit-reset": "60" } : {}) }
 }
 function json(value, status = 200, cache = false) { return new Response(JSON.stringify(value), { status, headers: headers(cache) }) }
-function problem(status, code) { return json({ error: { status, code, message: code, request_id: "request-smoke", retryable: false } }, status) }
+function problem(status, code) { return new Response(JSON.stringify({ error: { status, code, message: code, request_id: "request-smoke", retryable: false } }), { status, headers: { ...headers(), "content-type": "application/problem+json" } }) }
 
 async function fetcher(input, init = {}) {
   const url = new URL(input)
+  if (init.method === "OPTIONS") return new Response(null, { status: 204, headers: headers() })
   if (url.pathname.endsWith("/status")) {
     if (init.headers?.["OATI-Version"] === "999") return problem(406, "unsupported_version")
     return json({ status: "operational", service: "oati-public-lookup", version: "test", checked_at: now.toISOString() })
@@ -67,17 +69,31 @@ async function fetcher(input, init = {}) {
     ? records.get("revocation\0oati:revocation:smoke:production")
     : records.get(`${type}\0${url.searchParams.get("id")}`)
   if (!value) return problem(404, "record_not_found")
-  if (init.headers?.["If-None-Match"] === '"smoke"') return new Response(null, { status: 304, headers: { etag: '"smoke"' } })
+  if (init.headers?.["If-None-Match"] === '"smoke"') return new Response(null, { status: 304, headers: headers(true) })
   return json(value, 200, true)
 }
 
 test("hosted smoke covers the ten-record lookup and discovery contract", async () => {
-  const report = await runProductionLookupSmoke({ manifest, fetcher, now, verifySignedDocument: async () => ({ verified: true, issues: [] }) })
+  const report = await runProductionLookupSmoke({ manifest, fetcher, now, inspectTls: async () => ({ protocol: "TLSv1.3", valid_until: future }), verifySignedDocument: async () => ({ verified: true, issues: [] }) })
   assert.deepEqual(report.inventory, { expected: 10, resolved: 10 })
   assert.equal(report.summary.failed, 0, JSON.stringify(report.checks.filter((item) => item.status === "fail")))
   assert.equal(report.checks.some((item) => item.name === "discovery.organisation"), true)
+  assert.equal(report.checks.some((item) => item.name === "tls.endpoint"), true)
+  assert.equal(report.checks.some((item) => item.name === "api.cors-preflight"), true)
 })
 
 test("hosted smoke rejects an incomplete reviewed inventory", async () => {
   await assert.rejects(() => runProductionLookupSmoke({ manifest: { ...manifest, records: manifest.records.slice(1) }, fetcher, now }), /exactly 10 records/)
+})
+
+test("hosted smoke records a missing request ID as a contract failure", async () => {
+  const withoutRequestId = async (input, init) => {
+    const response = await fetcher(input, init)
+    const responseHeaders = new Headers(response.headers)
+    responseHeaders.delete("x-request-id")
+    return new Response(response.body, { status: response.status, headers: responseHeaders })
+  }
+  const report = await runProductionLookupSmoke({ manifest, fetcher: withoutRequestId, now, inspectTls: async () => ({ protocol: "TLSv1.3", valid_until: future }), verifySignedDocument: async () => ({ verified: true, issues: [] }) })
+  assert.ok(report.summary.failed > 0)
+  assert.match(report.checks.find((item) => item.name === "status.operational").error, /X-Request-ID/)
 })

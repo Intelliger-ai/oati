@@ -71,7 +71,7 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
           cache-dependency-path: |
-            cli/go.sum
+            cli/go.mod
             sdk/go/go.mod
       - run: go run ./scripts/test-package-install.go
         working-directory: sdk/go

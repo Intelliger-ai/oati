@@ -4,7 +4,7 @@ Thank you for helping build an interoperable trust standard for autonomous trans
 
 ## Development environment
 
-The repository's CI baseline is Node.js 24, pnpm 10.14, Python 3.13, Go 1.24, and Ruby 3.3. Install the TypeScript dependencies before running the complete gate set:
+The repository's CI baseline is Node.js 24, pnpm 10.14, Python 3.13, Go 1.25.12, and Ruby 3.3. Install the TypeScript dependencies before running the complete gate set:
 
 ```sh
 cd sdk/typescript

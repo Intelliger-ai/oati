@@ -28,5 +28,5 @@
   "issued_at": "2026-07-27T08:00:00Z",
   "expires_at": "2026-08-27T08:00:00Z",
   "issuer": "oati:org:acme-weather",
-  "proof": { "type": "DataIntegrityProof", "signature": "example" }
+  "proof": { "type": "OatiJwsProof2026", "cryptosuite": "eddsa-jcs-2022", "algorithm": "EdDSA", "created": "2026-07-27T00:00:00Z", "expires": "2026-07-27T00:05:00Z", "verification_method": "oati:key:acme-weather:signing-1", "proof_purpose": "assertionMethod", "audience": "https://api.intelliger.ai", "nonce": "merchant-profile-proof-0001", "signature": "ZXhhbXBsZQ..c2lnbmF0dXJl" }
 }

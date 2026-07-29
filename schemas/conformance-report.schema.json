@@ -27,7 +27,7 @@
         "properties": {
           "id": { "type": "string" }, "category": { "type": "string" }, "status": { "enum": ["pass", "fail"] },
           "expected_outcome": { "enum": ["pass", "fail"] }, "observed_outcome": { "enum": ["pass", "fail"] },
-          "codes": { "type": "array", "items": { "type": "string" } }
+          "codes": { "type": "array", "uniqueItems": true, "items": { "type": "string" } }
         }
       }
     }

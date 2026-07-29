@@ -33,6 +33,8 @@ The evaluator denies unless all applicable checks pass:
 8. Idempotency key has not been consumed.
 9. Proposed calls, amount, currency, and quantity remain inside applicable limits.
 
+When an Envelope declares a profile, it must match the Mandate profile. Profile data carried in a signed Envelope is bound to the corresponding evaluation context; a caller cannot substitute a different price, quantity, idempotency key, asset, or State Claim after signature verification.
+
 An omitted optional constraint is unbounded. An empty constraint array allows nothing.
 
 ## Delegation and non-amplification
@@ -56,6 +58,8 @@ Additional child restrictions are permitted. A parent constraint may not disappe
 ## Consumption
 
 Core consumption supports calls, decimal amount and currency, decimal quantity, idempotency key, and a consumed flag. Decimal values are non-negative base-10 strings and are evaluated using arbitrary-precision integer arithmetic—never binary floating point.
+
+For Commerce and RWA evaluations, profile-derived accounting fields take precedence over optional generic `consumption` input. If the caller supplies one of those fields with a different value, evaluation denies with `CONSUMPTION_CONTEXT_MISMATCH`. A caller also cannot disable consumption of a one-time Mandate. Generic `limits.max_quantity`, when present, applies cumulatively.
 
 The evaluator only proposes state. Production services MUST use compare-and-swap, serializable transactions, or an equivalent atomic mechanism so concurrent requests cannot both spend the same remaining authority.
 

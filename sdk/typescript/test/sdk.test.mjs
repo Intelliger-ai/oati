@@ -136,6 +136,23 @@ test("public projection uses a strict privacy allowlist", async () => {
   assert.equal(validateSchema("publicRecord", projected).valid, true)
 })
 
+test("public projection allow-lists attributes for every record type and rejects nested secrets", () => {
+  const allowed = {
+    organisation: "environment", issuer: "parent", key: "algorithm", agent: "protocols", passport: "subject",
+    mandate: "subject", receipt: "outcome", revocation: "target", service: "document", profile: "document",
+  }
+  for (const [type, attribute] of Object.entries(allowed)) {
+    const source = { type, id: `oati:${type}:privacy`, display_name: type, status: "active", issuer: "oati:issuer:privacy",
+      proof_status: "verified", public_attributes: { [attribute]: attribute === "document" ? "{}" : "public", customer_payload: "secret" } }
+    assert.deepEqual(projectPublicRecord(source).public_attributes, { [attribute]: source.public_attributes[attribute] }, type)
+  }
+  const nestedSecret = { type: "service", id: "oati:service:privacy", display_name: "service", status: "active", issuer: "oati:issuer:privacy",
+    proof_status: "verified", public_attributes: { document: JSON.stringify({ metadata: { api_key: "must-not-leak" } }) } }
+  assert.throws(() => projectPublicRecord(nestedSecret), /forbidden field api_key/)
+  const privateJwk = { ...nestedSecret, public_attributes: { document: JSON.stringify({ key: { kty: "OKP", crv: "Ed25519", x: "AA", d: "private" } }) } }
+  assert.throws(() => projectPublicRecord(privateJwk), /private JWK material/)
+})
+
 test("public key schema uses top-level issuer and validity", () => {
   const key = {
     type: "key", id: "oati:key:test:projection-1", display_name: "Projection key", status: "active",
@@ -166,6 +183,8 @@ test("core builders add the OATI version and preserve inputs", async () => {
   assert.equal(validateSchema("mandate", mandate).valid, true)
   mandate.actions.push("changed")
   assert.notDeepEqual(mandate.actions, mandateInput.actions)
+  mandate.limits.max_total = "999.00"
+  assert.equal(mandateInput.limits.max_total, "1.00")
 })
 
 test("Envelope, Decision, and Receipt builders produce schema-valid objects", async () => {
@@ -198,6 +217,12 @@ test("canonical JSON rejects non-JSON and cyclic values with a structured error"
   assert.throws(() => canonicalJson({ value: undefined }), (error) => error instanceof OatiError && error.code === "INVALID_CANONICAL_VALUE")
   const cyclic = {}; cyclic.self = cyclic
   assert.throws(() => canonicalJson(cyclic), (error) => error instanceof OatiError && error.code === "INVALID_CANONICAL_VALUE")
+  assert.throws(() => canonicalJson({ value: "\ud800" }), (error) => error instanceof OatiError && error.code === "INVALID_CANONICAL_VALUE")
+})
+
+test("canonical JSON follows RFC 8785 number and UTF-16 property ordering rules", () => {
+  assert.equal(canonicalJson({ one: 1.0, negative: -0, fixed: 1e20, scientific: 1e21 }), '{"fixed":100000000000000000000,"negative":0,"one":1,"scientific":1e+21}')
+  assert.equal(canonicalJson({ "דּ": 7, "😀": 6, "€": 5 }), '{"€":5,"😀":6,"דּ":7}')
 })
 
 test("lookup client encodes input and returns a typed public record", async () => {
@@ -347,7 +372,7 @@ test("service discovery decodes trusted records and follows a federated resolver
   const organisation = "oati:org:merchant-b"
   const document = { oati_version: "1.0", id: "oati:service:merchant-b:checkout", organisation_id: organisation,
     issuer: "oati:issuer:merchant-b", display_name: "Checkout", endpoints: [{ id: "purchase", url: "https://merchant.example/purchase", protocol: "http", audience: "https://merchant.example" }],
-    accepted_profiles: ["oati:profile:commerce:1"], status: "active", issued_at: "2026-07-28T00:00:00Z" }
+    accepted_profiles: [], status: "active", issued_at: "2026-07-28T00:00:00Z" }
   const service = { type: "service", id: document.id, organisation_id: organisation, issuer: document.issuer,
     status: "active", proof_status: "verified", public_attributes: { document: JSON.stringify(document) } }
   const calls = []
@@ -361,6 +386,22 @@ test("service discovery decodes trusted records and follows a federated resolver
   const federated = await client.discoverFederated("merchant.example", organisation)
   assert.equal(federated.services[0].record.id, document.id)
   assert.equal(calls[2], `https://resolver.example/oati/v1/discovery?organisation_id=${encodeURIComponent(organisation)}`)
+})
+
+test("service discovery fails over resolvers and rejects unpublished Profile references", async () => {
+  const payload = JSON.parse(await readFile(new URL("../../../conformance/discovery/organisation-valid.json", import.meta.url), "utf8"))
+  const calls = []
+  const client = new OatiLookupClient({ resolverUrls: ["https://primary.example/oati/v1", "https://secondary.example/oati/v1"], fetch: async (url) => {
+    calls.push(String(url))
+    return String(url).startsWith("https://primary.example") ? Response.json({}, { status: 503 }) : Response.json(payload)
+  } })
+  assert.equal((await client.discoverOrganisation(payload.organisation_id)).profiles.length, 1)
+  assert.equal(calls.length, 2)
+
+  const incomplete = structuredClone(payload); incomplete.profiles = []
+  const invalid = new OatiLookupClient({ fetch: async () => Response.json(incomplete) })
+  await assert.rejects(() => invalid.discoverOrganisation(payload.organisation_id),
+    (error) => error instanceof OatiLookupError && error.code === "LOOKUP_INVALID_RESPONSE")
 })
 
 test("lookup normalizes legacy key validity attributes to the top-level contract", async () => {
@@ -477,6 +518,16 @@ test("reference middleware denies authority and fails closed", async () => {
   const signerFailure = await noReceipt(fixture.request(deniedEnvelope), () => Response.json({ should_not_run: true }))
   assert.equal(signerFailure.status, 503)
   assert.equal((await signerFailure.json()).code, "MIDDLEWARE_UNAVAILABLE")
+
+  const invalidCorrelation = createOatiMiddleware({ ...fixture.options, generateCorrelationId: () => "invalid correlation value" })
+  const correlationFailure = await invalidCorrelation(fixture.request(deniedEnvelope), () => Response.json({ should_not_run: true }))
+  assert.equal(correlationFailure.status, 503)
+  assert.equal((await correlationFailure.json()).code, "MIDDLEWARE_UNAVAILABLE")
+
+  const wrongReceipt = createOatiMiddleware({ ...fixture.options, signReceipt: async (draft, context) => fixture.options.signReceipt({ ...draft, transaction_id: "oati:tx:test:wrong" }, context) })
+  const receiptBindingFailure = await wrongReceipt(fixture.request(deniedEnvelope), () => Response.json({ should_not_run: true }))
+  assert.equal(receiptBindingFailure.status, 503)
+  assert.equal((await receiptBindingFailure.json()).code, "MIDDLEWARE_UNAVAILABLE")
 })
 
 test("reference middleware requires atomic usage storage for constrained Mandates", async () => {
@@ -517,6 +568,15 @@ test("reference middleware atomically consumes usage and receipts conflicts and 
   assert.equal(failed.status, 500)
   const failedReceipt = JSON.parse(Buffer.from(failed.headers.get("OATI-Receipt"), "base64url").toString("utf8"))
   assert.equal(failedReceipt.outcome, "failed")
+
+  const reservedFixture = await middlewareFixture()
+  const { proof: _reservedProof, ...reservedUnsignedMandate } = reservedFixture.mandate
+  const reservedMandate = await reservedFixture.sign({ ...reservedUnsignedMandate, limits: { max_calls: 1 } }, "mandate-nonce-0000000006")
+  let reservedUsage
+  const reservedStore = { load: async () => ({ calls: 0 }), compareAndSet: async (_id, _previous, next) => { reservedUsage = next; return true } }
+  const reservedFailure = await createOatiMiddleware({ ...reservedFixture.options, usageStore: reservedStore })(reservedFixture.request(reservedFixture.envelope, reservedMandate), () => { throw new Error("upstream failed") })
+  assert.equal(reservedFailure.status, 500)
+  assert.equal(reservedUsage.calls, 1, "fail-closed reservation must not be released after an uncertain execution")
 })
 
 test("MCP and A2A adapters produce protocol metadata and schema-valid Envelopes", async () => {
@@ -535,6 +595,7 @@ test("MCP and A2A adapters produce protocol metadata and schema-valid Envelopes"
 
   const card = a2aAgentCard({ name: "Weather" }, "https://auth.example/authorize", "https://auth.example/token", { "a2a:send": "Send messages" })
   assert.ok(card.capabilities.extensions.some((item) => item.uri === OATI_A2A_EXTENSION_URI))
+  assert.equal(a2aAgentCard(card, "https://auth.example/authorize", "https://auth.example/token", { "a2a:send": "Send messages" }).security.length, 1)
   const a2aEnvelope = await a2aMessageEnvelope({ ...common, id: "oati:tx:test:adapter:2", targetAgentId: "oati:agent:weather:server", messageId: "message-1", contextId: "context-1", parts: [{ text: "forecast" }] })
   assert.equal(a2aEnvelope.action, "a2a.message.send")
   assert.equal(validateSchema("envelope", a2aEnvelope).valid, true)
@@ -557,12 +618,25 @@ test("OAuth and DPoP adapter verifies signature, request, token, key, and replay
   const jkt = await jwkThumbprint(jwk)
   const verified = await verifyDpopProof(proof, request, { accessToken: token, expectedJkt: jkt, now: new Date("2026-07-27T12:00:00Z"), replayStore })
   assert.equal(verified.valid, true, JSON.stringify(verified.issues))
+  assert.ok([...used][0].startsWith(`${jkt}\u0000`), "DPoP replay scope must include the key thumbprint")
   assert.deepEqual((await verifyDpopProof(proof, request, { accessToken: token, expectedJkt: jkt, now: new Date("2026-07-27T12:00:00Z"), replayStore })).issues, ["DPOP_REPLAY"])
 
   const mandate = await example("commerce/purchase-mandate.json"), envelope = await example("commerce/transaction-envelope.json")
   const oauthClaims = oatiOAuthClaims(envelope, mandate, jkt)
   assert.deepEqual(validateOAuthBinding(oauthClaims, envelope, jkt), [])
   assert.ok(validateOAuthBinding({ ...oauthClaims, cnf: { jkt: "wrong" } }, envelope, jkt).includes("OAUTH_DPOP_KEY_MISMATCH"))
+
+  const identity = "AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+  const forgedHeader = encoded({ typ: "dpop+jwt", alg: "EdDSA", jwk: { kty: "OKP", crv: "Ed25519", x: identity } })
+  const forgedClaims = encoded({ ...claims, jti: "small-order-forgery" })
+  const forgedSignature = Buffer.concat([Buffer.from([1]), Buffer.alloc(63)]).toString("base64url")
+  const forged = await verifyDpopProof(`${forgedHeader}.${forgedClaims}.${forgedSignature}`, request, { accessToken: token, now: new Date("2026-07-27T12:00:00Z"), replayStore })
+  assert.deepEqual(forged.issues, ["DPOP_JWK_INVALID"])
+
+  const unavailable = await verifyDpopProof(proof.replace("dpop-jti-000000000001", "unused"), request, { accessToken: token, expectedJkt: jkt, now: new Date("2026-07-27T12:00:00Z"), replayStore: { checkAndStore: async () => { throw new Error("offline") } } })
+  assert.equal(unavailable.valid, false)
+  assert.deepEqual(unavailable.issues, ["DPOP_REPLAY_UNAVAILABLE"])
+  assert.deepEqual((await verifyDpopProof(proof, request, { accessToken: "", now: new Date("2026-07-27T12:00:00Z"), replayStore })).issues, ["DPOP_TOKEN_INVALID"])
 })
 
 test("AuthZEN, Cedar, OPA, and Envoy adapters map one normalized authority context", async () => {
@@ -580,9 +654,14 @@ test("AuthZEN, Cedar, OPA, and Envoy adapters map one normalized authority conte
 
   const envoy = fromEnvoyCheckRequest({ attributes: { request: { http: { method: "POST", path: "/weather", host: "api.example", headers: {
     "oati-envelope": encodeOatiHeader(envelope), "oati-mandate": encodeOatiHeader(mandate),
-  } } } } })
+  }, body: "request-body" } } } })
   assert.equal(envoy.envelope.id, envelope.id)
   assert.equal(envoy.mandate.id, mandate.id)
+  assert.equal(envoy.method, "POST")
+  assert.equal(envoy.body, "request-body")
+  assert.throws(() => fromEnvoyCheckRequest({ attributes: { request: { http: { method: "POST", path: "/weather", headers: {
+    "OATI-Envelope": encodeOatiHeader(envelope), "oati-envelope": encodeOatiHeader(envelope), "oati-mandate": encodeOatiHeader(mandate),
+  } } } } }), /duplicate oati-envelope/)
 })
 
 const cryptoFixture = async (algorithm = "EdDSA", overrides = {}) => {

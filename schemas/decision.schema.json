@@ -16,6 +16,6 @@
     "decided_at": { "type": "string", "format": "date-time" },
     "expires_at": { "type": "string", "format": "date-time" },
     "issuer": { "type": "string", "minLength": 1 },
-    "proof": { "type": "object" }
+    "proof": { "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json" }
   }
 }

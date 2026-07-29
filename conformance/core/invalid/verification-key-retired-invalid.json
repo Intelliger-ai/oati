@@ -1,0 +1,10 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:key:example:retired-1",
+  "controller": "oati:issuer:example:enterprise",
+  "issuer": "oati:issuer:example:enterprise",
+  "algorithm": "EdDSA",
+  "public_key_jwk": { "kty": "OKP" },
+  "status": "retired",
+  "valid_from": "2026-01-01T00:00:00Z"
+}

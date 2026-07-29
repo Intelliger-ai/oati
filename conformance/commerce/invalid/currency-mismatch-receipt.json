@@ -23,5 +23,5 @@
       "terms_digest": "sha256:terms-example-001"
     }
   },
-  "proof": { "type": "DataIntegrityProof", "signature": "example" }
+  "proof": { "type": "OatiJwsProof2026", "cryptosuite": "eddsa-jcs-2022", "algorithm": "EdDSA", "created": "2026-07-27T09:02:01Z", "expires": "2026-07-27T09:07:01Z", "verification_method": "oati:key:acme-weather:signing-1", "proof_purpose": "assertionMethod", "audience": "https://buyer.example", "nonce": "invalid-receipt-proof-0001", "signature": "ZXhhbXBsZQ..c2lnbmF0dXJl" }
 }

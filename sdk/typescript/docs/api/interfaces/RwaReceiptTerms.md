@@ -44,9 +44,9 @@
 
 ***
 
-### resulting\_supply?
+### resulting\_supply
 
-> `optional` **resulting\_supply?**: `` `${number}` ``
+> **resulting\_supply**: `` `${number}` ``
 
 ***
 

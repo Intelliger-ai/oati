@@ -1,0 +1,15 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:key:example:signing-1",
+  "controller": "oati:issuer:example:enterprise",
+  "issuer": "oati:issuer:example:enterprise",
+  "algorithm": "EdDSA",
+  "public_key_jwk": {
+    "kty": "OKP",
+    "crv": "Ed25519",
+    "x": "11qYAYKxCrfVS_7TyWQHOg7hcvPapiMlrwIaaPcHURo"
+  },
+  "status": "active",
+  "valid_from": "2026-07-27T00:00:00Z",
+  "valid_until": "2027-07-27T00:00:00Z"
+}

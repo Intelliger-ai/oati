@@ -24,6 +24,7 @@ const envelope = await issuer.signTransaction(passport.id, mandate, {
   action: "catalog.read",
   resource: "oati:service:seller:catalog",
   purpose: "catalog_sync",
+  audience: "https://seller.example",
 }, new Date(now.getTime() + 1000))
 
 const result = evaluateAuthority({
@@ -40,6 +41,8 @@ JS
 ```
 
 `evaluateAuthority` does not persist usage. A production service must compare-and-set the prior usage snapshot and commit `next_usage` atomically with execution or Receipt state. Never execute first and update a counter afterward.
+
+The development issuer accepts only an unchanged, active Mandate that it issued for the active agent. Agent identifiers are namespaced by the development organisation, and transaction purpose/profile default to the Mandate. Use `extensions` for signed Commerce or RWA transaction terms; server-derived reserve and approval evidence still needs independent verification.
 
 To test lifecycle denial, call `issuer.setStatus("mandate", mandate.id, "revoked")`; publish the resulting revocation projection and ensure future verification/evaluation fails closed. Development issuers use ephemeral keys and are never production trust anchors.
 

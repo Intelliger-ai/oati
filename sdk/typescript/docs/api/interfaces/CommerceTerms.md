@@ -10,7 +10,7 @@
 
 ### billing\_model?
 
-> `optional` **billing\_model?**: `"fixed"` \| `"per_request"` \| `"per_unit"` \| `"subscription"`
+> `optional` **billing\_model?**: `"per_request"` \| `"per_unit"` \| `"subscription"` \| `"fixed"`
 
 ***
 

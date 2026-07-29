@@ -1,0 +1,12 @@
+{
+  "oati_version": "1.0",
+  "decision": "allow",
+  "mandate_id": "oati:mandate:example:read-1",
+  "transaction_id": "oati:tx:example:read-1",
+  "reason_codes": [],
+  "next_usage": {
+    "calls": 1,
+    "consumed": false,
+    "idempotency_keys": []
+  }
+}

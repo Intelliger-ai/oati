@@ -8,10 +8,10 @@
   "properties": {
     "oati_version": { "const": "1.0" },
     "id": { "type": "string", "pattern": "^oati:mandate:[A-Za-z0-9._:-]+$" },
-    "issuer": { "type": "string" },
+    "issuer": { "type": "string", "minLength": 1 },
     "subject": { "type": "string", "pattern": "^oati:agent:[A-Za-z0-9._:-]+$" },
     "sponsor": { "type": "string" },
-    "parent_mandate": { "type": "string" },
+    "parent_mandate": { "type": "string", "pattern": "^oati:mandate:[A-Za-z0-9._:-]+$" },
     "purpose": { "type": "string", "minLength": 1 },
     "actions": { "type": "array", "minItems": 1, "items": { "type": "string" }, "uniqueItems": true },
     "resources": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
@@ -21,6 +21,8 @@
     "data_use": { "type": "object", "additionalProperties": true },
     "delegation": {
       "type": "object",
+      "additionalProperties": false,
+      "required": ["allowed", "max_depth"],
       "properties": {
         "allowed": { "type": "boolean" },
         "max_depth": { "type": "integer", "minimum": 0 }
@@ -31,6 +33,6 @@
     "status": { "enum": ["active", "suspended", "revoked", "expired", "consumed"] },
     "profile": { "type": "string", "format": "uri" },
     "extensions": { "type": "object", "additionalProperties": true },
-    "proof": { "type": "object" }
+    "proof": { "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json" }
   }
 }

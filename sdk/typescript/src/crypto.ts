@@ -187,7 +187,7 @@ export async function verifyDocument(document: Record<string, unknown>, policy: 
       if (!protectedHeader || empty !== "" || !encodedSignature) throw new Error("invalid detached JWS")
       const header = JSON.parse(decoder.decode(fromBase64url(protectedHeader))) as Record<string, unknown>
       if (header.alg !== proof.algorithm || header.kid !== proof.verification_method || header.b64 !== false || header.typ !== "oati+jws"
-        || !Array.isArray(header.crit) || !header.crit.includes("b64")) throw new Error("protected header does not match proof")
+        || !Array.isArray(header.crit) || header.crit.length !== 1 || header.crit[0] !== "b64") throw new Error("protected header does not match proof")
       const unsigned = { ...document, proof: withoutSignature(proof) }
       const input = joinSigningInput(protectedHeader, encoder.encode(canonicalJson(unsigned)))
       const publicKey = await cryptoProvider().subtle.importKey("jwk", key.publicKeyJwk, webCryptoImportAlgorithm(proof.algorithm), false, ["verify"])
@@ -282,13 +282,16 @@ export function passportTrustResolver(passport: AgentPassport, upstream?: TrustR
 }
 
 function parseProof(value: unknown, issues: VerificationIssue[]): OatiJwsProof | null {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) { issue(issues, "PROOF_MISSING", "OATI proof is required"); return null }
+  if (value === undefined || value === null) { issue(issues, "PROOF_MISSING", "OATI proof is required"); return null }
+  if (typeof value !== "object" || Array.isArray(value)) { issue(issues, "PROOF_MALFORMED", "proof does not conform to the OATI JWS profile"); return null }
   const proof = value as Partial<OatiJwsProof>
   if (proof.type !== OATI_PROOF_TYPE || !OATI_SUPPORTED_ALGORITHMS.includes(proof.algorithm as OatiAlgorithm)
     || proof.cryptosuite !== suite(proof.algorithm as OatiAlgorithm) || typeof proof.created !== "string" || typeof proof.expires !== "string"
-    || typeof proof.verification_method !== "string" || proof.proof_purpose !== "assertionMethod"
-    || (typeof proof.audience !== "string" && !Array.isArray(proof.audience)) || typeof proof.nonce !== "string" || proof.nonce.length < 16
-    || typeof proof.signature !== "string") {
+    || typeof proof.verification_method !== "string" || proof.verification_method.length === 0 || proof.proof_purpose !== "assertionMethod"
+    || normalizeAudience(proof.audience as string | string[]).length === 0
+    || Array.isArray(proof.audience) && proof.audience.some((item) => typeof item !== "string" || item.length === 0)
+    || typeof proof.nonce !== "string" || proof.nonce.length < 16
+    || typeof proof.signature !== "string" || !/^[A-Za-z0-9_-]+\.\.[A-Za-z0-9_-]+$/.test(proof.signature)) {
     issue(issues, "PROOF_MALFORMED", "proof does not conform to the OATI JWS profile"); return null
   }
   return proof as OatiJwsProof
@@ -315,6 +318,7 @@ function checkKey(key: VerificationKey, proof: OatiJwsProof, now: Date, skew: nu
   if (key.status === "retired" && !key.validUntil) issue(issues, "KEY_INVALID", "retired verification keys require validUntil")
   const created = Date.parse(proof.created), from = Date.parse(key.validFrom), until = key.validUntil ? Date.parse(key.validUntil) : undefined
   if (Number.isNaN(from) || created < from - skew || until !== undefined && (Number.isNaN(until) || created >= until + skew)) issue(issues, "KEY_INVALID", "key was not valid when the proof was created")
+  if (key.revokedAt && Number.isNaN(Date.parse(key.revokedAt))) issue(issues, "KEY_INVALID", "verification key has an invalid revocation timestamp")
   if (key.status === "revoked" || key.revokedAt && Date.parse(key.revokedAt) <= now.getTime()) issue(issues, "KEY_REVOKED", "verification key is revoked")
 }
 
@@ -322,14 +326,18 @@ async function validateTrustChain(start: string, policy: VerificationPolicy, now
   const anchors = new Set(policy.trustAnchors), visited = new Set<string>()
   let current = start
   for (let depth = 0; depth <= (policy.maxTrustDepth ?? 8); depth++) {
-    if (anchors.has(current)) return current
     if (visited.has(current)) break
     visited.add(current)
+    await checkRevocation(policy.resolver, ["", current], now, issues)
+    if (anchors.has(current)) return current
     let issuer: TrustedIssuer | null
     try { issuer = await policy.resolver.resolveIssuer(current) } catch { issue(issues, "ISSUER_NOT_TRUSTED", `issuer ${current} could not be resolved`); return undefined }
     if (!issuer || issuer.proofStatus && issuer.proofStatus !== "verified") break
-    if (issuer.status !== "active" || issuer.revokedAt && Date.parse(issuer.revokedAt) <= now.getTime()) { issue(issues, "ISSUER_REVOKED", `issuer ${current} is not active`); return undefined }
-    if (issuer.validFrom && Date.parse(issuer.validFrom) > now.getTime() + skew || issuer.validUntil && Date.parse(issuer.validUntil) <= now.getTime() - skew) { issue(issues, "ISSUER_REVOKED", `issuer ${current} is outside its validity period`); return undefined }
+    const from = issuer.validFrom ? Date.parse(issuer.validFrom) : undefined
+    const until = issuer.validUntil ? Date.parse(issuer.validUntil) : undefined
+    const revoked = issuer.revokedAt ? Date.parse(issuer.revokedAt) : undefined
+    if (issuer.status !== "active" || revoked !== undefined && (Number.isNaN(revoked) || revoked <= now.getTime())) { issue(issues, "ISSUER_REVOKED", `issuer ${current} is not active`); return undefined }
+    if (from !== undefined && (Number.isNaN(from) || from > now.getTime() + skew) || until !== undefined && (Number.isNaN(until) || until <= now.getTime() - skew)) { issue(issues, "ISSUER_REVOKED", `issuer ${current} is outside its validity period`); return undefined }
     if (!issuer.parent) break
     current = issuer.parent
   }
@@ -342,6 +350,7 @@ async function checkRevocation(resolver: TrustResolver, targets: string[], now: 
     if (!target) continue
     let status: RevocationStatus | null
     try { status = await resolver.resolveRevocation(target) } catch { issue(issues, "REVOCATION_UNAVAILABLE", `revocation status for ${target} is unavailable`); continue }
+    if (status?.effectiveAt && Number.isNaN(Date.parse(status.effectiveAt))) { issue(issues, "REVOCATION_UNAVAILABLE", `revocation status for ${target} has an invalid effective time`); continue }
     if (status && status.status !== "good" && (!status.effectiveAt || Date.parse(status.effectiveAt) <= now.getTime())) {
       issue(issues, index === 0 ? "KEY_REVOKED" : index === 1 ? "ISSUER_REVOKED" : "DOCUMENT_REVOKED", `${target} is ${status.status}`)
     }
@@ -369,7 +378,7 @@ function issue(issues: VerificationIssue[], code: VerificationCode, message: str
 function documentId(document: Record<string, unknown>): string { return typeof document.id === "string" ? document.id : "" }
 function required(record: Record<string, string | undefined>, key: string): string { const value = record[key]; if (!value) throw new Error(`missing ${key}`); return value }
 function algorithmFromJwk(jwk: Record<string, unknown>): OatiAlgorithm { if (jwk.kty === "OKP" && jwk.crv === "Ed25519") return "EdDSA"; if (jwk.kty === "EC" && jwk.crv === "P-256") return "ES256"; throw new Error("unsupported Passport JWK") }
-function jwkMatches(jwk: JsonWebKey, algorithm: OatiAlgorithm): boolean { return algorithm === "EdDSA" ? jwk.kty === "OKP" && jwk.crv === "Ed25519" : jwk.kty === "EC" && jwk.crv === "P-256" }
+function jwkMatches(jwk: JsonWebKey, algorithm: OatiAlgorithm): boolean { return algorithm === "EdDSA" ? jwk.kty === "OKP" && jwk.crv === "Ed25519" && isValidEd25519PublicKey(jwk.x) : jwk.kty === "EC" && jwk.crv === "P-256" }
 function webCryptoImportAlgorithm(algorithm: OatiAlgorithm): EcKeyImportParams | AlgorithmIdentifier { return algorithm === "EdDSA" ? { name: "Ed25519" } : { name: "ECDSA", namedCurve: "P-256" } }
 function webCryptoAlgorithm(algorithm: OatiAlgorithm): AlgorithmIdentifier | EcdsaParams { return algorithm === "EdDSA" ? { name: "Ed25519" } : { name: "ECDSA", hash: "SHA-256" } }
 async function importSigningKey(key: CryptoKey | JsonWebKey, algorithm: OatiAlgorithm): Promise<CryptoKey> { return isCryptoKey(key) ? key : cryptoProvider().subtle.importKey("jwk", key, webCryptoImportAlgorithm(algorithm), false, ["sign"]) }
@@ -380,3 +389,46 @@ function joinSigningInput(protectedHeader: string, payload: Uint8Array): Uint8Ar
 function base64url(value: Uint8Array): string { let binary = ""; for (const byte of value) binary += String.fromCharCode(byte); return btoa(binary).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_") }
 function fromBase64url(value: string): Uint8Array { if (!/^[A-Za-z0-9_-]+$/.test(value)) throw new Error("invalid base64url"); const padded = value.replace(/-/g, "+").replace(/_/g, "/") + "=".repeat((4 - value.length % 4) % 4); const binary = atob(padded); return Uint8Array.from(binary, (character) => character.charCodeAt(0)) }
 function toArrayBuffer(value: Uint8Array): ArrayBuffer { return value.slice().buffer as ArrayBuffer }
+
+const ED25519_P = (1n << 255n) - 19n
+const ED25519_D = mod(-121665n * inverse(121666n, ED25519_P), ED25519_P)
+const ED25519_I = modPow(2n, (ED25519_P - 1n) / 4n, ED25519_P)
+type EdwardsPoint = readonly [bigint, bigint]
+
+/** Web Crypto implementations may accept small-order Ed25519 keys, so validate the encoded point before import. */
+export function isValidEd25519PublicKey(encoded: string | undefined): boolean {
+  if (!encoded) return false
+  try {
+    const bytes = fromBase64url(encoded)
+    if (bytes.length !== 32) return false
+    const sign = bytes[31]! >> 7
+    const copy = bytes.slice(); copy[31]! &= 0x7f
+    let y = 0n
+    for (let index = 31; index >= 0; index--) y = (y << 8n) + BigInt(copy[index]!)
+    if (y >= ED25519_P) return false
+    const y2 = mod(y * y, ED25519_P)
+    const x2 = mod((y2 - 1n) * inverse(ED25519_D * y2 + 1n, ED25519_P), ED25519_P)
+    let x = modPow(x2, (ED25519_P + 3n) / 8n, ED25519_P)
+    if (mod(x * x - x2, ED25519_P) !== 0n) x = mod(x * ED25519_I, ED25519_P)
+    if (mod(x * x - x2, ED25519_P) !== 0n) return false
+    if (Number(x & 1n) !== sign) x = ED25519_P - x
+    if (x === 0n && sign === 1) return false
+    let multiplied: EdwardsPoint = [x, y]
+    for (let index = 0; index < 3; index++) multiplied = addEdwards(multiplied, multiplied)
+    return multiplied[0] !== 0n || multiplied[1] !== 1n
+  } catch { return false }
+}
+function addEdwards([x1, y1]: EdwardsPoint, [x2, y2]: EdwardsPoint): EdwardsPoint {
+  const factor = mod(ED25519_D * x1 * x2 * y1 * y2, ED25519_P)
+  return [
+    mod((x1 * y2 + y1 * x2) * inverse(1n + factor, ED25519_P), ED25519_P),
+    mod((y1 * y2 + x1 * x2) * inverse(1n - factor, ED25519_P), ED25519_P),
+  ]
+}
+function inverse(value: bigint, modulus: bigint): bigint { return modPow(mod(value, modulus), modulus - 2n, modulus) }
+function mod(value: bigint, modulus: bigint): bigint { const result = value % modulus; return result < 0n ? result + modulus : result }
+function modPow(base: bigint, exponent: bigint, modulus: bigint): bigint {
+  let result = 1n, factor = mod(base, modulus), power = exponent
+  while (power > 0n) { if (power & 1n) result = result * factor % modulus; factor = factor * factor % modulus; power >>= 1n }
+  return result
+}

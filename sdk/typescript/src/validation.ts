@@ -58,7 +58,11 @@ export function getSchema(name: OatiSchemaName): Record<string, unknown> {
 export const schemaNames = Object.freeze(Object.keys(schemas) as OatiSchemaName[])
 
 function schemaIssues(errors: ErrorObject[] | null | undefined): SchemaIssue[] {
-  return (errors ?? []).map((error) => ({
+  return (errors ?? [])
+    // Branch diagnostics are implementation-specific. Publish the aggregate oneOf
+    // code, and suppress Ajv's annotation-only `if` result, for cross-SDK parity.
+    .filter((error) => error.keyword !== "if" && !/\/oneOf\/\d+\//.test(error.schemaPath))
+    .map((error) => ({
     code: `SCHEMA_${error.keyword.toUpperCase()}`,
     path: error.instancePath || "/",
     keyword: error.keyword,

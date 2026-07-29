@@ -16,12 +16,14 @@ def evaluate_authority(request:dict[str,Any])->dict[str,Any]:
     _constraint(m,"resources",e.get("resource"),"RESOURCE_NOT_ALLOWED",reasons)
     if e.get("purpose")!=m.get("purpose"): reasons.add("PURPOSE_MISMATCH")
     _constraint(m,"counterparties",e.get("counterparty"),"COUNTERPARTY_NOT_ALLOWED",reasons); _constraint(m,"destinations",e.get("destination"),"DESTINATION_NOT_ALLOWED",reasons)
+    if "profile" in e and e.get("profile")!=m.get("profile"): reasons.add("PROFILE_MISMATCH")
     if request.get("parent_mandate"): _child(m,request["parent_mandate"],request.get("delegation_depth",1),now,reasons)
     elif m.get("parent_mandate"): reasons.add("PARENT_MANDATE_REQUIRED")
     usage=_usage(request.get("usage",{})); delta=_consumption(request,m)
+    _consumption_context(request,delta,reasons)
     _limits(m,usage,delta,reasons)
-    if request.get("commerce") is not None or m.get("profile")==COMMERCE: _commerce(m,request.get("commerce"),usage,reasons)
-    if request.get("rwa") is not None or m.get("profile")==RWA: _rwa(m,request.get("rwa"),usage,"minted_supply" in request.get("usage",{}),now,reasons)
+    if request.get("commerce") is not None or m.get("profile")==COMMERCE: _commerce(m,e,request.get("commerce"),usage,reasons)
+    if request.get("rwa") is not None or m.get("profile")==RWA: _rwa(m,e,request.get("rwa"),usage,"minted_supply" in request.get("usage",{}),now,reasons)
     codes=sorted(reasons)
     return {"oati_version":"1.0","decision":"allow" if not codes else "deny","mandate_id":m["id"],"transaction_id":e["id"],"reason_codes":codes,"next_usage":_apply(usage,delta,request.get("rwa")) if not codes else usage}
 
@@ -52,13 +54,16 @@ def _limits(m,u,d,r):
     if d["idempotency_key"] and d["idempotency_key"] in u["idempotency_keys"]:r.add("IDEMPOTENCY_REPLAY")
     limits=m.get("limits",{})
     if "max_calls" in limits and u["calls"]+d["calls"]>limits["max_calls"]:r.add("CALL_LIMIT_EXCEEDED")
+    if m.get("profile") is None and "max_quantity" in limits and Decimal(u["quantity"])+Decimal(d["quantity"])>Decimal(str(limits["max_quantity"])):r.add("QUANTITY_LIMIT_EXCEEDED")
     if "max_total" in limits and d["amount"]!="0":
         currency=limits.get("currency")
         if currency and (d["currency"]!=currency or u["amount"]!="0" and u["currency"]!=currency):r.add("BUDGET_CURRENCY_MISMATCH")
         if Decimal(u["amount"])+Decimal(d["amount"])>Decimal(limits["max_total"]):r.add("BUDGET_EXCEEDED")
-def _commerce(m,c,u,r):
+def _commerce(m,e,c,u,r):
     limits=m.get("extensions",{}).get("commerce")
     if not c or not limits:r.add("COMMERCE_CONTEXT_REQUIRED");return
+    signed=e.get("extensions",{}).get("commerce")
+    envelope_mismatch=bool(signed) and (e.get("resource")!=c.get("service_id") or e.get("counterparty")!=c.get("merchant_organisation_id") or not _mapped(signed,c,(("offer_id","offer_id"),("currency","currency"),("quantity","quantity"),("quoted_unit_price","unit_price"),("quoted_total","total_amount"),("idempotency_key","idempotency_key"),("terms_digest","terms_digest"))))
     for f,code in (("merchant_organisation_id","COMMERCE_MERCHANT_NOT_ALLOWED"),("service_id","COMMERCE_SERVICE_NOT_ALLOWED"),("offer_id","COMMERCE_OFFER_NOT_ALLOWED")):
         if c.get(f)!=limits.get(f):r.add(code)
     if c["currency"]!=limits["currency"] or u["amount"]!="0" and u["currency"]!=c["currency"]:r.add("COMMERCE_CURRENCY_MISMATCH")
@@ -68,9 +73,12 @@ def _commerce(m,c,u,r):
     if Decimal(c["quantity"])>Decimal(limits["max_quantity"]):r.add("COMMERCE_QUANTITY_EXCEEDED")
     if limits.get("terms_digest") and c.get("terms_digest")!=limits["terms_digest"]:r.add("COMMERCE_TERMS_MISMATCH")
     if c["idempotency_key"] in u["idempotency_keys"]:r.add("IDEMPOTENCY_REPLAY")
-def _rwa(m,c,u,has_supply,now,r):
+    if envelope_mismatch and not any(code.startswith("COMMERCE_") for code in r):r.add("COMMERCE_ENVELOPE_CONTEXT_MISMATCH")
+def _rwa(m,e,c,u,has_supply,now,r):
     limits=m.get("extensions",{}).get("rwa")
     if not c or not limits:r.add("RWA_CONTEXT_REQUIRED");return
+    signed=e.get("extensions",{}).get("rwa")
+    if signed and (e.get("resource")!=c.get("asset_id") or not _same(signed,c,("asset_id","state_claim_id","network","token_contract","operation","unit","quantity"))):r.add("RWA_ENVELOPE_CONTEXT_MISMATCH")
     if not _same(c,limits,("asset_id","state_claim_id","network","token_contract","operation","unit")):r.add("RWA_TARGET_MISMATCH")
     if _time(c["claim_valid_until"])<=now:r.add("RWA_STATE_CLAIM_EXPIRED")
     if Decimal(u["quantity"])+Decimal(c["quantity"])>Decimal(limits["max_quantity"]):r.add("RWA_QUANTITY_EXCEEDED")
@@ -82,7 +90,19 @@ def _rwa(m,c,u,has_supply,now,r):
     if any(role not in c["approval_roles"] for role in limits.get("required_roles",[])):r.add("RWA_REQUIRED_ROLE_MISSING")
     if limits.get("one_time") and u["consumed"]:r.add("MANDATE_ALREADY_CONSUMED")
 def _consumption(req,m):
-    c=req.get("commerce");w=req.get("rwa");d={"calls":1,"amount":c["total_amount"] if c else "0","currency":c["currency"] if c else "","quantity":str(c["quantity"]) if c else w["quantity"] if w else "0","idempotency_key":c["idempotency_key"] if c else "","consume":bool(m.get("extensions",{}).get("rwa",{}).get("one_time") or m.get("limits",{}).get("one_time"))};d.update(req.get("consumption",{}));return d
+    c=req.get("commerce");w=req.get("rwa");supplied=req.get("consumption",{})
+    d={"calls":supplied.get("calls",1),"amount":supplied.get("amount","0"),"currency":supplied.get("currency",""),"quantity":supplied.get("quantity","0"),"idempotency_key":supplied.get("idempotency_key",""),"consume":supplied.get("consume") is True}
+    if c:d.update(amount=c["total_amount"],currency=c["currency"],quantity=str(c["quantity"]),idempotency_key=c["idempotency_key"])
+    elif w:d["quantity"]=w["quantity"]
+    d["consume"]=d["consume"] or bool(m.get("extensions",{}).get("rwa",{}).get("one_time") or m.get("limits",{}).get("one_time"))
+    return d
+def _consumption_context(req,effective,r):
+    supplied=req.get("consumption")
+    if not supplied:return
+    fields=("amount","currency","quantity","idempotency_key") if req.get("commerce") else ("quantity",) if req.get("rwa") else ()
+    constrained=list(fields)
+    if effective["consume"] and supplied.get("consume") is False:constrained.append("consume")
+    if any(field in supplied and supplied[field]!=effective[field] for field in constrained):r.add("CONSUMPTION_CONTEXT_MISMATCH")
 def _usage(v):return {"calls":v.get("calls",0),"amount":v.get("amount","0"),"currency":v.get("currency",""),"quantity":v.get("quantity","0"),"consumed":v.get("consumed",False),"idempotency_keys":sorted(v.get("idempotency_keys",[])),"minted_supply":v.get("minted_supply","0")}
 def _apply(u,d,rwa):
     n=deepcopy(u);n.update(calls=u["calls"]+d["calls"],amount=_fmt(Decimal(u["amount"])+Decimal(d["amount"])),currency=d["currency"] or u["currency"],quantity=_fmt(Decimal(u["quantity"])+Decimal(d["quantity"])),consumed=u["consumed"] or d["consume"]);n["idempotency_keys"]=sorted(u["idempotency_keys"]+([d["idempotency_key"]] if d["idempotency_key"] else []));n["minted_supply"]=_fmt(Decimal(rwa["current_supply"])+Decimal(rwa["quantity"])) if rwa else u["minted_supply"];return n
@@ -106,5 +126,6 @@ def _constraint(o,f,a,code,r):
     if f in o and a not in o[f]:r.add(code)
 def _subset(a,b):return all(x in b for x in a)
 def _same(a,b,fields):return all(a.get(f)==b.get(f) for f in fields)
+def _mapped(a,b,fields):return all(a.get(left)==b.get(right) for left,right in fields)
 def _time(v):return datetime.fromisoformat(v.replace("Z","+00:00"))
 def _fmt(v:Decimal):return format(v,"f")

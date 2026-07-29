@@ -1,0 +1,23 @@
+{
+  "action": "api.invoke",
+  "agent_id": "oati:agent:conformance:sender",
+  "id": "oati:tx:conformance:crypto-1",
+  "issued_at": "2026-07-27T12:00:00Z",
+  "mandate_id": "oati:mandate:conformance:crypto-1",
+  "nonce": "document-nonce-0000000001",
+  "oati_version": "1.0",
+  "organisation_id": "oati:org:conformance",
+  "proof": {
+    "algorithm": "EdDSA",
+    "audience": "https://merchant.example",
+    "created": "2026-07-27T12:00:00Z",
+    "cryptosuite": "eddsa-jcs-2022",
+    "expires": "2026-07-27T12:05:00Z",
+    "nonce": "proof-nonce-000000000001",
+    "proof_purpose": "assertionMethod",
+    "signature": "eyJhbGciOiJFZERTQSIsImI2NCI6ZmFsc2UsImNyaXQiOlsiZXhwIl0sImtpZCI6Im9hdGk6a2V5OmNvbmZvcm1hbmNlOmVkMjU1MTktMSIsInR5cCI6Im9hdGkrandzIn0..y2_tPMHZ2j_FX5aFqYiyrk3w9zpIzxm9ZuU5O-6Va0yRunHIYa05oVqso69cx7AnsEDdxO1eV8ehpL33DhyuBA",
+    "type": "OatiJwsProof2026",
+    "verification_method": "oati:key:conformance:ed25519-1"
+  },
+  "resource": "oati:service:conformance:echo"
+}

@@ -8,11 +8,11 @@
   "properties": {
     "oati_version": { "const": "1.0" },
     "id": { "type": "string", "pattern": "^oati:tx:[A-Za-z0-9._:-]+$" },
-    "agent_id": { "type": "string" },
-    "organisation_id": { "type": "string" },
-    "mandate_id": { "type": "string" },
-    "action": { "type": "string" },
-    "resource": { "type": "string" },
+    "agent_id": { "type": "string", "pattern": "^oati:agent:[A-Za-z0-9._:-]+$" },
+    "organisation_id": { "type": "string", "pattern": "^oati:org:[A-Za-z0-9._:-]+$" },
+    "mandate_id": { "type": "string", "pattern": "^oati:mandate:[A-Za-z0-9._:-]+$" },
+    "action": { "type": "string", "minLength": 1 },
+    "resource": { "type": "string", "minLength": 1 },
     "purpose": { "type": "string" },
     "destination": { "type": "string" },
     "counterparty": { "type": "string" },
@@ -23,6 +23,6 @@
     "nonce": { "type": "string", "minLength": 16 },
     "profile": { "type": "string", "format": "uri" },
     "extensions": { "type": "object", "additionalProperties": true },
-    "proof": { "type": "object" }
+    "proof": { "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json" }
   }
 }

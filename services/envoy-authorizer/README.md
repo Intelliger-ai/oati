@@ -8,7 +8,7 @@ Required production settings are:
 
 - `OATI_GATEWAY_EXTERNAL_ORIGIN` and `OATI_GATEWAY_EXPECTED_AUDIENCE`;
 - `OATI_GATEWAY_TRUST_ANCHORS` and comma-separated `OATI_LOOKUP_RESOLVER_URLS`;
-- `VALKEY_URL` with a dedicated ACL username and `VALKEY_PASSWORD_FILE` in production;
+- a `rediss://` `VALKEY_URL` with a dedicated ACL username and `VALKEY_PASSWORD_FILE` in production; use `VALKEY_TLS_CA_FILE` for a private CA and `VALKEY_TLS_SERVER_NAME` only when the certificate identity differs from the connection hostname;
 - `OATI_GATEWAY_RECEIPT_ISSUER`, `OATI_GATEWAY_RECEIPT_VERIFICATION_METHOD`, `OATI_GATEWAY_TRANSIT_KEY_NAME`, explicit `OATI_GATEWAY_TRANSIT_KEY_VERSION`, `OATI_TRANSIT_ADDR`, and `OATI_TRANSIT_TOKEN_FILE`;
 - `OATI_GATEWAY_INVALIDATION_TOKEN_FILE`, containing a distinct bearer secret of at least 32 characters for authenticated trust-cache purges;
 - `OATI_GATEWAY_TLS_CERT_FILE`, `OATI_GATEWAY_TLS_KEY_FILE`, and `OATI_GATEWAY_TLS_CLIENT_CA_FILE`.

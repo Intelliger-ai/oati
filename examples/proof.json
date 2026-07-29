@@ -1,0 +1,12 @@
+{
+  "type": "OatiJwsProof2026",
+  "cryptosuite": "eddsa-jcs-2022",
+  "algorithm": "EdDSA",
+  "created": "2026-07-27T12:00:00Z",
+  "expires": "2026-07-27T12:05:00Z",
+  "verification_method": "oati:key:example:signing-1",
+  "proof_purpose": "assertionMethod",
+  "audience": "https://service.example",
+  "nonce": "example-proof-nonce-0001",
+  "signature": "ZXhhbXBsZQ..c2lnbmF0dXJl"
+}

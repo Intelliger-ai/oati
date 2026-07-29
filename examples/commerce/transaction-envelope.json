@@ -26,5 +26,5 @@
       "terms_digest": "sha256:terms-example-001"
     }
   },
-  "proof": { "type": "DataIntegrityProof", "signature": "example" }
+  "proof": { "type": "OatiJwsProof2026", "cryptosuite": "eddsa-jcs-2022", "algorithm": "EdDSA", "created": "2026-07-27T09:02:00Z", "expires": "2026-07-27T09:07:00Z", "verification_method": "oati:key:intelliger:signing-1", "proof_purpose": "assertionMethod", "audience": "https://acme-weather.example", "nonce": "weather-envelope-proof-0001", "signature": "ZXhhbXBsZQ..c2lnbmF0dXJl" }
 }

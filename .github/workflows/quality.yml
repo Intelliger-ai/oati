@@ -13,6 +13,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  bounded-resilience:
+    name: Bounded fuzz and resilience corpus
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+        with: { version: 10.14.0 }
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: sdk/typescript/pnpm-lock.yaml
+      - uses: actions/setup-go@v7
+        with: { go-version-file: go.work }
+      - run: pnpm install --frozen-lockfile
+        working-directory: sdk/typescript
+      - run: pnpm build
+        working-directory: sdk/typescript
+      - run: node --test test/resilience.test.mjs
+        working-directory: sdk/typescript
+      - run: go test ./cmd/oati -run 'TestBoundedAdversarialCLIInputs|FuzzCLIArgumentParser|FuzzCanonicalJSON|FuzzEvaluatorStrings'
+        working-directory: cli
+
   sdk-and-conformance:
     name: SDKs, schemas, examples, conformance, generated files
     runs-on: ubuntu-latest
@@ -32,7 +56,7 @@ jobs:
         with:
           go-version-file: go.work
           cache-dependency-path: |
-            cli/go.sum
+            cli/go.mod
             sdk/go/go.mod
       - run: pnpm install --frozen-lockfile
         working-directory: sdk/typescript
@@ -41,12 +65,17 @@ jobs:
       - run: node --test services/envoy-authorizer/server.test.mjs
       - run: docker build -f services/envoy-authorizer/Dockerfile -t oati-envoy-authorizer:test .
       - run: ./integrations/envoy/test/integration.sh
+      - run: python -m pip install .
+        working-directory: sdk/python
       - run: PYTHONDONTWRITEBYTECODE=1 python -m unittest discover -s . -p 'test*.py' -v
         working-directory: sdk/python
       - run: go test ./...
         working-directory: sdk/go
+      - run: node --test conformance/check-reports.test.mjs
       - run: ./conformance/run-all.sh
+      - run: node --test scripts/check-docs.test.mjs
       - run: node scripts/check-docs.mjs
+      - run: node scripts/test-doc-journeys.mjs
       - run: node scripts/build-schema-site.mjs
       - run: ./scripts/check-generated.sh
       - run: node --test scripts/check-independent-review.test.mjs
@@ -65,7 +94,7 @@ jobs:
       - uses: actions/setup-go@v7
         with:
           go-version-file: go.work
-          cache-dependency-path: cli/go.sum
+          cache-dependency-path: cli/go.mod
       - run: go test ./...
         working-directory: cli
 
@@ -78,6 +107,7 @@ jobs:
       - uses: ruby/setup-ruby@v1
         with: { ruby-version: "3.3" }
       - run: ruby scripts/validate-openapi.rb
+      - run: node scripts/check-compatibility.mjs
       - uses: actions/setup-node@v7
         with: { node-version: 24 }
       - run: npx --yes @redocly/cli@1.34.5 lint api/lookup.openapi.yaml compatibility/platform-lookup.openapi.yaml

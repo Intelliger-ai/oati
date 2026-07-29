@@ -10,7 +10,7 @@ import {
 
 const here = dirname(fileURLToPath(import.meta.url))
 const args = parseArgs(process.argv.slice(2))
-const manifestPath = resolve(args.suite ?? resolve(here, "suite-v0.3.json"))
+const manifestPath = resolve(args.suite ?? resolve(here, "suite-v0.4.json"))
 const base = dirname(manifestPath)
 const suiteManifest = await json(manifestPath)
 const suiteCheck = validateSchema("conformanceSuite", suiteManifest)

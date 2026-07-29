@@ -1,5 +1,6 @@
 import { readFile, writeFile } from "node:fs/promises"
 import { resolve } from "node:path"
+import { connect as connectTls } from "node:tls"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import {
   LookupTrustResolver,
@@ -13,7 +14,7 @@ import {
 const defaultManifest = fileURLToPath(new URL("../../../smoke/production-lookup.inventory.json", import.meta.url))
 const forbiddenProjectionKeys = new Set(["private_attributes", "credential", "tenant_id", "internal_id", "private_key", "kms_key"])
 
-export async function runProductionLookupSmoke({ manifest, fetcher = globalThis.fetch, now = new Date(), verifySignedDocument }) {
+export async function runProductionLookupSmoke({ manifest, fetcher = globalThis.fetch, now = new Date(), verifySignedDocument, inspectTls = inspectTlsEndpoint }) {
   validateManifest(manifest)
   const resolverUrl = (process.env.OATI_LOOKUP_URL ?? manifest.resolver_url).replace(/\/$/, "")
   if (new URL(resolverUrl).protocol !== "https:" && process.env.OATI_ALLOW_HTTP_SMOKE !== "1") throw new Error("hosted smoke requires HTTPS")
@@ -32,6 +33,8 @@ export async function runProductionLookupSmoke({ manifest, fetcher = globalThis.
       checks.push({ name, status: "fail", duration_ms: Math.round(performance.now() - started), error: error instanceof Error ? error.message : String(error) })
     }
   }
+
+  await check("tls.endpoint", async () => inspectTls(resolverUrl, now))
 
   await check("status.operational", async () => {
     const response = await request("/status")
@@ -68,6 +71,7 @@ export async function runProductionLookupSmoke({ manifest, fetcher = globalThis.
     require(organisation?.etag, "organisation ETag is unavailable")
     const response = await request(`/lookup?type=organisation&id=${encodeURIComponent(organisation.expected.id)}`, { headers: { "If-None-Match": organisation.etag } })
     require(response.status === 304, `If-None-Match returned HTTP ${response.status}`)
+    responseContract(response, manifest, { cache: true, allowEmptyContentType: true })
     require(response.headers.get("etag") === organisation.etag, "304 response changed the ETag")
     return { etag: organisation.etag }
   })
@@ -77,6 +81,7 @@ export async function runProductionLookupSmoke({ manifest, fetcher = globalThis.
     const response = await request(`/lookup?type=revocation&target=${encodeURIComponent(expected.target)}`)
     const value = await responseJson(response)
     require(response.status === 200, `target revocation returned HTTP ${response.status}: ${problemCode(value)}`)
+    responseContract(response, manifest, { cache: true })
     require(value.id === expected.id && value.public_attributes.target === expected.target, "target revocation mapping is inconsistent")
     return { id: value.id, status: value.public_attributes.revocation_status }
   })
@@ -85,6 +90,7 @@ export async function runProductionLookupSmoke({ manifest, fetcher = globalThis.
     const response = await request("/status", { headers: { "OATI-Version": "999" } })
     const value = await responseJson(response)
     require(response.status === 406, `unsupported version returned HTTP ${response.status}`)
+    responseContract(response, manifest, { problem: true })
     structuredProblem(value, 406)
     return { code: value.error.code }
   })
@@ -93,12 +99,26 @@ export async function runProductionLookupSmoke({ manifest, fetcher = globalThis.
     const invalid = await request("/lookup?type=agent")
     const invalidValue = await responseJson(invalid)
     require(invalid.status === 400, `invalid request returned HTTP ${invalid.status}`)
+    responseContract(invalid, manifest, { problem: true })
     structuredProblem(invalidValue, 400)
     const missing = await request(`/lookup?type=agent&id=${encodeURIComponent("oati:agent:smoke:known-missing")}`)
     const missingValue = await responseJson(missing)
     require(missing.status === 404, `missing record returned HTTP ${missing.status}`)
+    responseContract(missing, manifest, { problem: true })
     structuredProblem(missingValue, 404)
     return { invalid_code: invalidValue.error.code, missing_code: missingValue.error.code }
+  })
+
+  await check("api.cors-preflight", async () => {
+    const response = await request("/lookup?type=organisation&id=preflight", {
+      method: "OPTIONS",
+      headers: { "Access-Control-Request-Method": "GET", "Access-Control-Request-Headers": "OATI-Version" },
+    })
+    require(response.status === 200 || response.status === 204, `CORS preflight returned HTTP ${response.status}`)
+    require(response.headers.get("access-control-allow-origin") === manifest.cors_origin, "preflight CORS origin is incorrect")
+    require(headerTokens(response, "access-control-allow-methods").includes("get"), "preflight does not allow GET")
+    require(headerTokens(response, "access-control-allow-headers").includes("oati-version"), "preflight does not allow OATI-Version")
+    return { status: response.status }
   })
 
   await check("lookup.signed-documents", async () => {
@@ -126,10 +146,14 @@ export async function runProductionLookupSmoke({ manifest, fetcher = globalThis.
     require(response.status === 200, `discovery returned HTTP ${response.status}: ${problemCode(value)}`)
     responseContract(response, manifest)
     require(value.organisation_id === manifest.organisation_id && Array.isArray(value.services) && Array.isArray(value.profiles), "discovery response is malformed")
-    const serviceIds = validateDiscoveryRecords(value.services, "service", manifest.organisation_id)
-    const profileIds = validateDiscoveryRecords(value.profiles, "profile", manifest.organisation_id)
+    const serviceIds = validateDiscoveryRecords(value.services, "service", manifest.organisation_id, now)
+    const profileIds = validateDiscoveryRecords(value.profiles, "profile", manifest.organisation_id, now)
     for (const id of manifest.discovery.service_ids) require(serviceIds.includes(id), `discovery omitted Service ${id}`)
     for (const id of manifest.discovery.profile_ids) require(profileIds.includes(id), `discovery omitted Profile ${id}`)
+    for (const record of value.services) {
+      const document = JSON.parse(record.public_attributes.document)
+      for (const profileId of document.accepted_profiles ?? []) require(profileIds.includes(profileId), `${record.id} references undiscoverable Profile ${profileId}`)
+    }
     const sdkDiscovery = await new OatiLookupClient({ resolverUrls: [resolverUrl], fetch: fetcher, retry: { maxRetries: 0 } }).discoverOrganisation(manifest.organisation_id, { cache: "reload" })
     require(sdkDiscovery.services.length === value.services.length && sdkDiscovery.profiles.length === value.profiles.length, "SDK discovery disagrees with the raw response")
     return { services: serviceIds, profiles: profileIds }
@@ -166,23 +190,44 @@ async function requestWithRetry(fetcher, url, options) {
 }
 
 function responseContract(response, manifest, options = {}) {
-  require(response.headers.get("content-type")?.startsWith("application/json"), "content-type is not application/json")
+  if (!options.allowEmptyContentType) {
+    const contentType = response.headers.get("content-type") ?? ""
+    require(contentType.startsWith(options.problem ? "application/problem+json" : "application/json"), `content-type is not ${options.problem ? "application/problem+json" : "application/json"}`)
+  }
   require(response.headers.get("oati-version") === "1.0", "OATI-Version response header is missing")
   require(response.headers.get("x-request-id"), "X-Request-ID is missing")
   require(response.headers.get("access-control-allow-origin") === manifest.cors_origin, "public CORS origin is incorrect")
   if (options.cache) {
-    require(response.headers.get("cache-control")?.includes("public"), "public Cache-Control is missing")
+    const cacheControl = response.headers.get("cache-control")?.toLowerCase() ?? ""
+    require(cacheControl.includes("public") && !cacheControl.includes("private") && !cacheControl.includes("no-store"), "public Cache-Control is missing or unsafe")
+    require(/(?:s-maxage|max-age)=\d+/.test(cacheControl), "Cache-Control has no explicit freshness lifetime")
     require(response.headers.get("etag"), "ETag is missing")
-    for (const header of ["x-ratelimit-limit", "x-ratelimit-remaining", "x-ratelimit-reset"]) require(response.headers.get(header), `${header} is missing`)
+    for (const header of ["x-ratelimit-limit", "x-ratelimit-remaining", "x-ratelimit-reset"]) {
+      const value = response.headers.get(header)
+      require(value !== null && /^\d+$/.test(value) && Number(value) >= 0, `${header} is missing or invalid`)
+    }
   }
 }
 
 function privacyProjection(record) {
-  for (const key of Object.keys(record)) require(!forbiddenProjectionKeys.has(key), `forbidden projection field ${key} leaked`)
-  for (const key of Object.keys(record.public_attributes ?? {})) require(!forbiddenProjectionKeys.has(key), `forbidden public attribute ${key} leaked`)
+  scanPrivacy(record, "record")
+  if (typeof record.public_attributes?.signed_document === "string") {
+    let signedDocument
+    try { signedDocument = JSON.parse(record.public_attributes.signed_document) } catch { throw new Error("signed_document is not valid JSON") }
+    scanPrivacy(signedDocument, "signed_document")
+  }
 }
 
-function validateDiscoveryRecords(records, type, organisationId) {
+function scanPrivacy(value, path) {
+  if (Array.isArray(value)) return value.forEach((item, index) => scanPrivacy(item, `${path}[${index}]`))
+  if (!value || typeof value !== "object") return
+  for (const [key, child] of Object.entries(value)) {
+    require(!forbiddenProjectionKeys.has(key.toLowerCase()), `forbidden field ${path}.${key} leaked`)
+    scanPrivacy(child, `${path}.${key}`)
+  }
+}
+
+function validateDiscoveryRecords(records, type, organisationId, now) {
   return records.map((record) => {
     require(record.type === type && record.organisation_id === organisationId && record.status === "active" && record.proof_status === "verified", `untrusted ${type} discovery record ${record.id}`)
     const document = JSON.parse(record.public_attributes.document)
@@ -190,9 +235,37 @@ function validateDiscoveryRecords(records, type, organisationId) {
     const result = validateSchema(schema, document)
     require(result.valid, `${record.id} discovery document is schema-invalid`)
     require(document.id === record.id && document.organisation_id === organisationId, `${record.id} discovery document is mismatched`)
+    require(document.issuer === record.issuer && document.status === "active", `${record.id} discovery issuer or status is mismatched`)
+    require(typeof document.expires_at === "string" && Date.parse(document.expires_at) > now.getTime(), `${record.id} discovery document is expired`)
     return record.id
   })
 }
+
+export function inspectTlsEndpoint(resolverUrl, now = new Date()) {
+  const url = new URL(resolverUrl)
+  require(url.protocol === "https:", "TLS inspection requires an HTTPS resolver")
+  return new Promise((resolvePromise, reject) => {
+    const socket = connectTls({ host: url.hostname, port: Number(url.port || 443), servername: url.hostname, rejectUnauthorized: true })
+    const finishError = (error) => { socket.destroy(); reject(error instanceof Error ? error : new Error(String(error))) }
+    socket.setTimeout(5_000, () => finishError(new Error("TLS handshake timed out")))
+    socket.once("error", finishError)
+    socket.once("secureConnect", () => {
+      try {
+        require(socket.authorized, `TLS certificate is not authorized: ${socket.authorizationError ?? "unknown"}`)
+        const protocol = socket.getProtocol()
+        require(protocol === "TLSv1.2" || protocol === "TLSv1.3", `unsupported TLS protocol ${protocol ?? "unknown"}`)
+        const certificate = socket.getPeerCertificate()
+        const validUntil = Date.parse(certificate.valid_to)
+        require(Number.isFinite(validUntil), "TLS certificate expiry is unavailable")
+        require(validUntil - now.getTime() >= 14 * 24 * 60 * 60 * 1000, `TLS certificate expires too soon: ${certificate.valid_to}`)
+        socket.end()
+        resolvePromise({ protocol, valid_until: new Date(validUntil).toISOString(), fingerprint256: certificate.fingerprint256 })
+      } catch (error) { finishError(error) }
+    })
+  })
+}
+
+function headerTokens(response, name) { return (response.headers.get(name) ?? "").toLowerCase().split(",").map((item) => item.trim()).filter(Boolean) }
 
 async function responseJson(response) { try { return await response.json() } catch { throw new Error(`HTTP ${response.status} did not return JSON`) } }
 function problemCode(value) { return value?.error?.code ?? "unknown_error" }

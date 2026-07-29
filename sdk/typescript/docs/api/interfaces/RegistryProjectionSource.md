@@ -124,7 +124,7 @@
 
 ### type
 
-> **type**: `"issuer"` \| `"profile"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"mandate"` \| `"receipt"` \| `"key"` \| `"revocation"` \| `"service"`
+> **type**: `"issuer"` \| `"profile"` \| `"mandate"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"receipt"` \| `"key"` \| `"revocation"` \| `"service"`
 
 #### Inherited from
 

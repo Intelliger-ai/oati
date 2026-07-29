@@ -1,0 +1,8 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:issuer:example:enterprise",
+  "parent": "oati:issuer:intelliger:root",
+  "status": "active",
+  "valid_from": "2026-07-27T00:00:00Z",
+  "valid_until": "2027-07-27T00:00:00Z"
+}

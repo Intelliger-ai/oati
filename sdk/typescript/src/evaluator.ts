@@ -85,14 +85,16 @@ export function evaluateAuthority(request: EvaluationRequest): EvaluationResult 
   if (envelope.purpose !== mandate.purpose) reasons.add("PURPOSE_MISMATCH")
   checkSetConstraint(mandate.counterparties, envelope.counterparty, "COUNTERPARTY_NOT_ALLOWED", reasons)
   checkSetConstraint(mandate.destinations, envelope.destination, "DESTINATION_NOT_ALLOWED", reasons)
+  if (envelope.profile !== undefined && envelope.profile !== mandate.profile) reasons.add("PROFILE_MISMATCH")
   if (request.parent_mandate) checkChildMandate(mandate, request.parent_mandate, request.delegation_depth ?? 1, now, reasons)
   else if (mandate.parent_mandate) reasons.add("PARENT_MANDATE_REQUIRED")
 
   const usage = normalizedUsage(request.usage)
   const delta = effectiveConsumption(request)
+  checkConsumptionContext(request, delta, reasons)
   checkConsumption(mandate, usage, delta, reasons)
-  if (request.commerce || mandate.profile === "https://specs.intelliger.ai/oati/profiles/commerce/v0.1") checkCommerce(mandate, request.commerce, usage, reasons)
-  if (request.rwa || mandate.profile === "https://specs.intelliger.ai/oati/profiles/rwa/v0.1") checkRwa(mandate, request.rwa, usage, request.usage.minted_supply !== undefined, now, reasons)
+  if (request.commerce || mandate.profile === "https://specs.intelliger.ai/oati/profiles/commerce/v0.1") checkCommerce(mandate, envelope, request.commerce, usage, reasons)
+  if (request.rwa || mandate.profile === "https://specs.intelliger.ai/oati/profiles/rwa/v0.1") checkRwa(mandate, envelope, request.rwa, usage, request.usage.minted_supply !== undefined, now, reasons)
 
   const reasonCodes = [...reasons].sort()
   return {
@@ -144,6 +146,8 @@ function checkConsumption(mandate: AgentMandate, usage: Required<UsageSnapshot>,
   if (delta.idempotency_key && usage.idempotency_keys.includes(delta.idempotency_key)) reasons.add("IDEMPOTENCY_REPLAY")
   const limits = mandate.limits ?? {}
   if (typeof limits.max_calls === "number" && usage.calls + delta.calls > limits.max_calls) reasons.add("CALL_LIMIT_EXCEEDED")
+  if (mandate.profile === undefined && (typeof limits.max_quantity === "string" || typeof limits.max_quantity === "number")
+    && compareDecimal(addDecimal(usage.quantity, delta.quantity), String(limits.max_quantity)) > 0) reasons.add("QUANTITY_LIMIT_EXCEEDED")
   if (typeof limits.max_total === "string" && delta.amount !== "0") {
     const currency = typeof limits.currency === "string" ? limits.currency : undefined
     if (currency && (delta.currency !== currency || usage.amount !== "0" && usage.currency !== currency)) reasons.add("BUDGET_CURRENCY_MISMATCH")
@@ -151,9 +155,15 @@ function checkConsumption(mandate: AgentMandate, usage: Required<UsageSnapshot>,
   }
 }
 
-function checkCommerce(mandate: AgentMandate, context: CommerceEvaluationContext | undefined, usage: Required<UsageSnapshot>, reasons: Set<string>): void {
+function checkCommerce(mandate: AgentMandate, envelope: TransactionEnvelope, context: CommerceEvaluationContext | undefined, usage: Required<UsageSnapshot>, reasons: Set<string>): void {
   const limits = objectAt(mandate.extensions, "commerce")
   if (!context || !limits) { reasons.add("COMMERCE_CONTEXT_REQUIRED"); return }
+  const signed = objectAt(envelope.extensions, "commerce")
+  const envelopeMismatch = signed && (envelope.resource !== context.service_id || envelope.counterparty !== context.merchant_organisation_id
+    || !sameMappedFields(signed, context as unknown as Record<string, unknown>, [
+      ["offer_id", "offer_id"], ["currency", "currency"], ["quantity", "quantity"], ["quoted_unit_price", "unit_price"],
+      ["quoted_total", "total_amount"], ["idempotency_key", "idempotency_key"], ["terms_digest", "terms_digest"],
+    ]))
   if (context.merchant_organisation_id !== limits.merchant_organisation_id) reasons.add("COMMERCE_MERCHANT_NOT_ALLOWED")
   if (context.service_id !== limits.service_id) reasons.add("COMMERCE_SERVICE_NOT_ALLOWED")
   if (context.offer_id !== limits.offer_id) reasons.add("COMMERCE_OFFER_NOT_ALLOWED")
@@ -164,11 +174,17 @@ function checkCommerce(mandate: AgentMandate, context: CommerceEvaluationContext
   if (compareDecimal(String(context.quantity), String(limits.max_quantity)) > 0) reasons.add("COMMERCE_QUANTITY_EXCEEDED")
   if (limits.terms_digest && context.terms_digest !== limits.terms_digest) reasons.add("COMMERCE_TERMS_MISMATCH")
   if (usage.idempotency_keys.includes(context.idempotency_key)) reasons.add("IDEMPOTENCY_REPLAY")
+  // Preserve the established primary domain failure when an already-invalid
+  // context also differs from the Envelope; otherwise report substitution.
+  if (envelopeMismatch && ![...reasons].some((code) => code.startsWith("COMMERCE_"))) reasons.add("COMMERCE_ENVELOPE_CONTEXT_MISMATCH")
 }
 
-function checkRwa(mandate: AgentMandate, context: RwaEvaluationContext | undefined, usage: Required<UsageSnapshot>, hasMintedSupply: boolean, now: number, reasons: Set<string>): void {
+function checkRwa(mandate: AgentMandate, envelope: TransactionEnvelope, context: RwaEvaluationContext | undefined, usage: Required<UsageSnapshot>, hasMintedSupply: boolean, now: number, reasons: Set<string>): void {
   const limits = objectAt(mandate.extensions, "rwa")
   if (!context || !limits) { reasons.add("RWA_CONTEXT_REQUIRED"); return }
+  const signed = objectAt(envelope.extensions, "rwa")
+  if (signed && (envelope.resource !== context.asset_id || !sameFields(signed, context as unknown as Record<string, unknown>,
+    ["asset_id", "state_claim_id", "network", "token_contract", "operation", "unit", "quantity"]))) reasons.add("RWA_ENVELOPE_CONTEXT_MISMATCH")
   if (!sameFields(context as unknown as Record<string, unknown>, limits, ["asset_id", "state_claim_id", "network", "token_contract", "operation", "unit"])) reasons.add("RWA_TARGET_MISMATCH")
   if (timestamp(context.claim_valid_until) <= now) reasons.add("RWA_STATE_CLAIM_EXPIRED")
   if (compareDecimal(addDecimal(usage.quantity, context.quantity), String(limits.max_quantity)) > 0) reasons.add("RWA_QUANTITY_EXCEEDED")
@@ -185,12 +201,22 @@ function effectiveConsumption(request: EvaluationRequest): Required<Consumption>
   const commerce = request.commerce, rwa = request.rwa, supplied = request.consumption ?? {}
   return {
     calls: supplied.calls ?? 1,
-    amount: supplied.amount ?? commerce?.total_amount ?? "0",
-    currency: supplied.currency ?? commerce?.currency ?? "",
-    quantity: supplied.quantity ?? (commerce ? String(commerce.quantity) : rwa?.quantity ?? "0"),
-    idempotency_key: supplied.idempotency_key ?? commerce?.idempotency_key ?? "",
-    consume: supplied.consume ?? Boolean(objectAt(request.mandate.extensions, "rwa")?.one_time || request.mandate.limits?.one_time),
+    amount: commerce?.total_amount ?? supplied.amount ?? "0",
+    currency: commerce?.currency ?? supplied.currency ?? "",
+    quantity: commerce ? String(commerce.quantity) : rwa?.quantity ?? supplied.quantity ?? "0",
+    idempotency_key: commerce?.idempotency_key ?? supplied.idempotency_key ?? "",
+    consume: Boolean(objectAt(request.mandate.extensions, "rwa")?.one_time || request.mandate.limits?.one_time) || supplied.consume === true,
   }
+}
+
+function checkConsumptionContext(request: EvaluationRequest, effective: Required<Consumption>, reasons: Set<string>): void {
+  const supplied = request.consumption
+  if (!supplied) return
+  const constrained: Array<keyof Consumption> = request.commerce
+    ? ["amount", "currency", "quantity", "idempotency_key"]
+    : request.rwa ? ["quantity"] : []
+  if (effective.consume && supplied.consume === false) constrained.push("consume")
+  if (constrained.some((field) => supplied[field] !== undefined && supplied[field] !== effective[field])) reasons.add("CONSUMPTION_CONTEXT_MISMATCH")
 }
 
 function applyConsumption(usage: Required<UsageSnapshot>, delta: Required<Consumption>, request: EvaluationRequest): UsageSnapshot {
@@ -214,6 +240,7 @@ function timestamp(value: string): number { const parsed = Date.parse(value); if
 function objectAt(value: Record<string, unknown> | undefined, key: string): Record<string, unknown> | undefined { const item = value?.[key]; return typeof item === "object" && item !== null && !Array.isArray(item) ? item as Record<string, unknown> : undefined }
 function stringArray(value: unknown): string[] { return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [] }
 function sameFields(child: Record<string, unknown>, parent: Record<string, unknown>, fields: string[]): boolean { return fields.every((field) => child[field] === parent[field]) }
+function sameMappedFields(left: Record<string, unknown>, right: Record<string, unknown>, fields: Array<readonly [string, string]>): boolean { return fields.every(([leftField, rightField]) => left[leftField] === right[rightField]) }
 function numberAtMost(child: unknown, parent: unknown): boolean { return typeof child === "number" && typeof parent === "number" && child <= parent }
 function numberAtLeast(child: unknown, parent: unknown): boolean { return typeof child === "number" && typeof parent === "number" && child >= parent }
 function decimalAtMost(child: unknown, parent: unknown): boolean { return typeof child === "string" && typeof parent === "string" && compareDecimal(child, parent) <= 0 }

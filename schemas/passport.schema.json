@@ -33,18 +33,6 @@
     "issued_at": { "type": "string", "format": "date-time" },
     "expires_at": { "type": "string", "format": "date-time" },
     "status_endpoint": { "type": "string", "format": "uri" },
-    "proof": { "$ref": "#/$defs/proof" }
-  },
-  "$defs": {
-    "proof": {
-      "type": "object",
-      "required": ["type", "created", "verification_method", "signature"],
-      "properties": {
-        "type": { "type": "string" },
-        "created": { "type": "string", "format": "date-time" },
-        "verification_method": { "type": "string" },
-        "signature": { "type": "string" }
-      }
-    }
+    "proof": { "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json" }
   }
 }

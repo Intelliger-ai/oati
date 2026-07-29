@@ -50,6 +50,18 @@ static_resources:
                             headers:remove("x-oati-transaction-id")
                             headers:remove("x-oati-correlation-id")
                           end
+                  - name: envoy.filters.http.local_ratelimit
+                    typed_config:
+                      "@type": type.googleapis.com/envoy.extensions.filters.http.local_ratelimit.v3.LocalRateLimit
+                      stat_prefix: oati_gateway_rate_limit
+                      token_bucket:
+                        max_tokens: 200
+                        tokens_per_fill: 200
+                        fill_interval: 1s
+                      filter_enabled:
+                        default_value: { numerator: 100, denominator: HUNDRED }
+                      filter_enforced:
+                        default_value: { numerator: 100, denominator: HUNDRED }
                   - name: envoy.filters.http.ext_authz
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.ext_authz.v3.ExtAuthz
@@ -80,14 +92,29 @@ static_resources:
                         authorization_response:
                           allowed_upstream_headers:
                             patterns:
-                              - { prefix: x-oati-, ignore_case: true }
+                              - { exact: x-oati-decision, ignore_case: true }
+                              - { exact: x-oati-transaction-id, ignore_case: true }
+                              - { exact: x-oati-correlation-id, ignore_case: true }
+                              - { exact: x-oati-receipt-id, ignore_case: true }
+                              - { exact: x-oati-receipt, ignore_case: true }
+                              - { exact: x-oati-reason-codes, ignore_case: true }
                           allowed_client_headers:
                             patterns:
                               - { exact: content-type, ignore_case: true }
-                              - { prefix: x-oati-, ignore_case: true }
+                              - { exact: x-oati-decision, ignore_case: true }
+                              - { exact: x-oati-transaction-id, ignore_case: true }
+                              - { exact: x-oati-correlation-id, ignore_case: true }
+                              - { exact: x-oati-receipt-id, ignore_case: true }
+                              - { exact: x-oati-receipt, ignore_case: true }
+                              - { exact: x-oati-reason-codes, ignore_case: true }
                           allowed_client_headers_on_success:
                             patterns:
-                              - { prefix: x-oati-, ignore_case: true }
+                              - { exact: x-oati-decision, ignore_case: true }
+                              - { exact: x-oati-transaction-id, ignore_case: true }
+                              - { exact: x-oati-correlation-id, ignore_case: true }
+                              - { exact: x-oati-receipt-id, ignore_case: true }
+                              - { exact: x-oati-receipt, ignore_case: true }
+                              - { exact: x-oati-reason-codes, ignore_case: true }
                   - name: envoy.filters.http.lua.remove_verified_authority
                     typed_config:
                       "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
@@ -142,4 +169,4 @@ overload_manager:
 
 admin:
   address:
-    socket_address: { address: 0.0.0.0, port_value: 9901 }
+    socket_address: { address: 127.0.0.1, port_value: 9901 }

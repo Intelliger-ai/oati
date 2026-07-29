@@ -1,4 +1,5 @@
 import { OatiLookupError } from "./errors.js"
+import { validateSchema } from "./validation.js"
 
 export const OATI_RECORD_TYPES = [
   "organisation", "agent", "passport", "mandate", "receipt", "issuer", "key", "revocation", "service", "profile",
@@ -89,6 +90,8 @@ export interface LookupClientOptions {
   baseUrl?: string
   fetch?: typeof globalThis.fetch
   timeoutMs?: number
+  /** Maximum resolver response body accepted before failing closed. Defaults to 2 MiB. */
+  maxResponseBytes?: number
   headers?: HeadersInit
   retry?: LookupRetryOptions
   cache?: LookupCacheOptions | false
@@ -109,6 +112,7 @@ export class OatiLookupClient {
   readonly baseUrl: string
   private readonly fetcher: typeof globalThis.fetch
   private readonly timeoutMs: number
+  private readonly maxResponseBytes: number
   private readonly headers: HeadersInit
   private readonly retries: Required<LookupRetryOptions>
   private readonly cacheOptions: Required<LookupCacheOptions> | false
@@ -122,6 +126,7 @@ export class OatiLookupClient {
     this.fetcher = options.fetch ?? globalThis.fetch
     if (typeof this.fetcher !== "function") throw new TypeError("A Fetch API implementation is required")
     this.timeoutMs = positive(options.timeoutMs ?? 10_000, "timeoutMs")
+    this.maxResponseBytes = positiveInteger(options.maxResponseBytes ?? 2_097_152, "maxResponseBytes")
     this.headers = options.headers ?? {}
     this.retries = {
       maxRetries: nonNegativeInteger(options.retry?.maxRetries ?? 2, "maxRetries"),
@@ -157,15 +162,32 @@ export class OatiLookupClient {
   /** Discover all active, verified services and profiles published by an organisation. */
   async discoverOrganisation(organisationId: string, options: LookupOptions = {}): Promise<OrganisationDiscovery> {
     if (!organisationId.startsWith("oati:org:")) throw new OatiLookupError("LOOKUP_BAD_REQUEST", "A valid OATI organisation id is required")
-    const payload = await this.fetchDiscovery(`${this.baseUrl}/discovery?organisation_id=${encodeURIComponent(organisationId)}`, options)
+    let payload: unknown
+    let lastError: OatiLookupError | undefined
+    for (const resolverUrl of this.resolverUrls) {
+      try {
+        payload = await this.fetchDiscovery(`${resolverUrl}/discovery?organisation_id=${encodeURIComponent(organisationId)}`, options)
+        lastError = undefined
+        break
+      } catch (error) {
+        if (!(error instanceof OatiLookupError) || !retryable(error)) throw error
+        lastError = error
+      }
+    }
+    if (lastError || payload === undefined) throw lastError ?? new OatiLookupError("LOOKUP_UNAVAILABLE", "No OATI discovery resolver was available")
     if (!isObject(payload) || payload.organisation_id !== organisationId || !Array.isArray(payload.services) || !Array.isArray(payload.profiles)) {
       throw new OatiLookupError("LOOKUP_INVALID_RESPONSE", "Resolver returned an invalid discovery response", { details: payload })
     }
-    return {
+    const discovery = {
       organisation_id: organisationId,
       services: payload.services.map((value) => decodeDiscoveryRecord(value, "service") as unknown as { record: ServiceRecord; document: ServiceDiscoveryDocument }),
       profiles: payload.profiles.map((value) => decodeDiscoveryRecord(value, "profile") as unknown as { record: ProfileRecord; document: ProfileDiscoveryDocument }),
     }
+    const profiles = new Set(discovery.profiles.map(({ record }) => record.id))
+    for (const { document } of discovery.services) for (const profile of document.accepted_profiles) {
+      if (!profiles.has(profile)) throw new OatiLookupError("LOOKUP_INVALID_RESPONSE", `Discovery service references unpublished profile ${profile}`, { details: payload })
+    }
+    return discovery
   }
 
   /** Resolve a domain's `/.well-known/oati`, then use its advertised resolver. */
@@ -187,7 +209,7 @@ export class OatiLookupClient {
     const timeoutMs = options.timeoutMs ?? this.timeoutMs; const timeout = setTimeout(() => controller.abort(), timeoutMs)
     try {
       const response = await this.fetcher(url, { headers: { Accept: "application/json", ...this.headers }, signal: controller.signal })
-      const payload = await readPayload(response)
+      const payload = await readPayload(response, this.maxResponseBytes)
       if (!response.ok) throw responseError(response, payload, rateLimitInfo(response))
       return payload
     } catch (error) {
@@ -291,7 +313,7 @@ export class OatiLookupClient {
         record: cached.record as OatiRecordByType[T], expiresAt: expiry(response, this.cacheOptions, false),
         etag: cached.etag, rateLimit: { ...cached.rateLimit, ...rateLimit }, revalidated: true, cacheable: isCacheable(response),
       }
-      const payload = await readPayload(response)
+      const payload = await readPayload(response, this.maxResponseBytes)
       if (!response.ok) throw responseError(response, payload, rateLimit)
       if (!isPublicRecord(payload)) throw new OatiLookupError(
         "LOOKUP_INVALID_RESPONSE", "Resolver returned an invalid or mismatched public record", { status: response.status, details: payload, rateLimit },
@@ -320,9 +342,28 @@ export class OatiLookupClient {
 
 export function createLookupClient(options: LookupClientOptions = {}): OatiLookupClient { return new OatiLookupClient(options) }
 
-async function readPayload(response: Response): Promise<unknown> {
-  const text = await response.text(); if (text === "") return undefined
-  try { return JSON.parse(text) as unknown } catch { throw new OatiLookupError("LOOKUP_INVALID_RESPONSE", "Resolver returned non-JSON content", { status: response.status }) }
+async function readPayload(response: Response, maximum: number): Promise<unknown> {
+  const declared = Number(response.headers.get("Content-Length"))
+  if (Number.isFinite(declared) && declared > maximum) throw new OatiLookupError("LOOKUP_INVALID_RESPONSE", `Resolver response exceeds ${maximum} bytes`, { status: response.status })
+  const reader = response.body?.getReader()
+  if (!reader) return undefined
+  const chunks: Uint8Array[] = []; let size = 0
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    size += value.byteLength
+    if (size > maximum) {
+      await reader.cancel().catch(() => undefined)
+      throw new OatiLookupError("LOOKUP_INVALID_RESPONSE", `Resolver response exceeds ${maximum} bytes`, { status: response.status })
+    }
+    chunks.push(value)
+  }
+  const encoded = new Uint8Array(size); let offset = 0
+  for (const chunk of chunks) { encoded.set(chunk, offset); offset += chunk.byteLength }
+  try {
+    const text = new TextDecoder("utf-8", { fatal: true }).decode(encoded); if (text === "") return undefined
+    return JSON.parse(text) as unknown
+  } catch { throw new OatiLookupError("LOOKUP_INVALID_RESPONSE", "Resolver returned non-JSON content", { status: response.status }) }
 }
 function responseError(response: Response, details: unknown, rateLimit: RateLimitInfo): OatiLookupError {
   const options = { status: response.status, details, rateLimit, ...(rateLimit.retryAfter === undefined ? {} : { retryAfter: rateLimit.retryAfter }) }
@@ -409,6 +450,11 @@ function decodeDiscoveryRecord(value: unknown, type: "service" | "profile") {
   if (!isPublicRecord(value) || value.type !== type || value.status !== "active" || value.proof_status !== "verified") throw new OatiLookupError("LOOKUP_INVALID_RESPONSE", "Discovery contains an untrusted record", { details: value })
   const document = JSON.parse(value.public_attributes.document!) as Record<string, unknown>
   if (!isObject(document) || document.id !== value.id || document.organisation_id !== value.organisation_id || document.issuer !== value.issuer || document.status !== "active") throw new OatiLookupError("LOOKUP_INVALID_RESPONSE", "Discovery document does not match its public record", { details: value })
+  const checked = validateSchema(type === "service" ? "serviceDiscovery" : "profileDiscovery", document)
+  if (!checked.valid) throw new OatiLookupError("LOOKUP_INVALID_RESPONSE", "Discovery document does not satisfy its published schema", { details: checked.issues })
+  if ((value.expires_at && Date.parse(value.expires_at) <= Date.now()) || (typeof document.expires_at === "string" && Date.parse(document.expires_at) <= Date.now())) {
+    throw new OatiLookupError("LOOKUP_INVALID_RESPONSE", "Discovery contains an expired record", { details: value })
+  }
   return { record: value, document }
 }
 function federationOrigin(domain: string): string {

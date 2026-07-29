@@ -48,7 +48,7 @@ First configured resolver, retained for source compatibility.
 
 ##### type?
 
-`"issuer"` \| `"profile"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"mandate"` \| `"receipt"` \| `"key"` \| `"revocation"` \| `"service"`
+`"issuer"` \| `"profile"` \| `"mandate"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"receipt"` \| `"key"` \| `"revocation"` \| `"service"`
 
 ##### id?
 
@@ -132,7 +132,7 @@ Discover all active, verified services and profiles published by an organisation
 
 ##### T
 
-`T` *extends* `"issuer"` \| `"profile"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"mandate"` \| `"receipt"` \| `"key"` \| `"revocation"` \| `"service"`
+`T` *extends* `"issuer"` \| `"profile"` \| `"mandate"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"receipt"` \| `"key"` \| `"revocation"` \| `"service"`
 
 #### Parameters
 
@@ -164,7 +164,7 @@ Lookup with resolver, cache, and rate-limit metadata.
 
 ##### T
 
-`T` *extends* `"issuer"` \| `"profile"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"mandate"` \| `"receipt"` \| `"key"` \| `"revocation"` \| `"service"`
+`T` *extends* `"issuer"` \| `"profile"` \| `"mandate"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"receipt"` \| `"key"` \| `"revocation"` \| `"service"`
 
 #### Parameters
 
@@ -240,7 +240,7 @@ Resolve expected absence and proof-state failures without exception-based contro
 
 ##### T
 
-`T` *extends* `"issuer"` \| `"profile"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"mandate"` \| `"receipt"` \| `"key"` \| `"revocation"` \| `"service"`
+`T` *extends* `"issuer"` \| `"profile"` \| `"mandate"` \| `"organisation"` \| `"agent"` \| `"passport"` \| `"receipt"` \| `"key"` \| `"revocation"` \| `"service"`
 
 #### Parameters
 

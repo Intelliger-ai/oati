@@ -169,6 +169,7 @@
 - [fromEnvoyCheckRequest](functions/fromEnvoyCheckRequest.md)
 - [getSchema](functions/getSchema.md)
 - [httpRequestDigest](functions/httpRequestDigest.md)
+- [isValidEd25519PublicKey](functions/isValidEd25519PublicKey.md)
 - [jwkThumbprint](functions/jwkThumbprint.md)
 - [mcpAuthorizationHeaders](functions/mcpAuthorizationHeaders.md)
 - [mcpProtectedResourceMetadata](functions/mcpProtectedResourceMetadata.md)

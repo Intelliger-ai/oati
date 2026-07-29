@@ -132,7 +132,7 @@ Export tenant-private registry records for the development control-plane API.
 
 ##### type
 
-`"agent"` \| `"passport"` \| `"mandate"`
+`"mandate"` \| `"agent"` \| `"passport"`
 
 ##### id
 
@@ -182,13 +182,17 @@ Export tenant-private registry records for the development control-plane API.
 
 ### create()
 
-> `static` **create**(`input`): `Promise`\<`DevelopmentIssuer`\>
+> `static` **create**(`input`, `now?`): `Promise`\<`DevelopmentIssuer`\>
 
 #### Parameters
 
 ##### input
 
 [`DevelopmentOrganisationInput`](../interfaces/DevelopmentOrganisationInput.md)
+
+##### now?
+
+`Date` = `...`
 
 #### Returns
 

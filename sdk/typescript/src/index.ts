@@ -209,7 +209,7 @@ export interface RwaReceiptTerms {
   unit: string
   chain_transaction_hash: string
   approval_count: number
-  resulting_supply?: DecimalString
+  resulting_supply: DecimalString
 }
 
 export interface RwaReceipt extends ActionReceipt {
@@ -246,6 +246,8 @@ export function validateCommerceReceipt(
   if (commerce.quantity < 1) issues.push("quantity must be at least 1")
   if (!isDecimal(commerce.unit_price)) issues.push("unit_price must be a non-negative decimal string")
   if (!isDecimal(commerce.total_amount)) issues.push("total_amount must be a non-negative decimal string")
+  if (isDecimal(commerce.unit_price) && isDecimal(commerce.total_amount)
+    && compareDecimal(commerce.total_amount, multiplyDecimal(commerce.unit_price, commerce.quantity)) !== 0) issues.push("total amount must equal unit price multiplied by quantity")
   if (mandate) {
     const limit = mandate.extensions.commerce
     if (receipt.mandate_id !== mandate.id) issues.push("receipt mandate_id does not match Mandate")
@@ -253,6 +255,7 @@ export function validateCommerceReceipt(
     if (commerce.service_id !== limit.service_id) issues.push("service is not authorised by Mandate")
     if (commerce.offer_id !== limit.offer_id) issues.push("offer is not authorised by Mandate")
     if (commerce.currency !== limit.currency) issues.push("receipt currency differs from Mandate")
+    if (limit.terms_digest && commerce.terms_digest !== limit.terms_digest) issues.push("receipt terms digest differs from Mandate")
     if (commerce.quantity > limit.max_quantity) issues.push("quantity exceeds Mandate")
     if (compareDecimal(commerce.unit_price, limit.max_unit_price) > 0) issues.push("unit price exceeds Mandate")
     if (compareDecimal(commerce.total_amount, limit.max_total) > 0) issues.push("total amount exceeds Mandate")
@@ -280,10 +283,13 @@ export function validateMintMandate(
   if (!isDecimal(rwa.max_quantity) || compareDecimal(rwa.max_quantity, "0") <= 0) issues.push("max_quantity must be greater than zero")
   if (rwa.minimum_approvals < 1) issues.push("minimum_approvals must be at least 1")
   if (claim) {
+    if (claim.claim_type !== "reserve_balance") issues.push("controlled mint requires a reserve_balance State Claim")
     if (rwa.asset_id !== claim.asset_id) issues.push("State Claim asset differs from Mandate")
     if (rwa.state_claim_id !== claim.id) issues.push("State Claim id differs from Mandate")
     if (rwa.unit !== claim.unit) issues.push("State Claim unit differs from Mandate")
     if (new Date(claim.valid_until) <= now) issues.push("State Claim is expired")
+    if (new Date(claim.observed_at) > now) issues.push("State Claim observation is in the future")
+    if (new Date(claim.valid_until) <= new Date(claim.observed_at)) issues.push("State Claim valid_until must be after observed_at")
     if (compareDecimal(rwa.max_quantity, claim.value) > 0) issues.push("mint authority exceeds claimed reserve")
   }
   return result(issues)
@@ -299,12 +305,16 @@ export function validateRwaReceipt(
   if (!rwa) return result([...issues, "missing extensions.rwa"])
   if (!rwa.chain_transaction_hash) issues.push("missing chain transaction hash")
   if (rwa.approval_count < 0) issues.push("approval_count cannot be negative")
+  if (!isDecimal(rwa.quantity) || compareDecimal(rwa.quantity, "0") <= 0) issues.push("receipt quantity must be greater than zero")
+  if (rwa.resulting_supply === undefined || !isDecimal(rwa.resulting_supply)) issues.push("receipt resulting_supply must be a non-negative decimal string")
   if (mandate) {
     const limit = mandate.extensions.rwa
     if (receipt.mandate_id !== mandate.id) issues.push("receipt mandate_id does not match Mandate")
     if (rwa.asset_id !== limit.asset_id) issues.push("receipt asset differs from Mandate")
     if (rwa.state_claim_id !== limit.state_claim_id) issues.push("receipt State Claim differs from Mandate")
     if (rwa.network !== limit.network || rwa.token_contract !== limit.token_contract) issues.push("receipt token target differs from Mandate")
+    if (rwa.operation !== limit.operation) issues.push("receipt operation differs from Mandate")
+    if (rwa.unit !== limit.unit) issues.push("receipt unit differs from Mandate")
     if (compareDecimal(rwa.quantity, limit.max_quantity) > 0) issues.push("receipt quantity exceeds Mandate")
     if (rwa.approval_count < limit.minimum_approvals) issues.push("receipt has insufficient approvals")
   }
@@ -355,6 +365,15 @@ function compareDecimal(left: string, right: string): number {
   const a = leftFraction.padEnd(width, "0")
   const b = rightFraction.padEnd(width, "0")
   return a === b ? 0 : a > b ? 1 : -1
+}
+
+function multiplyDecimal(value: string, multiplier: number): string {
+  if (!isDecimal(value) || !Number.isSafeInteger(multiplier) || multiplier < 0) return "invalid"
+  const [whole, fraction = ""] = value.split(".")
+  const coefficient = BigInt(`${whole}${fraction}`) * BigInt(multiplier)
+  if (fraction.length === 0) return coefficient.toString()
+  const digits = coefficient.toString().padStart(fraction.length + 1, "0")
+  return `${digits.slice(0, -fraction.length)}.${digits.slice(-fraction.length)}`
 }
 
 export * from "./builders.js"

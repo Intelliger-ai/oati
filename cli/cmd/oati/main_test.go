@@ -164,6 +164,40 @@ func TestMintMandateRejectsReserveAmplification(t *testing.T) {
 	}
 }
 
+func TestCommerceReceiptRejectsInconsistentArithmeticAndTerms(t *testing.T) {
+	receipt := map[string]any{"profile": commerceProfile, "mandate_id": "oati:mandate:test", "extensions": map[string]any{"commerce": map[string]any{
+		"merchant_organisation_id": "oati:org:seller", "service_id": "oati:service:seller:data", "offer_id": "offer-1",
+		"currency": "EUR", "quantity": json.Number("2"), "unit_price": "1.00", "total_amount": "1.00", "terms_digest": "sha256:changed",
+	}}}
+	mandate := map[string]any{"id": "oati:mandate:test", "extensions": map[string]any{"commerce": map[string]any{
+		"merchant_organisation_id": "oati:org:seller", "service_id": "oati:service:seller:data", "offer_id": "offer-1",
+		"currency": "EUR", "max_quantity": json.Number("2"), "max_unit_price": "1.00", "max_total": "2.00", "terms_digest": "sha256:terms",
+	}}}
+	issues := append(validateCommerceReceipt(receipt), compareCommerceReceipt(receipt, mandate)...)
+	if !contains(issues, "total amount must equal unit price multiplied by quantity") || !contains(issues, "terms digest differs from Mandate") {
+		t.Fatalf("expected arithmetic and terms violations, got %v", issues)
+	}
+}
+
+func TestRwaControlledMintRejectsWrongEvidenceAndReceiptBindings(t *testing.T) {
+	mandate := map[string]any{"id": "oati:mandate:test", "extensions": map[string]any{"rwa": map[string]any{
+		"asset_id": "oati:asset:test", "state_claim_id": "oati:claim:test", "operation": "mint", "network": "eip155:1",
+		"token_contract": "0x1", "unit": "EUR", "max_quantity": "10", "minimum_approvals": json.Number("2"),
+	}}}
+	claim := map[string]any{"id": "oati:claim:test", "asset_id": "oati:asset:test", "claim_type": "nav", "unit": "EUR", "value": "10"}
+	if issues := compareMintMandate(mandate, claim); !contains(issues, "controlled mint requires a reserve_balance State Claim") {
+		t.Fatalf("expected reserve claim violation, got %v", issues)
+	}
+	receipt := map[string]any{"mandate_id": "oati:mandate:test", "extensions": map[string]any{"rwa": map[string]any{
+		"asset_id": "oati:asset:test", "state_claim_id": "oati:claim:test", "operation": "burn", "network": "eip155:1",
+		"token_contract": "0x1", "quantity": "1", "unit": "USD", "chain_transaction_hash": "0x2", "approval_count": json.Number("2"), "resulting_supply": "9",
+	}}}
+	issues := compareRwaReceipt(receipt, mandate)
+	if !contains(issues, "operation differs from Mandate") || !contains(issues, "unit differs from Mandate") {
+		t.Fatalf("expected operation and unit violations, got %v", issues)
+	}
+}
+
 func TestCryptographicConformanceVectorAndReplay(t *testing.T) {
 	root := filepath.Join("..", "..", "..", "conformance", "crypto")
 	var signed, stderr bytes.Buffer
@@ -239,6 +273,37 @@ func TestCryptographicPolicyChecksFailClosed(t *testing.T) {
 	late := time.Date(2026, 7, 27, 12, 10, 0, 0, time.UTC)
 	if report := verifyObject(value, bundle, "https://merchant.example", late, 5*time.Minute, 30*time.Second); !reportHas(report, "PROOF_EXPIRED") {
 		t.Fatalf("expected expiry failure: %#v", report)
+	}
+}
+
+func TestCryptographicLifecycleAndMalformedProofVectors(t *testing.T) {
+	root := filepath.Join("..", "..", "..", "conformance", "crypto")
+	now := time.Date(2026, 7, 27, 12, 2, 0, 0, time.UTC)
+	cases := []struct {
+		document, bundle, code string
+	}{
+		{"missing-proof-envelope.json", "trust-bundle.json", "PROOF_MISSING"},
+		{"malformed-proof-envelope.json", "trust-bundle.json", "PROOF_MALFORMED"},
+		{"protected-header-mismatch-envelope.json", "trust-bundle.json", "SIGNATURE_INVALID"},
+		{"ed25519-small-order-forgery-envelope.json", "ed25519-small-order-trust-bundle.json", "KEY_INVALID"},
+		{"signed-envelope.json", "invalid-key-time-bundle.json", "KEY_INVALID"},
+		{"signed-envelope.json", "invalid-issuer-time-bundle.json", "ISSUER_REVOKED"},
+		{"signed-envelope.json", "revocation-intermediate-target-bundle.json", "ISSUER_REVOKED"},
+	}
+	for _, test := range cases {
+		t.Run(test.code+"/"+test.bundle, func(t *testing.T) {
+			value, err := readObject(filepath.Join(root, test.document))
+			if err != nil {
+				t.Fatal(err)
+			}
+			var bundle trustBundle
+			if err := readJSONFile(filepath.Join(root, test.bundle), &bundle); err != nil {
+				t.Fatal(err)
+			}
+			if report := verifyObject(value, bundle, "https://merchant.example", now, 5*time.Minute, 30*time.Second); !reportHas(report, test.code) {
+				t.Fatalf("expected %s: %#v", test.code, report)
+			}
+		})
 	}
 }
 

@@ -1,0 +1,5 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:tx:conformance:missing-proof",
+  "issuer": "oati:agent:conformance:sender"
+}

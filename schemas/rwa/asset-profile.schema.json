@@ -38,6 +38,6 @@
     "issued_at": { "type": "string", "format": "date-time" },
     "expires_at": { "type": "string", "format": "date-time" },
     "issuer": { "type": "string" },
-    "proof": { "type": "object" }
+    "proof": { "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json" }
   }
 }

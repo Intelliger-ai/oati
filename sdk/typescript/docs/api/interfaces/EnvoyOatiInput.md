@@ -8,6 +8,12 @@
 
 ## Properties
 
+### body?
+
+> `optional` **body?**: `string`
+
+***
+
 ### destination?
 
 > `optional` **destination?**: `unknown`

@@ -20,7 +20,7 @@ const ALLOWED_RESPONSE_HEADERS = new Set([
 
 export function createApplication(config = configuration()) {
   config = { ...config, invalidationToken: configuredInvalidationToken(config) }
-  const valkey = config.valkey ?? new ValkeyClient(config.valkeyUrl, config.valkeyPasswordFile)
+  const valkey = config.valkey ?? new ValkeyClient(config.valkeyUrl, config.valkeyPasswordFile, config.valkeyTlsCAFile, config.valkeyTlsServerName)
   const replayCache = config.replayCache ?? new ValkeyReplayCache(valkey, config.replayPrefix)
   const usageStore = config.usageStore ?? new ValkeyUsageStore(valkey, config.usagePrefix)
   const lookup = config.lookup ?? new OatiLookupClient({
@@ -114,6 +114,7 @@ export function configuration(environment = process.env) {
     trustAnchors: required("OATI_GATEWAY_TRUST_ANCHORS").split(",").map((value) => value.trim()).filter(Boolean),
     resolverUrls: required("OATI_LOOKUP_RESOLVER_URLS").split(",").map((value) => value.trim()).filter(Boolean),
     valkeyUrl: required("VALKEY_URL"), valkeyPasswordFile: environment.VALKEY_PASSWORD_FILE,
+    valkeyTlsCAFile: environment.VALKEY_TLS_CA_FILE, valkeyTlsServerName: environment.VALKEY_TLS_SERVER_NAME,
     replayPrefix: environment.OATI_GATEWAY_REPLAY_PREFIX ?? "oati:gateway:replay:",
     usagePrefix: environment.OATI_GATEWAY_USAGE_PREFIX ?? "oati:gateway:usage:", receiptStream: environment.OATI_GATEWAY_RECEIPT_STREAM ?? "oati:gateway:receipts",
     lookupTimeoutMs: integer("OATI_GATEWAY_LOOKUP_TIMEOUT_MS", 1500, 100, 10_000), lookupCacheMs: integer("OATI_GATEWAY_LOOKUP_CACHE_MS", 15_000, 0, 60_000),
@@ -134,6 +135,7 @@ export function configuration(environment = process.env) {
   if (production && config.resolverUrls.some((value) => new URL(value).protocol !== "https:")) throw new Error("production lookup resolvers must use HTTPS")
   if (production && new URL(config.transitAddr).protocol !== "https:") throw new Error("production Transit endpoint must use HTTPS")
   const valkey = new URL(config.valkeyUrl)
+  if (production && valkey.protocol !== "rediss:") throw new Error("production authorizer requires TLS-protected Valkey (rediss)")
   if (production && (!valkey.username || (!valkey.password && !config.valkeyPasswordFile))) throw new Error("production authorizer requires a Valkey ACL username and password file")
   return config
 }
@@ -205,10 +207,15 @@ class ValkeyUsageStore {
 }
 
 class ValkeyClient {
-  constructor(value, passwordFile) { this.url = new URL(value); this.passwordFile = passwordFile; if (!["redis:", "rediss:"].includes(this.url.protocol)) throw new Error("VALKEY_URL must use redis or rediss") }
+  constructor(value, passwordFile, tlsCAFile, tlsServerName) {
+    this.url = new URL(value); this.passwordFile = passwordFile; this.tlsCAFile = tlsCAFile; this.tlsServerName = tlsServerName
+    if (!["redis:", "rediss:"].includes(this.url.protocol)) throw new Error("VALKEY_URL must use redis or rediss")
+  }
   command(...parts) {
     return new Promise((resolve, reject) => {
-      const options = { host: this.url.hostname, port: Number(this.url.port || 6379) }
+      const options = { host: this.url.hostname, port: Number(this.url.port || 6379),
+        ...(this.url.protocol === "rediss:" ? { servername: this.tlsServerName ?? this.url.hostname, rejectUnauthorized: true,
+          ...(this.tlsCAFile ? { ca: fs.readFileSync(this.tlsCAFile) } : {}) } : {}) }
       const socket = this.url.protocol === "rediss:" ? tls.connect(options) : net.createConnection(options)
       const commands = []
       const password = this.passwordFile ? fs.readFileSync(this.passwordFile, "utf8").trim() : decodeURIComponent(this.url.password)

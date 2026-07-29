@@ -87,7 +87,16 @@ class SDKParityTest(unittest.TestCase):
 
     def test_all_published_examples_validate(self):
         examples = (
+            ("proof", "proof.json"),
+            ("issuer", "issuer.json"),
+            ("verificationKey", "verification-key.json"),
+            ("revocation", "revocation.json"),
             ("passport", "passport.json"),
+            ("mandate", "mandate.json"),
+            ("receipt", "receipt.json"),
+            ("evaluationRequest", "evaluation-request.json"),
+            ("evaluationResult", "evaluation-result.json"),
+            ("publicRecord", "public-record.json"),
             ("envelope", "commerce/transaction-envelope.json"),
             ("decision", "decision.json"),
             ("wellKnown", "well-known-oati.json"),
@@ -175,22 +184,20 @@ class SDKParityTest(unittest.TestCase):
         invalid = LookupClient(
             ["https://resolver.test/oati/v1"],
             opener=lambda *_args, **_kwargs: Response(
-                {"type": "key", "id": "oati:key:test", "status": "active", "issuer": "oati:issuer:test", "proof_status": "invalid", "public_attributes": {}}
+                {"type": "key", "id": "oati:key:test", "status": "active", "issuer": "oati:issuer:test", "issued_at":"2026-01-01T00:00:00Z","expires_at":"2027-01-01T00:00:00Z","proof_status": "invalid", "public_attributes": {"controller":"oati:issuer:test","algorithm":"EdDSA","public_key_jwk":"{}"}}
             ),
         )
-        self.assertEqual(invalid.lookup_state("key", "oati:key:test")["state"], "invalid-proof")
+        self.assertEqual(invalid.lookup_state("key", "oati:key:test")["state"], "invalid_proof")
 
+        discovery_payload=fixture("conformance/discovery/organisation-valid.json")
         discovery = LookupClient(
             ["https://resolver.test/oati/v1"],
             opener=lambda *_args, **_kwargs: Response(
-                {
-                    "organisation_id": "oati:org:test",
-                    "services": [{"type": "service", "id": "oati:service:test:api", "status": "active", "issuer": "oati:issuer:test", "organisation_id": "oati:org:test", "proof_status": "verified", "public_attributes": {"document": "{}"}}],
-                    "profiles": [],
-                }
+                discovery_payload
             ),
         )
-        self.assertEqual(discovery.discover_organisation("oati:org:test")["services"][0]["id"], "oati:service:test:api")
+        discovered=discovery.discover_organisation("oati:org:merchant-b")
+        self.assertEqual(discovered["services"][0]["record"]["id"], "oati:service:merchant-b:checkout")
 
         untrusted = LookupClient(
             ["https://resolver.test/oati/v1"],
@@ -204,6 +211,12 @@ class SDKParityTest(unittest.TestCase):
         )
         with self.assertRaisesRegex(LookupError, "untrusted discovery record"):
             untrusted.discover_organisation("oati:org:test")
+
+        def federated_opener(request,timeout):
+            if request.full_url=="https://merchant.example/.well-known/oati":return Response({"oati_version":"1.0","organisations":["oati:org:merchant-b"],"resolvers":["https://resolver.test/oati/v1"]})
+            return Response(discovery_payload)
+        federated=LookupClient(["https://unused.test/oati/v1"],opener=federated_opener).discover_federated("merchant.example","oati:org:merchant-b")
+        self.assertEqual(federated["profiles"][0]["document"]["id"],"oati:profile:merchant-b:commerce-1")
 
     def test_lookup_etag_revalidation_and_negative_cache(self):
         responses = [

@@ -85,7 +85,7 @@ export function createOatiMiddleware(options: OatiMiddlewareOptions): OatiMiddle
   const extract = options.extract ?? ((request: Request) => extractOatiHeaders(request, options.maxHeaderBytes))
   return async (request, next) => {
     let extracted: ExtractedOatiRequest
-    let correlationId: string
+    let correlationId: string | undefined
     try {
       correlationId = correlation(request.headers.get(OATI_HTTP_HEADERS.correlationId), options.generateCorrelationId)
       extracted = await extract(request)
@@ -96,11 +96,13 @@ export function createOatiMiddleware(options: OatiMiddlewareOptions): OatiMiddle
       if (declaredTransaction && declaredTransaction !== extracted.envelope.id) throw middlewareError("MIDDLEWARE_BAD_REQUEST", "Transaction header does not match the Envelope")
     } catch (error) {
       const safeError = isMiddlewareError(error) ? error : middlewareError("MIDDLEWARE_BAD_REQUEST", "OATI headers or objects are invalid")
-      return problem(safeError, 400, "Invalid OATI request")
+      const status = safeError.code === "MIDDLEWARE_UNAVAILABLE" ? 503 : 400
+      return problem(safeError, status, status === 503 ? "OATI middleware unavailable" : "Invalid OATI request", correlationId)
     }
 
     const transactionId = extracted.envelope.id
     try {
+      if (!correlationId) throw middlewareError("MIDDLEWARE_UNAVAILABLE", "Correlation ID generation failed")
       const mandatePolicy = reusableDocumentPolicy(await options.verificationPolicy("mandate", request))
       const mandateVerification = await verifyDocument(extracted.mandate as unknown as Record<string, unknown>, mandatePolicy)
       if (!mandateVerification.verified) return await deniedVerification(options, request, extracted, correlationId, mandateVerification, "mandate", now())
@@ -226,6 +228,8 @@ async function issueReceipt(options: OatiMiddlewareOptions, context: OatiMiddlew
   }
   const receipt = await options.signReceipt(draft, context)
   assertSchema<ActionReceipt>("receipt", receipt)
+  const { proof: _proof, ...unsignedReceipt } = receipt
+  if (canonicalJson(unsignedReceipt) !== canonicalJson({ oati_version: "1.0", ...draft })) throw middlewareError("MIDDLEWARE_UNAVAILABLE", "Signed Receipt does not match the authorized transaction")
   await options.emitReceipt?.(receipt, context)
   return receipt
 }
@@ -276,7 +280,9 @@ function middlewareError(code: "MIDDLEWARE_BAD_REQUEST" | "MIDDLEWARE_UNAUTHENTI
 function isMiddlewareError(error: unknown): error is OatiError { return error instanceof OatiError && error.code.startsWith("MIDDLEWARE_") }
 function correlation(value: string | null, generator?: () => string): string {
   if (value !== null) { if (!/^[A-Za-z0-9._:-]{1,128}$/.test(value)) throw middlewareError("MIDDLEWARE_BAD_REQUEST", "Invalid correlation ID"); return value }
-  return generator?.() ?? safeUuid()
+  const generated = generator?.() ?? safeUuid()
+  if (!/^[A-Za-z0-9._:-]{1,128}$/.test(generated)) throw middlewareError("MIDDLEWARE_UNAVAILABLE", "Generated correlation ID is invalid")
+  return generated
 }
 function decodeHeader(value: string | null, name: string, maxBytes: number): unknown {
   if (!value) throw middlewareError("MIDDLEWARE_BAD_REQUEST", `${name} is required`)

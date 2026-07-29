@@ -1,0 +1,13 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:receipt:example:invalid-proof",
+  "transaction_id": "oati:tx:example:read-1",
+  "agent_id": "oati:agent:example:buyer",
+  "organisation_id": "oati:org:example",
+  "mandate_id": "oati:mandate:example:read-1",
+  "decision": "allow",
+  "outcome": "succeeded",
+  "occurred_at": "2026-07-27T12:01:00Z",
+  "issuer": "oati:issuer:example:enterprise",
+  "proof": {}
+}

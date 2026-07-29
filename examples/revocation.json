@@ -1,0 +1,9 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:revocation:example:agent-1",
+  "target": "oati:agent:example:buyer",
+  "status": "good",
+  "effective_at": "2026-07-27T00:00:00Z",
+  "issuer": "oati:issuer:example:enterprise",
+  "reason": "Initial good-standing publication"
+}

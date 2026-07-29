@@ -75,6 +75,9 @@ func evaluateAuthority(request map[string]any) (map[string]any, error) {
 	}
 	checkSetConstraint(mandate, "counterparties", stringValue(envelope, "counterparty"), "COUNTERPARTY_NOT_ALLOWED", reasons)
 	checkSetConstraint(mandate, "destinations", stringValue(envelope, "destination"), "DESTINATION_NOT_ALLOWED", reasons)
+	if _, present := envelope["profile"]; present && stringValue(envelope, "profile") != stringValue(mandate, "profile") {
+		reasons["PROFILE_MISMATCH"] = true
+	}
 	if parent := objectValue(request, "parent_mandate"); parent != nil {
 		checkChildMandate(mandate, parent, intValue(request["delegation_depth"], 1), now, reasons)
 	} else if stringValue(mandate, "parent_mandate") != "" {
@@ -83,15 +86,16 @@ func evaluateAuthority(request map[string]any) (map[string]any, error) {
 
 	usage := normalizeUsage(objectValue(request, "usage"))
 	delta := effectiveConsumption(request, mandate)
+	checkConsumptionContext(request, delta, reasons)
 	checkConsumption(mandate, usage, delta, reasons)
 	commerce := objectValue(request, "commerce")
 	if commerce != nil || stringValue(mandate, "profile") == commerceProfile {
-		checkCommerce(mandate, commerce, usage, reasons)
+		checkCommerce(mandate, envelope, commerce, usage, reasons)
 	}
 	rwa := objectValue(request, "rwa")
 	if rwa != nil || stringValue(mandate, "profile") == rwaProfile {
 		_, hasMintedSupply := objectValue(request, "usage")["minted_supply"]
-		checkRWA(mandate, rwa, usage, hasMintedSupply, now, reasons)
+		checkRWA(mandate, envelope, rwa, usage, hasMintedSupply, now, reasons)
 	}
 
 	codes := make([]string, 0, len(reasons))
@@ -193,6 +197,11 @@ func checkConsumption(mandate, usage, delta map[string]any, reasons map[string]b
 	if _, ok := limits["max_calls"]; ok && intValue(usage["calls"], 0)+intValue(delta["calls"], 0) > intValue(limits["max_calls"], 0) {
 		reasons["CALL_LIMIT_EXCEEDED"] = true
 	}
+	if stringValue(mandate, "profile") == "" {
+		if maximum, ok := limits["max_quantity"]; ok && decimalCompare(decimalAdd(stringValue(usage, "quantity"), stringValue(delta, "quantity")), numberString(maximum)) > 0 {
+			reasons["QUANTITY_LIMIT_EXCEEDED"] = true
+		}
+	}
 	maxTotal := stringValue(limits, "max_total")
 	amount := stringValue(delta, "amount")
 	if maxTotal != "" && amount != "0" {
@@ -206,12 +215,16 @@ func checkConsumption(mandate, usage, delta map[string]any, reasons map[string]b
 	}
 }
 
-func checkCommerce(mandate, context, usage map[string]any, reasons map[string]bool) {
+func checkCommerce(mandate, envelope, context, usage map[string]any, reasons map[string]bool) {
 	limits := objectValue(objectValue(mandate, "extensions"), "commerce")
 	if context == nil || limits == nil {
 		reasons["COMMERCE_CONTEXT_REQUIRED"] = true
 		return
 	}
+	signed := objectValue(objectValue(envelope, "extensions"), "commerce")
+	envelopeMismatch := signed != nil && (stringValue(envelope, "resource") != stringValue(context, "service_id") ||
+		stringValue(envelope, "counterparty") != stringValue(context, "merchant_organisation_id") ||
+		!sameMappedFields(signed, context, [][2]string{{"offer_id", "offer_id"}, {"currency", "currency"}, {"quantity", "quantity"}, {"quoted_unit_price", "unit_price"}, {"quoted_total", "total_amount"}, {"idempotency_key", "idempotency_key"}, {"terms_digest", "terms_digest"}}))
 	comparisons := []struct{ field, code string }{{"merchant_organisation_id", "COMMERCE_MERCHANT_NOT_ALLOWED"}, {"service_id", "COMMERCE_SERVICE_NOT_ALLOWED"}, {"offer_id", "COMMERCE_OFFER_NOT_ALLOWED"}}
 	for _, check := range comparisons {
 		if stringValue(context, check.field) != stringValue(limits, check.field) {
@@ -239,13 +252,20 @@ func checkCommerce(mandate, context, usage map[string]any, reasons map[string]bo
 	if contains(stringList(usage["idempotency_keys"]), stringValue(context, "idempotency_key")) {
 		reasons["IDEMPOTENCY_REPLAY"] = true
 	}
+	if envelopeMismatch && !hasReasonPrefix(reasons, "COMMERCE_") {
+		reasons["COMMERCE_ENVELOPE_CONTEXT_MISMATCH"] = true
+	}
 }
 
-func checkRWA(mandate, context, usage map[string]any, hasMintedSupply bool, now time.Time, reasons map[string]bool) {
+func checkRWA(mandate, envelope, context, usage map[string]any, hasMintedSupply bool, now time.Time, reasons map[string]bool) {
 	limits := objectValue(objectValue(mandate, "extensions"), "rwa")
 	if context == nil || limits == nil {
 		reasons["RWA_CONTEXT_REQUIRED"] = true
 		return
+	}
+	signed := objectValue(objectValue(envelope, "extensions"), "rwa")
+	if signed != nil && (stringValue(envelope, "resource") != stringValue(context, "asset_id") || !sameFields(signed, context, []string{"asset_id", "state_claim_id", "network", "token_contract", "operation", "unit", "quantity"})) {
+		reasons["RWA_ENVELOPE_CONTEXT_MISMATCH"] = true
 	}
 	if !sameFields(context, limits, []string{"asset_id", "state_claim_id", "network", "token_contract", "operation", "unit"}) {
 		reasons["RWA_TARGET_MISMATCH"] = true
@@ -284,6 +304,9 @@ func checkRWA(mandate, context, usage map[string]any, hasMintedSupply bool, now 
 func effectiveConsumption(request, mandate map[string]any) map[string]any {
 	supplied, commerce, rwa := objectValue(request, "consumption"), objectValue(request, "commerce"), objectValue(request, "rwa")
 	result := map[string]any{"calls": json.Number("1"), "amount": "0", "currency": "", "quantity": "0", "idempotency_key": "", "consume": false}
+	for key, value := range supplied {
+		result[key] = value
+	}
 	if commerce != nil {
 		result["amount"], result["currency"], result["quantity"], result["idempotency_key"] = stringValue(commerce, "total_amount"), stringValue(commerce, "currency"), numberString(commerce["quantity"]), stringValue(commerce, "idempotency_key")
 	} else if rwa != nil {
@@ -295,10 +318,31 @@ func effectiveConsumption(request, mandate map[string]any) map[string]any {
 	if limits := objectValue(mandate, "limits"); limits != nil && boolValue(limits["one_time"]) {
 		result["consume"] = true
 	}
-	for key, value := range supplied {
-		result[key] = value
-	}
 	return result
+}
+
+func checkConsumptionContext(request, effective map[string]any, reasons map[string]bool) {
+	supplied := objectValue(request, "consumption")
+	if supplied == nil {
+		return
+	}
+	fields := []string{}
+	if objectValue(request, "commerce") != nil {
+		fields = []string{"amount", "currency", "quantity", "idempotency_key"}
+	} else if objectValue(request, "rwa") != nil {
+		fields = []string{"quantity"}
+	}
+	if boolValue(effective["consume"]) {
+		if value, present := supplied["consume"]; present && !boolValue(value) {
+			fields = append(fields, "consume")
+		}
+	}
+	for _, field := range fields {
+		if suppliedValue, present := supplied[field]; present && fmt.Sprint(suppliedValue) != fmt.Sprint(effective[field]) {
+			reasons["CONSUMPTION_CONTEXT_MISMATCH"] = true
+			return
+		}
+	}
 }
 
 func applyConsumption(usage, delta, rwa map[string]any) map[string]any {
@@ -530,6 +574,24 @@ func sameFields(child, parent map[string]any, fields []string) bool {
 		}
 	}
 	return true
+}
+
+func sameMappedFields(child, parent map[string]any, fields [][2]string) bool {
+	for _, field := range fields {
+		if fmt.Sprint(child[field[0]]) != fmt.Sprint(parent[field[1]]) {
+			return false
+		}
+	}
+	return true
+}
+
+func hasReasonPrefix(reasons map[string]bool, prefix string) bool {
+	for code := range reasons {
+		if strings.HasPrefix(code, prefix) {
+			return true
+		}
+	}
+	return false
 }
 func firstNonEmpty(first, second string) string {
 	if first != "" {

@@ -43,6 +43,12 @@ conformance suite 0.1; implementation name and version; report digest.
 
 “Compatible with OATI” without a core version and conformance report is not a valid compatibility claim.
 
+## Executable compatibility policy
+
+[`compatibility/policy.json`](../compatibility/policy.json) is the machine-readable release policy. It pins the core and API major versions, package versions, current conformance chain, full-baseline exceptions, the minimum migration window, and SHA-256 fingerprints for frozen suites and the reviewed platform snapshot. `node scripts/check-compatibility.mjs` verifies those relationships, every API operation's version-negotiation/406 contract, and package-version consistency. CI runs it alongside the OpenAPI compatibility comparison.
+
+Changing a frozen digest is not a correction workflow. Publish a new suite or platform snapshot and update the chain instead. Package-version changes and compatibility-policy changes must land together, so a tag cannot silently publish artifacts whose declared versions disagree with the reviewed policy.
+
 ## Deprecation notice
 
 Deprecations are announced in release notes and documentation with the replacement, first deprecated release, earliest removal date, and security impact. Hosted APIs also emit standards-based `Deprecation` and `Sunset` headers when a deployed version enters its retirement window.

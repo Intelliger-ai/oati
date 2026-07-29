@@ -11,21 +11,220 @@ import (
 	"os"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
+	"unicode/utf16"
+	"unicode/utf8"
 )
 
 var schemaFiles = map[string]string{"proof": "proof.schema.json", "verificationKey": "verification-key.schema.json", "issuer": "issuer.schema.json", "revocation": "revocation.schema.json", "evaluationRequest": "evaluation-request.schema.json", "evaluationResult": "evaluation-result.schema.json", "publicRecord": "public-record.schema.json", "serviceDiscovery": "service-discovery.schema.json", "profileDiscovery": "profile-discovery.schema.json", "wellKnown": "well-known.schema.json", "conformanceSuite": "conformance-suite.schema.json", "conformanceReport": "conformance-report.schema.json", "passport": "passport.schema.json", "mandate": "mandate.schema.json", "envelope": "transaction-envelope.schema.json", "decision": "decision.schema.json", "receipt": "receipt.schema.json", "commerceOffer": "commerce/merchant-service-profile.schema.json", "commerceMandate": "commerce/purchase-mandate.schema.json", "commerceReceipt": "commerce/commerce-receipt.schema.json", "rwaAsset": "rwa/asset-profile.schema.json", "rwaStateClaim": "rwa/asset-state-claim.schema.json", "rwaMandate": "rwa/asset-mandate.schema.json", "rwaReceipt": "rwa/rwa-receipt.schema.json"}
 var publicFields = []string{"type", "id", "display_name", "status", "issuer", "organisation_id", "issued_at", "expires_at", "assurance_level", "proof_status", "public_attributes"}
+var publicAttributesByType = map[string]map[string]bool{
+	"organisation": {"environment": true, "website": true, "jurisdiction": true, "signed_document": true},
+	"issuer":       {"environment": true, "parent": true, "revoked_at": true, "signed_document": true},
+	"key":          {"controller": true, "algorithm": true, "public_key_jwk": true, "revoked_at": true, "signed_document": true},
+	"agent":        {"protocol": true, "protocols": true, "signed_document": true},
+	"passport":     {"subject": true, "signed_document": true},
+	"mandate":      {"subject": true, "signed_document": true},
+	"receipt":      {"transaction_id": true, "mandate_id": true, "outcome": true, "signed_document": true},
+	"revocation":   {"target": true, "revocation_status": true, "effective_at": true, "signed_document": true},
+	"service":      {"document": true, "signed_document": true},
+	"profile":      {"document": true, "signed_document": true},
+}
+var sensitivePublicFields = map[string]bool{"access_token": true, "api_key": true, "credential": true, "internal_id": true, "kms_key": true, "operator_notes": true, "password": true, "private_attributes": true, "private_key": true, "refresh_token": true, "secret": true, "tenant_id": true}
 
 func CanonicalJSON(value any) (string, error) {
-	var output bytes.Buffer
-	encoder := json.NewEncoder(&output)
-	encoder.SetEscapeHTML(false)
-	if err := encoder.Encode(value); err != nil {
+	var output strings.Builder
+	if err := writeCanonical(&output, value); err != nil {
 		return "", err
 	}
-	return strings.TrimSuffix(output.String(), "\n"), nil
+	return output.String(), nil
+}
+func writeCanonical(output *strings.Builder, value any) error {
+	switch typed := value.(type) {
+	case nil:
+		output.WriteString("null")
+	case bool:
+		if typed {
+			output.WriteString("true")
+		} else {
+			output.WriteString("false")
+		}
+	case string:
+		return writeCanonicalString(output, typed)
+	case json.Number:
+		number, err := strconv.ParseFloat(string(typed), 64)
+		if err != nil {
+			return fmt.Errorf("invalid JSON number: %w", err)
+		}
+		return writeCanonicalNumber(output, number)
+	case float64:
+		return writeCanonicalNumber(output, typed)
+	case float32:
+		return writeCanonicalNumber(output, float64(typed))
+	case int:
+		return writeCanonicalNumber(output, float64(typed))
+	case int8:
+		return writeCanonicalNumber(output, float64(typed))
+	case int16:
+		return writeCanonicalNumber(output, float64(typed))
+	case int32:
+		return writeCanonicalNumber(output, float64(typed))
+	case int64:
+		return writeCanonicalNumber(output, float64(typed))
+	case uint:
+		return writeCanonicalNumber(output, float64(typed))
+	case uint8:
+		return writeCanonicalNumber(output, float64(typed))
+	case uint16:
+		return writeCanonicalNumber(output, float64(typed))
+	case uint32:
+		return writeCanonicalNumber(output, float64(typed))
+	case uint64:
+		return writeCanonicalNumber(output, float64(typed))
+	case []any:
+		output.WriteByte('[')
+		for index, item := range typed {
+			if index > 0 {
+				output.WriteByte(',')
+			}
+			if err := writeCanonical(output, item); err != nil {
+				return err
+			}
+		}
+		output.WriteByte(']')
+	case []string:
+		output.WriteByte('[')
+		for index, item := range typed {
+			if index > 0 {
+				output.WriteByte(',')
+			}
+			if err := writeCanonicalString(output, item); err != nil {
+				return err
+			}
+		}
+		output.WriteByte(']')
+	case map[string]any:
+		keys := make([]string, 0, len(typed))
+		for key := range typed {
+			if !utf8.ValidString(key) {
+				return errors.New("invalid Unicode in JSON object key")
+			}
+			keys = append(keys, key)
+		}
+		sort.Slice(keys, func(i, j int) bool { return compareUTF16(keys[i], keys[j]) < 0 })
+		output.WriteByte('{')
+		for index, key := range keys {
+			if index > 0 {
+				output.WriteByte(',')
+			}
+			if err := writeCanonicalString(output, key); err != nil {
+				return err
+			}
+			output.WriteByte(':')
+			if err := writeCanonical(output, typed[key]); err != nil {
+				return err
+			}
+		}
+		output.WriteByte('}')
+	case map[string]string:
+		converted := make(map[string]any, len(typed))
+		for key, item := range typed {
+			converted[key] = item
+		}
+		return writeCanonical(output, converted)
+	default:
+		encoded, err := json.Marshal(value)
+		if err != nil {
+			return fmt.Errorf("unsupported canonical JSON value %T: %w", value, err)
+		}
+		var normalized any
+		if err := decode(encoded, &normalized); err != nil {
+			return fmt.Errorf("normalize canonical JSON value %T: %w", value, err)
+		}
+		return writeCanonical(output, normalized)
+	}
+	return nil
+}
+func writeCanonicalNumber(output *strings.Builder, value float64) error {
+	if value != value || value > 1.7976931348623157e308 || value < -1.7976931348623157e308 {
+		return errors.New("non-finite numbers are not valid JSON")
+	}
+	if value == 0 {
+		output.WriteByte('0')
+		return nil
+	}
+	abs := value
+	if abs < 0 {
+		abs = -abs
+	}
+	format := 'e'
+	if abs >= 1e-6 && abs < 1e21 {
+		format = 'f'
+	}
+	rendered := strconv.FormatFloat(value, byte(format), -1, 64)
+	if format == 'e' {
+		parts := strings.Split(rendered, "e")
+		exponent, _ := strconv.Atoi(parts[1])
+		rendered = parts[0] + "e"
+		if exponent >= 0 {
+			rendered += "+"
+		}
+		rendered += strconv.Itoa(exponent)
+	}
+	output.WriteString(rendered)
+	return nil
+}
+func writeCanonicalString(output *strings.Builder, value string) error {
+	if !utf8.ValidString(value) {
+		return errors.New("invalid Unicode in JSON string")
+	}
+	output.WriteByte('"')
+	for _, character := range value {
+		switch character {
+		case '"', '\\':
+			output.WriteByte('\\')
+			output.WriteRune(character)
+		case '\b':
+			output.WriteString("\\b")
+		case '\t':
+			output.WriteString("\\t")
+		case '\n':
+			output.WriteString("\\n")
+		case '\f':
+			output.WriteString("\\f")
+		case '\r':
+			output.WriteString("\\r")
+		default:
+			if character < 0x20 {
+				output.WriteString(fmt.Sprintf("\\u%04x", character))
+			} else {
+				output.WriteRune(character)
+			}
+		}
+	}
+	output.WriteByte('"')
+	return nil
+}
+func compareUTF16(left, right string) int {
+	a := utf16.Encode([]rune(left))
+	b := utf16.Encode([]rune(right))
+	for index := 0; index < len(a) && index < len(b); index++ {
+		if a[index] < b[index] {
+			return -1
+		}
+		if a[index] > b[index] {
+			return 1
+		}
+	}
+	if len(a) < len(b) {
+		return -1
+	}
+	if len(a) > len(b) {
+		return 1
+	}
+	return 0
 }
 func BuildPassport(value map[string]any) map[string]any { return build(value) }
 func BuildMandate(value map[string]any) map[string]any  { return build(value) }
@@ -51,7 +250,66 @@ func ProjectPublicRecord(source map[string]any) (map[string]any, error) {
 			return nil, fmt.Errorf("required public field %s is missing", key)
 		}
 	}
+	recordType, _ := result["type"].(string)
+	allowed, ok := publicAttributesByType[recordType]
+	if !ok {
+		return nil, fmt.Errorf("unsupported public record type")
+	}
+	attributes, ok := result["public_attributes"].(map[string]any)
+	if !ok {
+		return nil, fmt.Errorf("public_attributes must be an object")
+	}
+	filtered := map[string]any{}
+	for name, value := range attributes {
+		if !allowed[name] {
+			continue
+		}
+		text, ok := value.(string)
+		if !ok {
+			return nil, fmt.Errorf("public attribute %s must be a string", name)
+		}
+		if name == "document" || name == "public_key_jwk" || name == "signed_document" {
+			var document any
+			if err := decode([]byte(text), &document); err != nil {
+				return nil, fmt.Errorf("public attribute %s must contain valid JSON", name)
+			}
+			if err := inspectPublicJSON(document, name, 0); err != nil {
+				return nil, err
+			}
+		}
+		filtered[name] = text
+	}
+	result["public_attributes"] = filtered
 	return result, nil
+}
+
+func inspectPublicJSON(value any, attribute string, depth int) error {
+	if depth > 32 {
+		return fmt.Errorf("public attribute %s exceeds the nesting limit", attribute)
+	}
+	switch current := value.(type) {
+	case []any:
+		for _, item := range current {
+			if err := inspectPublicJSON(item, attribute, depth+1); err != nil {
+				return err
+			}
+		}
+	case map[string]any:
+		for key, nested := range current {
+			if sensitivePublicFields[strings.ToLower(key)] {
+				return fmt.Errorf("public attribute %s contains forbidden field %s", attribute, key)
+			}
+			if err := inspectPublicJSON(nested, attribute, depth+1); err != nil {
+				return err
+			}
+		}
+		if _, isJWK := current["kty"].(string); isJWK {
+			if _, private := current["d"]; private {
+				return fmt.Errorf("public attribute %s contains private JWK material", attribute)
+			}
+		}
+	}
+	return nil
 }
 
 func ValidateSchema(name string, value any, schemaRoot string) ([]string, error) {
@@ -102,6 +360,28 @@ func validate(value any, schema, root map[string]any, codes map[string]bool, sch
 	for _, branch := range list(schema["allOf"]) {
 		validate(value, object(branch), root, codes, schemaRoot)
 	}
+	if branches := list(schema["oneOf"]); branches != nil {
+		matches := 0
+		for _, branch := range branches {
+			branchCodes := map[string]bool{}
+			validate(value, object(branch), root, branchCodes, schemaRoot)
+			if len(branchCodes) == 0 {
+				matches++
+			}
+		}
+		if matches != 1 {
+			codes["SCHEMA_ONEOF"] = true
+		}
+	}
+	if condition := object(schema["if"]); condition != nil {
+		conditionCodes := map[string]bool{}
+		validate(value, condition, root, conditionCodes, schemaRoot)
+		if len(conditionCodes) == 0 {
+			if then := object(schema["then"]); then != nil {
+				validate(value, then, root, codes, schemaRoot)
+			}
+		}
+	}
 	if kind := str(schema["type"]); kind != "" && !matchesType(value, kind) {
 		codes["SCHEMA_TYPE"] = true
 		return
@@ -116,6 +396,9 @@ func validate(value any, schema, root map[string]any, codes map[string]bool, sch
 	case string:
 		if len(typed) < integer(schema["minLength"]) {
 			codes["SCHEMA_MINLENGTH"] = true
+		}
+		if maximum, ok := schema["maxLength"]; ok && utf8.RuneCountInString(typed) > integer(maximum) {
+			codes["SCHEMA_MAXLENGTH"] = true
 		}
 		if pattern := str(schema["pattern"]); pattern != "" {
 			if matched, _ := regexp.MatchString(pattern, typed); !matched {
@@ -134,6 +417,9 @@ func validate(value any, schema, root map[string]any, codes map[string]bool, sch
 	case []any:
 		if len(typed) < integer(schema["minItems"]) {
 			codes["SCHEMA_MINITEMS"] = true
+		}
+		if maximum, ok := schema["maxItems"]; ok && len(typed) > integer(maximum) {
+			codes["SCHEMA_MAXITEMS"] = true
 		}
 		if unique, _ := schema["uniqueItems"].(bool); unique {
 			for index := range typed {
@@ -171,6 +457,32 @@ func validate(value any, schema, root map[string]any, codes map[string]bool, sch
 			}
 		}
 	}
+	if number, ok := numberValue(value); ok {
+		if minimum, exists := numberValue(schema["minimum"]); exists && number < minimum {
+			codes["SCHEMA_MINIMUM"] = true
+		}
+		if maximum, exists := numberValue(schema["maximum"]); exists && number > maximum {
+			codes["SCHEMA_MAXIMUM"] = true
+		}
+	}
+}
+func numberValue(value any) (float64, bool) {
+	switch typed := value.(type) {
+	case json.Number:
+		number, err := typed.Float64()
+		return number, err == nil
+	case float64:
+		return typed, true
+	case float32:
+		return float64(typed), true
+	case int:
+		return float64(typed), true
+	case int64:
+		return float64(typed), true
+	case int32:
+		return float64(typed), true
+	}
+	return 0, false
 }
 
 type PublicRecord struct {
@@ -180,6 +492,9 @@ type PublicRecord struct {
 	Status           string            `json:"status"`
 	Issuer           string            `json:"issuer"`
 	OrganisationID   string            `json:"organisation_id,omitempty"`
+	IssuedAt         string            `json:"issued_at,omitempty"`
+	ExpiresAt        string            `json:"expires_at,omitempty"`
+	AssuranceLevel   string            `json:"assurance_level,omitempty"`
 	ProofStatus      string            `json:"proof_status"`
 	PublicAttributes map[string]string `json:"public_attributes"`
 }

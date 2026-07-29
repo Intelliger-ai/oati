@@ -12,6 +12,8 @@ from pathlib import Path
 
 SDK_ROOT = Path(__file__).resolve().parents[1]
 CONSUMER = r'''
+from importlib.metadata import distribution
+import cryptography
 from oati import canonical_json, create_mandate, validate_schema
 
 mandate = create_mandate({
@@ -27,6 +29,14 @@ mandate = create_mandate({
 })
 assert canonical_json({"b": 2, "a": 1}) == '{"a":1,"b":2}'
 assert validate_schema("mandate", mandate) == []
+installed = distribution("intelliger-oati")
+assert installed.metadata["License-Expression"] == "Apache-2.0"
+assert installed.metadata["Requires-Python"] == ">=3.11"
+assert any(requirement.startswith("cryptography>=44") for requirement in (installed.metadata.get_all("Requires-Dist") or []))
+installed_files = {str(path).replace("\\\\", "/") for path in (installed.files or [])}
+assert "oati/_schema_bundle.json" in installed_files
+assert "oati/py.typed" in installed_files
+assert any(path.endswith("licenses/LICENSE") for path in installed_files)
 print("fresh Python package consumer passed")
 '''
 
@@ -50,7 +60,7 @@ def main() -> None:
         environment = root / "consumer"
         run(sys.executable, "-m", "venv", str(environment))
         python = environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
-        run(str(python), "-m", "pip", "install", "--disable-pip-version-check", "--no-deps", str(artifacts[0]))
+        run(str(python), "-m", "pip", "install", "--disable-pip-version-check", str(artifacts[0]))
         run(str(python), "-I", "-c", CONSUMER, cwd=root)
 
 if __name__ == "__main__":

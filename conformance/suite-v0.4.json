@@ -1,0 +1,29 @@
+{
+  "suite_version": "0.4.0",
+  "standard_version": "1.0",
+  "extends": "suite-v0.3.json",
+  "cases": [
+    { "id": "proof.missing", "category": "signature", "operation": "verify", "input": "crypto/missing-proof-envelope.json", "auxiliary": "crypto/trust-bundle.json", "options": { "audience": "https://merchant.example", "now": "2026-07-27T12:02:00Z" }, "expected": { "outcome": "fail", "codes": ["PROOF_MISSING"] } },
+    { "id": "proof.malformed", "category": "signature", "operation": "verify", "input": "crypto/malformed-proof-envelope.json", "auxiliary": "crypto/trust-bundle.json", "options": { "audience": "https://merchant.example", "now": "2026-07-27T12:02:00Z" }, "expected": { "outcome": "fail", "codes": ["PROOF_MALFORMED"] } },
+    { "id": "signature.protected-header-mismatch", "category": "signature", "operation": "verify", "input": "crypto/protected-header-mismatch-envelope.json", "auxiliary": "crypto/trust-bundle.json", "options": { "audience": "https://merchant.example", "now": "2026-07-27T12:02:00Z" }, "expected": { "outcome": "fail", "codes": ["SIGNATURE_INVALID"] } },
+    { "id": "lifecycle.key-invalid-time", "category": "revocation-expiry", "operation": "verify", "input": "crypto/signed-envelope.json", "auxiliary": "crypto/invalid-key-time-bundle.json", "options": { "audience": "https://merchant.example", "now": "2026-07-27T12:02:00Z" }, "expected": { "outcome": "fail", "codes": ["KEY_INVALID"] } },
+    { "id": "lifecycle.issuer-invalid-time", "category": "revocation-expiry", "operation": "verify", "input": "crypto/signed-envelope.json", "auxiliary": "crypto/invalid-issuer-time-bundle.json", "options": { "audience": "https://merchant.example", "now": "2026-07-27T12:02:00Z" }, "expected": { "outcome": "fail", "codes": ["ISSUER_REVOKED"] } },
+    { "id": "revocation.intermediate-issuer-target", "category": "revocation-expiry", "operation": "verify", "input": "crypto/signed-envelope.json", "auxiliary": "crypto/revocation-intermediate-target-bundle.json", "options": { "audience": "https://merchant.example", "now": "2026-07-27T12:02:00Z" }, "expected": { "outcome": "fail", "codes": ["ISSUER_REVOKED"] } },
+    { "id": "canonicalization.rfc8785-values", "category": "canonicalization", "operation": "canonicalize", "input": "canonical/input/rfc8785-values.json", "auxiliary": "canonical/expected/rfc8785-values.json", "expected": { "outcome": "pass", "codes": [] } },
+    { "id": "canonicalization.utf16-order", "category": "canonicalization", "operation": "canonicalize", "input": "canonical/input/utf16-order.json", "auxiliary": "canonical/expected/utf16-order.json", "expected": { "outcome": "pass", "codes": [] } },
+    { "id": "core.proof.valid", "category": "core", "operation": "schema", "schema": "proof", "input": "../examples/proof.json", "expected": { "outcome": "pass", "codes": [] } },
+    { "id": "core.proof.invalid", "category": "core", "operation": "schema", "schema": "proof", "input": "core/invalid/proof-invalid.json", "expected": { "outcome": "fail", "codes": ["SCHEMA_MINLENGTH", "SCHEMA_ONEOF", "SCHEMA_PATTERN"] } },
+    { "id": "core.issuer.valid", "category": "core", "operation": "schema", "schema": "issuer", "input": "../examples/issuer.json", "expected": { "outcome": "pass", "codes": [] } },
+    { "id": "core.verification-key.valid", "category": "core", "operation": "schema", "schema": "verificationKey", "input": "../examples/verification-key.json", "expected": { "outcome": "pass", "codes": [] } },
+    { "id": "core.verification-key.retired-invalid", "category": "core", "operation": "schema", "schema": "verificationKey", "input": "core/invalid/verification-key-retired-invalid.json", "expected": { "outcome": "fail", "codes": ["SCHEMA_REQUIRED"] } },
+    { "id": "core.revocation.valid", "category": "core", "operation": "schema", "schema": "revocation", "input": "../examples/revocation.json", "expected": { "outcome": "pass", "codes": [] } },
+    { "id": "core.mandate.generic-valid", "category": "core", "operation": "schema", "schema": "mandate", "input": "../examples/mandate.json", "expected": { "outcome": "pass", "codes": [] } },
+    { "id": "core.receipt.generic-valid", "category": "core", "operation": "schema", "schema": "receipt", "input": "../examples/receipt.json", "expected": { "outcome": "pass", "codes": [] } },
+    { "id": "core.receipt.invalid-proof", "category": "core", "operation": "schema", "schema": "receipt", "input": "core/invalid/receipt-invalid-proof.json", "expected": { "outcome": "fail", "codes": ["SCHEMA_REQUIRED"] } },
+    { "id": "core.evaluation-request.valid", "category": "core", "operation": "schema", "schema": "evaluationRequest", "input": "../examples/evaluation-request.json", "expected": { "outcome": "pass", "codes": [] } },
+    { "id": "core.evaluation-result.valid", "category": "core", "operation": "schema", "schema": "evaluationResult", "input": "../examples/evaluation-result.json", "expected": { "outcome": "pass", "codes": [] } },
+    { "id": "core.public-record.valid", "category": "core", "operation": "schema", "schema": "publicRecord", "input": "../examples/public-record.json", "expected": { "outcome": "pass", "codes": [] } },
+    { "id": "signature.ed25519.small-order-forgery", "category": "signature", "operation": "verify", "input": "crypto/ed25519-small-order-forgery-envelope.json", "auxiliary": "crypto/ed25519-small-order-trust-bundle.json", "options": { "audience": "https://merchant.example", "now": "2026-07-27T12:02:00Z" }, "expected": { "outcome": "fail", "codes": ["KEY_INVALID"] } },
+    { "id": "evaluator.context-binding-hardening", "category": "delegation", "operation": "evaluate-suite", "input": "evaluator/cases.json", "options": { "case_names": ["hardening-generic-profile-quantity-one-time", "hardening-commerce-signed-context-and-consumption", "hardening-rwa-signed-context"] }, "expected": { "outcome": "pass", "codes": [] } }
+  ]
+}

@@ -113,7 +113,19 @@ const resolver = new LookupTrustResolver(lookup)
 
 For key lookup records, `issuer`, `issued_at`, and `expires_at` are canonical top-level fields. `public_attributes` contains key-specific material such as `controller`, `algorithm`, and `public_key_jwk`. The client normalizes the former legacy `issuer`, `valid_from`, and `valid_until` attributes during migration, but new resolvers and integrations should emit the top-level contract.
 
-To test the SDK against the platform service, start `oati-platform/services/lookup-api` and run `pnpm test:lookup-integration`. Override `OATI_LOOKUP_URL`, `OATI_LOOKUP_TYPE`, and `OATI_LOOKUP_ID` for a deployed resolver.
+To test against a real resolver without private infrastructure, start the repository-root sandbox and point the integration check at its generated buyer Agent record:
+
+```bash
+./sandbox/oati-sandbox
+cd sdk/typescript
+OATI_LOOKUP_URL=http://127.0.0.1:9080/oati/v1 \
+OATI_LOOKUP_ID=oati:agent:sandbox-buyer:sandbox-buyer \
+pnpm test:lookup-integration
+cd ../..
+./sandbox/oati-sandbox down
+```
+
+`OATI_LOOKUP_TYPE` defaults to `agent`; override it with the matching ID when exercising another compatible resolver.
 
 ## Reference HTTP middleware
 
@@ -271,9 +283,12 @@ Evaluation does not mutate or persist state. Production callers must atomically 
 
 - `@intelliger/oati` — complete public API;
 - `@intelliger/oati/validation` — schema validation only;
-- `@intelliger/oati/lookup` — public resolver client only.
-- `@intelliger/oati/crypto` — signing, trust resolution, replay, and verification.
-- `@intelliger/oati/evaluator` — deterministic authority decisions and proposed usage transitions.
+- `@intelliger/oati/lookup` — public resolver client only;
+- `@intelliger/oati/middleware` — fail-closed HTTP verification and Receipt middleware;
+- `@intelliger/oati/adapters` — MCP, A2A, OAuth/DPoP, AuthZEN, Cedar, OPA, and Envoy mappings;
+- `@intelliger/oati/crypto` — signing, trust resolution, replay, and verification;
+- `@intelliger/oati/evaluator` — deterministic authority decisions and proposed usage transitions;
+- `@intelliger/oati/development` — ephemeral local issuance and lifecycle workflows.
 
 Generated API documentation is available in [`docs/api/`](docs/api/README.md).
 
@@ -281,7 +296,7 @@ Generated API documentation is available in [`docs/api/`](docs/api/README.md).
 
 ### Test identity issuance
 
-`DevelopmentIssuer` runs the complete credential lifecycle locally with ephemeral Ed25519 keys. It creates a development organisation, registers an agent with an agent-bound transaction key, issues signed Passport and Mandate objects, signs example transactions and Receipts, produces strict public projections, and emits suspension or revocation records.
+`DevelopmentIssuer` runs the complete credential lifecycle locally with ephemeral Ed25519 keys. It creates a development organisation, registers an organisation-namespaced agent with an agent-bound transaction key, issues signed Passport and Mandate objects, signs example transactions and Receipts, produces strict public projections, and emits suspension or revocation records. It rejects duplicate or inactive agents, foreign or modified Mandates, expired issuance, and invalid credential lifetimes.
 
 ```ts
 import { DevelopmentIssuer } from "@intelliger/oati/development"
@@ -297,6 +312,7 @@ const envelope = await issuer.signTransaction(passport.id, mandate, {
   action: "api.call",
   resource: "https://sandbox.example/api",
   protocol: "mcp",
+  audience: "https://sandbox.example",
 })
 const publicPassport = issuer.publish("passport", passport.id)
 const registryRecords = issuer.registryRecords() // POST each to the private control plane
@@ -304,6 +320,7 @@ const revocation = issuer.setStatus("mandate", mandate.id, "revoked")
 ```
 
 Development issuers and their keys are memory-only, deliberately marked with `assurance_level: development`, and must never be promoted into production trust stores.
+Pass an explicit `Date` as the optional second argument to `DevelopmentIssuer.create` and the optional final argument to lifecycle methods when reproducible fixtures are needed. Transaction purpose and profile default to the issued Mandate; profile-specific signed fields can be supplied through `extensions`.
 
 ```bash
 pnpm install

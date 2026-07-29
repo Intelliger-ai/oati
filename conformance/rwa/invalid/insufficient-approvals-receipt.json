@@ -20,8 +20,9 @@
       "quantity": "250.00",
       "unit": "EUR",
       "chain_transaction_hash": "0xbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
-      "approval_count": 1
+      "approval_count": 1,
+      "resulting_supply": "750.00"
     }
   },
-  "proof": { "type": "DataIntegrityProof", "signature": "example" }
+  "proof": { "type": "OatiJwsProof2026", "cryptosuite": "eddsa-jcs-2022", "algorithm": "EdDSA", "created": "2026-07-27T09:02:01Z", "expires": "2026-07-27T09:07:01Z", "verification_method": "oati:key:example-rwa:signing-1", "proof_purpose": "assertionMethod", "audience": "https://rwa.example", "nonce": "invalid-rwa-receipt-0001", "signature": "ZXhhbXBsZQ..c2lnbmF0dXJl" }
 }

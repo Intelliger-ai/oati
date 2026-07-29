@@ -1,0 +1,17 @@
+{
+  "oati_version": "1.0",
+  "id": "oati:tx:conformance:malformed-proof",
+  "issuer": "oati:agent:conformance:sender",
+  "proof": {
+    "type": "OatiJwsProof2026",
+    "cryptosuite": "eddsa-jcs-2022",
+    "algorithm": "EdDSA",
+    "created": "not-an-instant",
+    "expires": "2026-07-27T12:05:00Z",
+    "verification_method": "oati:key:conformance:ed25519-1",
+    "proof_purpose": "assertionMethod",
+    "audience": [],
+    "nonce": "short",
+    "signature": "not-a-detached-jws"
+  }
+}

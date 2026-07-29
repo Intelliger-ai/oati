@@ -1,4 +1,5 @@
 import { canonicalJson } from "./canonical.js"
+import { isValidEd25519PublicKey } from "./crypto.js"
 import { OatiError } from "./errors.js"
 import type { ActionReceipt, AgentMandate, AuthorisationDecision, TransactionEnvelope } from "./index.js"
 import { encodeOatiHeader, OATI_HTTP_HEADERS } from "./middleware.js"
@@ -49,9 +50,11 @@ export function a2aAgentCard(card: A2aAgentCard, authorizationUrl: string, token
   const capabilities = { ...(card.capabilities ?? {}) }
   const extensions = Array.isArray(capabilities.extensions) ? [...capabilities.extensions] : []
   if (!extensions.some((item) => isObject(item) && item.uri === OATI_A2A_EXTENSION_URI)) extensions.push({ uri: OATI_A2A_EXTENSION_URI, required: true })
+  const security = [...(card.security ?? [])]
+  if (!security.some((requirement) => Object.keys(requirement).length === 1 && Array.isArray(requirement.oati_oauth))) security.push({ oati_oauth: Object.keys(scopes) })
   return { ...card, capabilities: { ...capabilities, extensions }, securitySchemes: { ...(card.securitySchemes ?? {}), oati_oauth: {
     oauth2SecurityScheme: { flows: { authorizationCode: { authorizationUrl, tokenUrl, scopes } } },
-  } }, security: [...(card.security ?? []), { oati_oauth: Object.keys(scopes) }] }
+  } }, security }
 }
 
 export async function a2aMessageEnvelope(input: AdapterEnvelopeInput & { targetAgentId: string; messageId: string; contextId?: string; taskId?: string; parts: unknown[] }): Promise<TransactionEnvelope> {
@@ -67,7 +70,7 @@ export function a2aMessageWithAuthority<T extends Record<string, unknown>>(messa
   return { ...message, metadata: { ...metadata, [OATI_A2A_EXTENSION_URI]: { envelope, mandate } } }
 }
 
-export interface DpopReplayStore { checkAndStore(jti: string, expiresAt: Date): boolean | Promise<boolean> }
+export interface DpopReplayStore { /** Atomically stores a key-thumbprint-scoped JTI. */ checkAndStore(replayKey: string, expiresAt: Date): boolean | Promise<boolean> }
 export interface DpopVerificationOptions { accessToken: string; expectedJkt?: string; now?: Date; clockSkewSeconds?: number; maxAgeSeconds?: number; replayStore: DpopReplayStore }
 export interface DpopVerificationResult { valid: boolean; jkt?: string; claims?: Record<string, unknown>; issues: string[] }
 
@@ -75,12 +78,15 @@ export interface DpopVerificationResult { valid: boolean; jkt?: string; claims?:
 export async function verifyDpopProof(proof: string, request: Request, options: DpopVerificationOptions): Promise<DpopVerificationResult> {
   const issues: string[] = []
   try {
+    if (!options.accessToken) return { valid: false, issues: ["DPOP_TOKEN_INVALID"] }
+    if (options.clockSkewSeconds !== undefined && (!Number.isFinite(options.clockSkewSeconds) || options.clockSkewSeconds < 0)
+      || options.maxAgeSeconds !== undefined && (!Number.isFinite(options.maxAgeSeconds) || options.maxAgeSeconds <= 0)) return { valid: false, issues: ["DPOP_POLICY_INVALID"] }
     const [encodedHeader, encodedPayload, encodedSignature, extra] = proof.split(".")
     if (!encodedHeader || !encodedPayload || !encodedSignature || extra !== undefined) throw new Error("malformed JWT")
     const header = decodeObject(encodedHeader), claims = decodeObject(encodedPayload)
     if (header.typ !== "dpop+jwt") issues.push("DPOP_TYP_INVALID")
     if (header.alg !== "ES256" && header.alg !== "EdDSA") issues.push("DPOP_ALGORITHM_UNSUPPORTED")
-    if (!isObject(header.jwk) || "d" in header.jwk) issues.push("DPOP_JWK_INVALID")
+    if (!isObject(header.jwk) || "d" in header.jwk || !dpopJwkMatchesAlgorithm(header.jwk, header.alg)) issues.push("DPOP_JWK_INVALID")
     const jkt = isObject(header.jwk) ? await jwkThumbprint(header.jwk) : undefined
     if (options.expectedJkt && jkt !== options.expectedJkt) issues.push("DPOP_KEY_BINDING_MISMATCH")
     if (claims.htm !== request.method.toUpperCase()) issues.push("DPOP_METHOD_MISMATCH")
@@ -89,15 +95,22 @@ export async function verifyDpopProof(proof: string, request: Request, options: 
     if (claims.ath !== await accessTokenHash(options.accessToken)) issues.push("DPOP_TOKEN_HASH_MISMATCH")
     const now = Math.floor((options.now ?? new Date()).getTime() / 1000), skew = options.clockSkewSeconds ?? 30, maxAge = options.maxAgeSeconds ?? 300
     if (typeof claims.iat !== "number" || claims.iat > now + skew || claims.iat < now - maxAge - skew) issues.push("DPOP_TIME_INVALID")
-    if (typeof claims.jti !== "string" || claims.jti === "") issues.push("DPOP_JTI_INVALID")
+    if (typeof claims.jti !== "string" || claims.jti === "" || claims.jti.length > 256) issues.push("DPOP_JTI_INVALID")
     if (issues.length === 0 && isObject(header.jwk)) {
       const algorithm = header.alg === "EdDSA" ? { name: "Ed25519" } : { name: "ECDSA", namedCurve: "P-256" }
       const verificationAlgorithm = header.alg === "EdDSA" ? { name: "Ed25519" } : { name: "ECDSA", hash: "SHA-256" }
-      const key = await crypto.subtle.importKey("jwk", header.jwk, algorithm, false, ["verify"])
+      const signature = fromBase64url(encodedSignature)
+      if (signature.byteLength !== 64 || header.alg === "EdDSA" && !isValidEd25519PublicKey(base64url(signature.slice(0, 32)))) issues.push("DPOP_SIGNATURE_INVALID")
       const signingInput = new TextEncoder().encode(`${encodedHeader}.${encodedPayload}`)
-      if (!await crypto.subtle.verify(verificationAlgorithm, key, fromBase64url(encodedSignature).slice().buffer, signingInput)) issues.push("DPOP_SIGNATURE_INVALID")
+      try {
+        const key = await crypto.subtle.importKey("jwk", header.jwk, algorithm, false, ["verify"])
+        if (!issues.includes("DPOP_SIGNATURE_INVALID") && !await crypto.subtle.verify(verificationAlgorithm, key, signature.slice().buffer, signingInput)) issues.push("DPOP_SIGNATURE_INVALID")
+      } catch { issues.push("DPOP_JWK_INVALID") }
     }
-    if (issues.length === 0 && !await options.replayStore.checkAndStore(claims.jti as string, new Date((now + maxAge) * 1000))) issues.push("DPOP_REPLAY")
+    if (issues.length === 0) {
+      try { if (!await options.replayStore.checkAndStore(`${jkt}\u0000${claims.jti as string}`, new Date(((claims.iat as number) + maxAge + skew) * 1000))) issues.push("DPOP_REPLAY") }
+      catch { issues.push("DPOP_REPLAY_UNAVAILABLE") }
+    }
     return { valid: issues.length === 0, ...(jkt ? { jkt } : {}), claims, issues }
   } catch { return { valid: false, issues: ["DPOP_MALFORMED"] } }
 }
@@ -148,6 +161,8 @@ export function toAuthZenRequest(envelope: TransactionEnvelope, mandate: AgentMa
 
 export function fromAuthZenResponse(response: AuthZenEvaluationResponse, envelope: TransactionEnvelope, issuer: string, at = new Date()): AuthorisationDecision {
   if (typeof response.decision !== "boolean") throw adapterError("AuthZEN response decision must be boolean")
+  required(issuer, "issuer")
+  if (Number.isNaN(at.getTime())) throw adapterError("AuthZEN decision time must be valid")
   const obligations = Array.isArray(response.context?.obligations) ? response.context.obligations.filter(isObject) : undefined
   return { oati_version: "1.0", id: `oati:decision:authzen:${safeId(envelope.id)}`, transaction_id: envelope.id,
     decision: response.decision ? "allow" : "deny", policy_digest: stringOr(response.context?.policy_digest, "authzen:unspecified"),
@@ -169,17 +184,19 @@ export function toOpaInput(envelope: TransactionEnvelope, mandate: AgentMandate,
 export function opaAllowed(response: unknown): boolean { return isObject(response) && response.result === true }
 
 export interface EnvoyCheckRequest { attributes?: { request?: { http?: { method?: string; path?: string; host?: string; headers?: Record<string, string>; body?: string } }; source?: unknown; destination?: unknown; metadataContext?: unknown } }
-export interface EnvoyOatiInput { method: string; path: string; host: string; headers: Record<string, string>; source?: unknown; destination?: unknown; metadata?: unknown; envelope: TransactionEnvelope; mandate: AgentMandate; parentMandate?: AgentMandate }
+export interface EnvoyOatiInput { method: string; path: string; host: string; headers: Record<string, string>; body?: string; source?: unknown; destination?: unknown; metadata?: unknown; envelope: TransactionEnvelope; mandate: AgentMandate; parentMandate?: AgentMandate }
 
 /** Extract OATI authority from an Envoy v3 ext_authz CheckRequest. */
 export function fromEnvoyCheckRequest(check: EnvoyCheckRequest): EnvoyOatiInput {
   const http = check.attributes?.request?.http
   if (!http || !http.method || !http.path) throw adapterError("Envoy CheckRequest is missing HTTP attributes")
   const headers = lowerHeaders(http.headers ?? {})
+  if (http.body !== undefined && lenUtf8(http.body) > 1_048_576) throw adapterError("Envoy CheckRequest body exceeds 1048576 bytes")
   const envelope = decodeAuthorityHeader(headers[OATI_HTTP_HEADERS.envelope.toLowerCase()], "Envelope") as TransactionEnvelope
   const mandate = decodeAuthorityHeader(headers[OATI_HTTP_HEADERS.mandate.toLowerCase()], "Mandate") as AgentMandate
   const parentValue = headers[OATI_HTTP_HEADERS.parentMandate.toLowerCase()]
-  return { method: http.method, path: http.path, host: http.host ?? headers[":authority"] ?? "", headers,
+  return { method: http.method.toUpperCase(), path: http.path, host: http.host ?? headers[":authority"] ?? "", headers,
+    ...(http.body === undefined ? {} : { body: http.body }),
     ...(check.attributes?.source === undefined ? {} : { source: check.attributes.source }),
     ...(check.attributes?.destination === undefined ? {} : { destination: check.attributes.destination }),
     ...(check.attributes?.metadataContext === undefined ? {} : { metadata: check.attributes.metadataContext }), envelope, mandate,
@@ -192,15 +209,44 @@ export function envoyDecisionHeaders(decision: AuthorisationDecision, receipt?: 
 }
 
 function envelope(input: AdapterEnvelopeInput, action: string, resource: string, protocol: "mcp" | "a2a", extensions: Record<string, unknown>): TransactionEnvelope {
+  for (const [value, name, prefix] of [[input.id, "id", "oati:tx:"], [input.agentId, "agentId", "oati:agent:"], [input.organisationId, "organisationId", "oati:org:"], [input.mandateId, "mandateId", "oati:mandate:"]] as const) if (!value.startsWith(prefix) || value.length === prefix.length) throw adapterError(`${name} must be a valid ${prefix} identifier`)
+  required(input.purpose, "purpose"); if (lenUtf8(input.nonce) < 16) throw adapterError("nonce must contain at least 16 UTF-8 bytes")
+  const issuedAt = new Date(input.issuedAt); if (Number.isNaN(issuedAt.getTime())) throw adapterError("issuedAt must be a valid instant")
   return { oati_version: "1.0", id: input.id, agent_id: input.agentId, organisation_id: input.organisationId,
     mandate_id: input.mandateId, action, resource, purpose: input.purpose, protocol, issued_at: input.issuedAt, nonce: input.nonce, extensions }
 }
 function adapterHeaders(envelopeValue: TransactionEnvelope, mandate: AgentMandate): Headers { return new Headers({ [OATI_HTTP_HEADERS.envelope]: encodeOatiHeader(envelopeValue), [OATI_HTTP_HEADERS.mandate]: encodeOatiHeader(mandate), [OATI_HTTP_HEADERS.transactionId]: envelopeValue.id }) }
 function normalizedPolicyContext(envelopeValue: TransactionEnvelope, mandate: AgentMandate): Record<string, unknown> { return { transaction_id: envelopeValue.id, mandate_id: mandate.id, purpose: envelopeValue.purpose ?? mandate.purpose, counterparty: envelopeValue.counterparty ?? "", destination: envelopeValue.destination ?? "", organisation_id: envelopeValue.organisation_id, mandate_status: mandate.status, mandate_expires_at: mandate.expires_at } }
-function decodeAuthorityHeader(value: string | undefined, name: string): unknown { if (!value) throw adapterError(`OATI ${name} header is missing`); try { return JSON.parse(new TextDecoder().decode(fromBase64url(value))) } catch { throw adapterError(`OATI ${name} header is malformed`) } }
+function decodeAuthorityHeader(value: string | undefined, name: string): unknown {
+  if (!value) throw adapterError(`OATI ${name} header is missing`)
+  if (lenUtf8(value) > 65_536) throw adapterError(`OATI ${name} header exceeds 65536 bytes`)
+  try { return JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(fromBase64url(value))) }
+  catch { throw adapterError(`OATI ${name} header is malformed`) }
+}
 function decodeObject(value: string): Record<string, unknown> { const parsed = JSON.parse(new TextDecoder().decode(fromBase64url(value))); if (!isObject(parsed)) throw new Error("not object"); return parsed }
 async function digestJson(value: unknown): Promise<string> { return `sha256:${hex(await sha256(new TextEncoder().encode(canonicalJson(value))))}` }
-function lowerHeaders(headers: Record<string, string>): Record<string, string> { return Object.fromEntries(Object.entries(headers).map(([key, value]) => [key.toLowerCase(), value])) }
+function lowerHeaders(headers: Record<string, string>): Record<string, string> {
+  const result: Record<string, string> = {}
+  let bytes = 0
+  for (const [key, value] of Object.entries(headers)) {
+    const lowered = key.toLowerCase()
+    if (!(lowered === ":authority" || /^[!#$%&'*+.^_`|~0-9a-z-]+$/.test(lowered)) || /[\r\n\0]/.test(value)) throw adapterError("Envoy CheckRequest contains an unsafe header")
+    bytes += lenUtf8(key) + lenUtf8(value)
+    if (bytes > 98_304) throw adapterError("Envoy CheckRequest headers exceed 98304 bytes")
+    if (lowered in result) throw adapterError(`Envoy CheckRequest contains duplicate ${lowered} headers`)
+    result[lowered] = value
+  }
+  return result
+}
+function dpopJwkMatchesAlgorithm(jwk: Record<string, unknown>, algorithm: unknown): boolean {
+  if (algorithm === "EdDSA") return jwk.kty === "OKP" && jwk.crv === "Ed25519" && typeof jwk.x === "string" && isValidEd25519PublicKey(jwk.x)
+  if (algorithm === "ES256") {
+    if (jwk.kty !== "EC" || jwk.crv !== "P-256" || typeof jwk.x !== "string" || typeof jwk.y !== "string") return false
+    try { return fromBase64url(jwk.x).byteLength === 32 && fromBase64url(jwk.y).byteLength === 32 } catch { return false }
+  }
+  return false
+}
+function lenUtf8(value: string): number { return new TextEncoder().encode(value).byteLength }
 function adapterError(message: string): OatiError { return new OatiError("ADAPTER_INVALID_INPUT", message) }
 function required(value: string, name: string): void { if (!value.trim()) throw adapterError(`${name} is required`) }
 function isObject(value: unknown): value is Record<string, unknown> { return typeof value === "object" && value !== null && !Array.isArray(value) }

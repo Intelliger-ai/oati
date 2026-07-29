@@ -238,6 +238,20 @@ func validateCommerceReceipt(value map[string]any) []string {
 	if !validCurrency(stringValue(commerce, "currency")) {
 		violations = append(violations, "invalid Commerce currency")
 	}
+	quantity, quantityOK := numberValue(commerce["quantity"])
+	if !quantityOK || quantity < 1 || quantity != float64(int64(quantity)) {
+		violations = append(violations, "quantity must be a positive integer")
+	}
+	unitPrice, total := stringValue(commerce, "unit_price"), stringValue(commerce, "total_amount")
+	if !validDecimal(unitPrice) {
+		violations = append(violations, "unit_price must be a non-negative decimal string")
+	}
+	if !validDecimal(total) {
+		violations = append(violations, "total_amount must be a non-negative decimal string")
+	}
+	if quantityOK && validDecimal(unitPrice) && validDecimal(total) && decimalCompare(total, decimalMultiply(unitPrice, int(quantity))) != 0 {
+		violations = append(violations, "total amount must equal unit price multiplied by quantity")
+	}
 	return violations
 }
 
@@ -247,6 +261,9 @@ func compareCommerceReceipt(receipt, mandate map[string]any) []string {
 	m, mok := extension(mandate, "commerce")
 	if !rok || !mok {
 		return []string{"Receipt and Mandate need Commerce extensions"}
+	}
+	if stringValue(receipt, "mandate_id") != stringValue(mandate, "id") {
+		violations = append(violations, "receipt mandate_id does not match Mandate")
 	}
 	for _, field := range []string{"merchant_organisation_id", "service_id", "offer_id", "currency"} {
 		if stringValue(r, field) != stringValue(m, field) {
@@ -263,6 +280,9 @@ func compareCommerceReceipt(receipt, mandate map[string]any) []string {
 	mq, _ := numberValue(m["max_quantity"])
 	if rq > mq {
 		violations = append(violations, "quantity exceeds Mandate")
+	}
+	if digest := stringValue(m, "terms_digest"); digest != "" && stringValue(r, "terms_digest") != digest {
+		violations = append(violations, "terms digest differs from Mandate")
 	}
 	return violations
 }
@@ -331,6 +351,9 @@ func compareMintMandate(mandate, claim map[string]any) []string {
 	if !ok {
 		return []string{"Mandate needs extensions.rwa"}
 	}
+	if claimType := stringValue(claim, "claim_type"); claimType != "" && claimType != "reserve_balance" {
+		violations = append(violations, "controlled mint requires a reserve_balance State Claim")
+	}
 	if stringValue(rwa, "asset_id") != stringValue(claim, "asset_id") {
 		violations = append(violations, "State Claim asset differs from Mandate")
 	}
@@ -354,7 +377,14 @@ func validateRwaReceipt(value map[string]any) []string {
 	if !ok {
 		return []string{"missing extensions.rwa"}
 	}
-	return requireFields(rwa, "asset_id", "state_claim_id", "operation", "network", "token_contract", "quantity", "unit", "chain_transaction_hash", "approval_count")
+	violations := requireFields(rwa, "asset_id", "state_claim_id", "operation", "network", "token_contract", "quantity", "unit", "chain_transaction_hash", "approval_count", "resulting_supply")
+	if quantity := stringValue(rwa, "quantity"); !validDecimal(quantity) || !exceeds(quantity, "0") {
+		violations = append(violations, "receipt quantity must be greater than zero")
+	}
+	if supply := stringValue(rwa, "resulting_supply"); !validDecimal(supply) {
+		violations = append(violations, "resulting_supply must be a non-negative decimal string")
+	}
+	return violations
 }
 
 func compareRwaReceipt(receipt, mandate map[string]any) []string {
@@ -363,6 +393,9 @@ func compareRwaReceipt(receipt, mandate map[string]any) []string {
 	m, mok := extension(mandate, "rwa")
 	if !rok || !mok {
 		return []string{"Receipt and Mandate need RWA extensions"}
+	}
+	if stringValue(receipt, "mandate_id") != stringValue(mandate, "id") {
+		violations = append(violations, "receipt mandate_id does not match Mandate")
 	}
 	for _, field := range []string{"asset_id", "state_claim_id", "operation", "network", "token_contract", "unit"} {
 		if stringValue(r, field) != stringValue(m, field) {
@@ -596,7 +629,7 @@ func runLookup(args []string, stdout, stderr io.Writer) error {
 		return fmt.Errorf("lookup request failed: %w", err)
 	}
 	defer response.Body.Close()
-	body, err := io.ReadAll(io.LimitReader(response.Body, 2<<20))
+	body, err := readLimited(response.Body, 2<<20)
 	if err != nil {
 		return fmt.Errorf("read lookup response: %w", err)
 	}
@@ -654,7 +687,7 @@ func runDiscover(args []string, stdout, stderr io.Writer) error {
 		return fmt.Errorf("discovery request failed: %w", err)
 	}
 	defer response.Body.Close()
-	body, err := io.ReadAll(io.LimitReader(response.Body, 2<<20))
+	body, err := readLimited(response.Body, 2<<20)
 	if err != nil {
 		return fmt.Errorf("read discovery response: %w", err)
 	}
@@ -708,7 +741,11 @@ func readAny(path string) (any, error) {
 		defer file.Close()
 		reader = file
 	}
-	decoder := json.NewDecoder(io.LimitReader(reader, 8<<20))
+	encoded, err := readLimited(reader, 8<<20)
+	if err != nil {
+		return nil, err
+	}
+	decoder := json.NewDecoder(bytes.NewReader(encoded))
 	decoder.UseNumber()
 	var value any
 	if err := decoder.Decode(&value); err != nil {
@@ -716,6 +753,17 @@ func readAny(path string) (any, error) {
 	}
 	if decoder.Decode(&struct{}{}) != io.EOF {
 		return nil, errors.New("input contains more than one JSON value")
+	}
+	return value, nil
+}
+
+func readLimited(reader io.Reader, maximum int64) ([]byte, error) {
+	value, err := io.ReadAll(io.LimitReader(reader, maximum+1))
+	if err != nil {
+		return nil, err
+	}
+	if int64(len(value)) > maximum {
+		return nil, fmt.Errorf("input exceeds %d byte limit", maximum)
 	}
 	return value, nil
 }

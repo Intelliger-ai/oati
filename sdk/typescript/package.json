@@ -4,6 +4,27 @@
   "description": "TypeScript SDK for OATI objects, trust verification, deterministic authority evaluation, Commerce, RWA, and lookup",
   "type": "module",
   "license": "Apache-2.0",
+  "author": "Intelliger",
+  "homepage": "https://github.com/Intelliger-ai/oati/tree/main/sdk/typescript#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Intelliger-ai/oati.git",
+    "directory": "sdk/typescript"
+  },
+  "bugs": {
+    "url": "https://github.com/Intelliger-ai/oati/issues"
+  },
+  "keywords": [
+    "agents",
+    "authorization",
+    "identity",
+    "oati",
+    "trust"
+  ],
+  "sideEffects": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "engines": {
     "node": ">=20"
   },

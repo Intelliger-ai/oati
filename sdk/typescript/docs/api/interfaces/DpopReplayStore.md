@@ -10,11 +10,11 @@
 
 ### checkAndStore()
 
-> **checkAndStore**(`jti`, `expiresAt`): `boolean` \| `Promise`\<`boolean`\>
+> **checkAndStore**(`replayKey`, `expiresAt`): `boolean` \| `Promise`\<`boolean`\>
 
 #### Parameters
 
-##### jti
+##### replayKey
 
 `string`
 

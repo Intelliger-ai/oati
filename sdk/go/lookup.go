@@ -3,6 +3,7 @@ package oati
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
 	"net/url"
@@ -15,9 +16,19 @@ import (
 var RecordTypes = []string{"organisation", "agent", "passport", "mandate", "receipt", "issuer", "key", "revocation", "service", "profile"}
 
 type OrganisationDiscovery struct {
-	OrganisationID string         `json:"organisation_id"`
-	Services       []PublicRecord `json:"services"`
-	Profiles       []PublicRecord `json:"profiles"`
+	OrganisationID string             `json:"organisation_id"`
+	Services       []DiscoveredRecord `json:"services"`
+	Profiles       []DiscoveredRecord `json:"profiles"`
+}
+type DiscoveredRecord struct {
+	Record   PublicRecord   `json:"record"`
+	Document map[string]any `json:"document"`
+}
+type FederationDocument struct {
+	OATIVersion   string   `json:"oati_version"`
+	Organisations []string `json:"organisations"`
+	Resolvers     []string `json:"resolvers"`
+	ExpiresAt     string   `json:"expires_at,omitempty"`
 }
 
 type LookupError struct {
@@ -52,6 +63,7 @@ type LookupState struct {
 type cacheEntry struct {
 	record         *PublicRecord
 	resolver, etag string
+	rate           RateLimit
 	expires        time.Time
 	notFound       bool
 }
@@ -86,7 +98,7 @@ func (c *ResolverClient) LookupRevocationByTargetDetailed(ctx context.Context, t
 }
 func (c *ResolverClient) DiscoverOrganisation(ctx context.Context, organisationID string) (OrganisationDiscovery, error) {
 	if !strings.HasPrefix(organisationID, "oati:org:") {
-		return OrganisationDiscovery{}, fmt.Errorf("valid organisation id required")
+		return OrganisationDiscovery{}, &LookupError{Code: "LOOKUP_BAD_REQUEST", Err: fmt.Errorf("valid organisation id required")}
 	}
 	var last error
 	for _, resolver := range c.ResolverURLs {
@@ -101,8 +113,12 @@ func (c *ResolverClient) DiscoverOrganisation(ctx context.Context, organisationI
 			last = &LookupError{Code: "LOOKUP_UNAVAILABLE", Err: err}
 			continue
 		}
-		var result OrganisationDiscovery
-		decodeErr := json.NewDecoder(response.Body).Decode(&result)
+		var payload struct {
+			OrganisationID string         `json:"organisation_id"`
+			Services       []PublicRecord `json:"services"`
+			Profiles       []PublicRecord `json:"profiles"`
+		}
+		decodeErr := json.NewDecoder(response.Body).Decode(&payload)
 		response.Body.Close()
 		if response.StatusCode == http.StatusNotFound {
 			return OrganisationDiscovery{}, &LookupError{Code: "LOOKUP_NOT_FOUND", Status: 404}
@@ -111,17 +127,78 @@ func (c *ResolverClient) DiscoverOrganisation(ctx context.Context, organisationI
 			last = &LookupError{Code: "LOOKUP_UNAVAILABLE", Status: response.StatusCode}
 			continue
 		}
-		if decodeErr != nil || result.OrganisationID != organisationID {
+		if decodeErr != nil || payload.OrganisationID != organisationID {
 			return OrganisationDiscovery{}, &LookupError{Code: "LOOKUP_INVALID_RESPONSE", Err: decodeErr}
 		}
-		for _, item := range append(append([]PublicRecord{}, result.Services...), result.Profiles...) {
-			if item.OrganisationID != organisationID || item.Status != "active" || item.ProofStatus != "verified" {
-				return OrganisationDiscovery{}, &LookupError{Code: "LOOKUP_INVALID_RESPONSE"}
+		result := OrganisationDiscovery{OrganisationID: organisationID}
+		for _, item := range payload.Services {
+			decoded, decodeError := decodeDiscoveryRecord(item, "service", organisationID)
+			if decodeError != nil {
+				return OrganisationDiscovery{}, decodeError
+			}
+			result.Services = append(result.Services, decoded)
+		}
+		for _, item := range payload.Profiles {
+			decoded, decodeError := decodeDiscoveryRecord(item, "profile", organisationID)
+			if decodeError != nil {
+				return OrganisationDiscovery{}, decodeError
+			}
+			result.Profiles = append(result.Profiles, decoded)
+		}
+		profiles := map[string]bool{}
+		for _, item := range result.Profiles {
+			profiles[item.Record.ID] = true
+		}
+		for _, item := range result.Services {
+			for _, profile := range stringsFrom(item.Document["accepted_profiles"]) {
+				if !profiles[profile] {
+					return OrganisationDiscovery{}, &LookupError{Code: "LOOKUP_INVALID_RESPONSE", Err: fmt.Errorf("service references unpublished profile %s", profile)}
+				}
 			}
 		}
 		return result, nil
 	}
 	return OrganisationDiscovery{}, last
+}
+func (c *ResolverClient) DiscoverFederated(ctx context.Context, domain, organisationID string) (OrganisationDiscovery, error) {
+	candidate := domain
+	if !strings.Contains(candidate, "://") {
+		candidate = "https://" + candidate
+	}
+	origin, err := url.Parse(candidate)
+	if err != nil || origin.Scheme != "https" || origin.Hostname() == "" || origin.User != nil || (origin.Path != "" && origin.Path != "/") || origin.RawQuery != "" || origin.Fragment != "" {
+		return OrganisationDiscovery{}, &LookupError{Code: "LOOKUP_BAD_REQUEST", Err: fmt.Errorf("federation requires a bare HTTPS domain")}
+	}
+	request, _ := http.NewRequestWithContext(ctx, http.MethodGet, origin.Scheme+"://"+origin.Host+"/.well-known/oati", nil)
+	request.Header.Set("Accept", "application/json")
+	response, err := c.http().Do(request)
+	if err != nil {
+		return OrganisationDiscovery{}, &LookupError{Code: "LOOKUP_UNAVAILABLE", Err: err}
+	}
+	defer response.Body.Close()
+	if response.StatusCode == http.StatusNotFound {
+		return OrganisationDiscovery{}, &LookupError{Code: "LOOKUP_NOT_FOUND", Status: 404}
+	}
+	if response.StatusCode < 200 || response.StatusCode >= 300 {
+		return OrganisationDiscovery{}, &LookupError{Code: "LOOKUP_UNAVAILABLE", Status: response.StatusCode}
+	}
+	var document FederationDocument
+	if json.NewDecoder(response.Body).Decode(&document) != nil || document.OATIVersion != "1.0" || !containsString(document.Organisations, organisationID) || len(document.Resolvers) == 0 || expired(document.ExpiresAt) {
+		return OrganisationDiscovery{}, &LookupError{Code: "LOOKUP_INVALID_RESPONSE"}
+	}
+	for _, resolver := range document.Resolvers {
+		parsed, parseErr := url.Parse(resolver)
+		if parseErr != nil || parsed.Scheme != "https" || parsed.Hostname() == "" {
+			return OrganisationDiscovery{}, &LookupError{Code: "LOOKUP_INVALID_RESPONSE"}
+		}
+	}
+	federated := NewResolverClient(document.Resolvers...)
+	federated.HTTPClient = c.HTTPClient
+	federated.MaxRetries = c.MaxRetries
+	federated.BaseDelay = c.BaseDelay
+	federated.CacheTTL = c.CacheTTL
+	federated.NegativeTTL = c.NegativeTTL
+	return federated.DiscoverOrganisation(ctx, organisationID)
 }
 func (c *ResolverClient) lookupSelectedDetailed(ctx context.Context, kind, selector, value string, reload bool) (LookupResult, error) {
 	if !containsString(RecordTypes, kind) || value == "" {
@@ -135,13 +212,17 @@ func (c *ResolverClient) lookupSelectedDetailed(ctx context.Context, kind, selec
 		if cached.notFound {
 			return LookupResult{}, &LookupError{Code: "LOOKUP_NOT_FOUND", Status: 404}
 		}
-		return LookupResult{Record: *cached.record, ResolverURL: cached.resolver, Cache: "hit"}, nil
+		return LookupResult{Record: *cached.record, ResolverURL: cached.resolver, Cache: "hit", RateLimit: cached.rate}, nil
 	}
 	var last error
 	for _, resolver := range c.ResolverURLs {
-		result, etag, rate, revalidated, err := c.retry(ctx, resolver, kind, selector, value, cached)
+		reusable := cacheEntry{}
+		if ok && cached.resolver == resolver {
+			reusable = cached
+		}
+		result, etag, rate, revalidated, err := c.retry(ctx, resolver, kind, selector, value, reusable)
 		if err == nil {
-			c.store(key, cacheEntry{record: &result, resolver: resolver, etag: etag, expires: time.Now().Add(c.ttl())})
+			c.store(key, cacheEntry{record: &result, resolver: resolver, etag: etag, rate: rate, expires: time.Now().Add(c.ttl())})
 			cacheState := "miss"
 			if revalidated {
 				cacheState = "revalidated"
@@ -161,15 +242,17 @@ func (c *ResolverClient) LookupState(ctx context.Context, kind, id string) Looku
 	if err != nil {
 		state := "unavailable"
 		if e, ok := err.(*LookupError); ok && e.Code == "LOOKUP_NOT_FOUND" {
-			state = "not-found"
+			state = "not_found"
 		}
 		return LookupState{State: state, Err: err}
 	}
 	state := "found"
 	if record.ProofStatus == "invalid" {
-		state = "invalid-proof"
-	} else if record.ProofStatus == "unknown" || record.ProofStatus == "unavailable" {
+		state = "invalid_proof"
+	} else if record.ProofStatus == "unknown" {
 		state = "unknown"
+	} else if record.ProofStatus == "unavailable" {
+		state = "unavailable"
 	}
 	return LookupState{State: state, Record: &record}
 }
@@ -188,7 +271,7 @@ func (c *ResolverClient) retry(ctx context.Context, resolver, kind, selector, va
 			}
 			select {
 			case <-ctx.Done():
-				return PublicRecord{}, "", RateLimit{}, false, ctx.Err()
+				return PublicRecord{}, "", RateLimit{}, false, contextLookupError(ctx)
 			case <-time.After(delay):
 			}
 		}
@@ -218,7 +301,7 @@ func (c *ResolverClient) request(ctx context.Context, resolver, kind, selector, 
 	if err != nil {
 		code := "LOOKUP_UNAVAILABLE"
 		if ctx.Err() != nil {
-			code = "LOOKUP_TIMEOUT"
+			return PublicRecord{}, "", RateLimit{}, false, contextLookupError(ctx)
 		}
 		return PublicRecord{}, "", RateLimit{}, false, &LookupError{Code: code, Err: err}
 	}
@@ -248,7 +331,63 @@ func (c *ResolverClient) request(ctx context.Context, resolver, kind, selector, 
 	if record.Type != kind || !selectorMatches {
 		return PublicRecord{}, "", rate, false, &LookupError{Code: "LOOKUP_INVALID_RESPONSE"}
 	}
+	if record.Status == "" || record.Issuer == "" || !containsString([]string{"verified", "invalid", "unavailable", "unknown"}, record.ProofStatus) || record.PublicAttributes == nil {
+		return PublicRecord{}, "", rate, false, &LookupError{Code: "LOOKUP_INVALID_RESPONSE"}
+	}
+	if record.Type == "key" {
+		if record.IssuedAt == "" {
+			record.IssuedAt = record.PublicAttributes["valid_from"]
+		}
+		if record.ExpiresAt == "" {
+			record.ExpiresAt = record.PublicAttributes["valid_until"]
+		}
+		if record.IssuedAt == "" || record.ExpiresAt == "" || record.PublicAttributes["controller"] == "" || !containsString([]string{"EdDSA", "ES256"}, record.PublicAttributes["algorithm"]) || record.PublicAttributes["public_key_jwk"] == "" {
+			return PublicRecord{}, "", rate, false, &LookupError{Code: "LOOKUP_INVALID_RESPONSE"}
+		}
+	}
+	if record.Type == "service" || record.Type == "profile" {
+		if _, decodeErr := decodeDiscoveryRecord(record, record.Type, record.OrganisationID); decodeErr != nil {
+			return PublicRecord{}, "", rate, false, decodeErr
+		}
+	}
 	return record, response.Header.Get("ETag"), rate, false, nil
+}
+func contextLookupError(ctx context.Context) *LookupError {
+	code := "LOOKUP_TIMEOUT"
+	if errors.Is(ctx.Err(), context.Canceled) {
+		code = "LOOKUP_CANCELLED"
+	}
+	return &LookupError{Code: code, Err: ctx.Err()}
+}
+func expired(value string) bool {
+	if value == "" {
+		return false
+	}
+	parsed, err := time.Parse(time.RFC3339, value)
+	return err != nil || !parsed.After(time.Now())
+}
+func decodeDiscoveryRecord(record PublicRecord, kind, organisationID string) (DiscoveredRecord, error) {
+	if record.Type != kind || record.OrganisationID != organisationID || record.Status != "active" || record.ProofStatus != "verified" {
+		return DiscoveredRecord{}, &LookupError{Code: "LOOKUP_INVALID_RESPONSE", Err: fmt.Errorf("untrusted discovery record")}
+	}
+	raw := record.PublicAttributes["document"]
+	var document map[string]any
+	decoder := json.NewDecoder(strings.NewReader(raw))
+	decoder.UseNumber()
+	if raw == "" || decoder.Decode(&document) != nil {
+		return DiscoveredRecord{}, &LookupError{Code: "LOOKUP_INVALID_RESPONSE", Err: fmt.Errorf("invalid discovery document")}
+	}
+	if str(document["id"]) != record.ID || str(document["organisation_id"]) != organisationID || str(document["issuer"]) != record.Issuer || str(document["status"]) != "active" || expired(record.ExpiresAt) || expired(str(document["expires_at"])) {
+		return DiscoveredRecord{}, &LookupError{Code: "LOOKUP_INVALID_RESPONSE", Err: fmt.Errorf("invalid, mismatched, or expired discovery document")}
+	}
+	if kind == "service" {
+		if str(document["oati_version"]) != "1.0" || len(list(document["endpoints"])) == 0 || document["accepted_profiles"] == nil {
+			return DiscoveredRecord{}, &LookupError{Code: "LOOKUP_INVALID_RESPONSE"}
+		}
+	} else if str(document["oati_version"]) != "1.0" || str(document["schema_uri"]) == "" || str(document["digest"]) == "" {
+		return DiscoveredRecord{}, &LookupError{Code: "LOOKUP_INVALID_RESPONSE"}
+	}
+	return DiscoveredRecord{Record: record, Document: document}, nil
 }
 func (c *ResolverClient) store(key string, value cacheEntry) {
 	c.mu.Lock()

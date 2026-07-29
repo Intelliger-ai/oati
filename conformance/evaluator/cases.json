@@ -54,10 +54,6 @@
               "billing_model": "per_request",
               "terms_digest": "sha256:terms-example-001"
             }
-          },
-          "proof": {
-            "type": "DataIntegrityProof",
-            "signature": "example"
           }
         },
         "envelope": {
@@ -87,10 +83,6 @@
               "idempotency_key": "weather-purchase-001",
               "terms_digest": "sha256:terms-example-001"
             }
-          },
-          "proof": {
-            "type": "DataIntegrityProof",
-            "signature": "example"
           }
         },
         "usage": {
@@ -183,10 +175,6 @@
               "billing_model": "per_request",
               "terms_digest": "sha256:terms-example-001"
             }
-          },
-          "proof": {
-            "type": "DataIntegrityProof",
-            "signature": "example"
           }
         },
         "envelope": {
@@ -216,10 +204,6 @@
               "idempotency_key": "weather-purchase-001",
               "terms_digest": "sha256:terms-example-001"
             }
-          },
-          "proof": {
-            "type": "DataIntegrityProof",
-            "signature": "example"
           }
         },
         "usage": {
@@ -304,10 +288,6 @@
               "billing_model": "per_request",
               "terms_digest": "sha256:terms-example-001"
             }
-          },
-          "proof": {
-            "type": "DataIntegrityProof",
-            "signature": "example"
           }
         },
         "envelope": {
@@ -337,10 +317,6 @@
               "idempotency_key": "weather-purchase-001",
               "terms_digest": "sha256:terms-example-001"
             }
-          },
-          "proof": {
-            "type": "DataIntegrityProof",
-            "signature": "example"
           }
         },
         "usage": {
@@ -423,10 +399,6 @@
                 "approver"
               ]
             }
-          },
-          "proof": {
-            "type": "DataIntegrityProof",
-            "signature": "example"
           }
         },
         "envelope": {
@@ -533,10 +505,6 @@
                 "approver"
               ]
             }
-          },
-          "proof": {
-            "type": "DataIntegrityProof",
-            "signature": "example"
           }
         },
         "envelope": {
@@ -638,10 +606,6 @@
                 "approver"
               ]
             }
-          },
-          "proof": {
-            "type": "DataIntegrityProof",
-            "signature": "example"
           }
         },
         "envelope": {
@@ -741,10 +705,6 @@
                 "approver"
               ]
             }
-          },
-          "proof": {
-            "type": "DataIntegrityProof",
-            "signature": "example"
           }
         },
         "envelope": {
@@ -1417,6 +1377,230 @@
           "PURPOSE_MISMATCH",
           "RESOURCE_NOT_ALLOWED"
         ]
+      }
+    },
+    {
+      "name": "hardening-generic-profile-quantity-one-time",
+      "request": {
+        "oati_version": "1.0",
+        "evaluation_time": "2026-07-29T10:00:00Z",
+        "mandate": {
+          "oati_version": "1.0",
+          "id": "oati:mandate:hardening:generic",
+          "issuer": "oati:issuer:hardening",
+          "subject": "oati:agent:hardening:generic",
+          "purpose": "inventory",
+          "actions": ["inventory.reserve"],
+          "limits": {"max_quantity": "1", "one_time": true},
+          "not_before": "2026-07-29T09:00:00Z",
+          "expires_at": "2026-07-29T11:00:00Z",
+          "status": "active"
+        },
+        "envelope": {
+          "oati_version": "1.0",
+          "id": "oati:tx:hardening:generic",
+          "agent_id": "oati:agent:hardening:generic",
+          "organisation_id": "oati:org:hardening",
+          "mandate_id": "oati:mandate:hardening:generic",
+          "action": "inventory.reserve",
+          "resource": "inventory:item:1",
+          "purpose": "inventory",
+          "profile": "https://specs.intelliger.ai/oati/profiles/commerce/v0.1",
+          "issued_at": "2026-07-29T10:00:00Z",
+          "nonce": "hardening-generic-nonce"
+        },
+        "usage": {
+          "calls": 0,
+          "quantity": "0.75",
+          "consumed": false,
+          "idempotency_keys": []
+        },
+        "consumption": {
+          "quantity": "1",
+          "consume": false
+        }
+      },
+      "expected": {
+        "decision": "deny",
+        "reason_codes": [
+          "CONSUMPTION_CONTEXT_MISMATCH",
+          "PROFILE_MISMATCH",
+          "QUANTITY_LIMIT_EXCEEDED"
+        ]
+      }
+    },
+    {
+      "name": "hardening-commerce-signed-context-and-consumption",
+      "request": {
+        "oati_version": "1.0",
+        "evaluation_time": "2026-07-29T10:00:00Z",
+        "mandate": {
+          "oati_version": "1.0",
+          "id": "oati:mandate:hardening:commerce",
+          "issuer": "oati:issuer:hardening",
+          "subject": "oati:agent:hardening:buyer",
+          "purpose": "procurement",
+          "actions": ["service.purchase"],
+          "resources": ["oati:service:hardening:data"],
+          "counterparties": ["oati:org:hardening:seller"],
+          "profile": "https://specs.intelliger.ai/oati/profiles/commerce/v0.1",
+          "extensions": {
+            "commerce": {
+              "merchant_organisation_id": "oati:org:hardening:seller",
+              "service_id": "oati:service:hardening:data",
+              "offer_id": "offer-1",
+              "currency": "EUR",
+              "max_unit_price": "1.00",
+              "max_total": "10.00",
+              "max_quantity": 10,
+              "terms_digest": "sha256:hardening-terms"
+            }
+          },
+          "not_before": "2026-07-29T09:00:00Z",
+          "expires_at": "2026-07-29T11:00:00Z",
+          "status": "active"
+        },
+        "envelope": {
+          "oati_version": "1.0",
+          "id": "oati:tx:hardening:commerce",
+          "agent_id": "oati:agent:hardening:buyer",
+          "organisation_id": "oati:org:hardening",
+          "mandate_id": "oati:mandate:hardening:commerce",
+          "action": "service.purchase",
+          "resource": "oati:service:hardening:data",
+          "counterparty": "oati:org:hardening:seller",
+          "purpose": "procurement",
+          "profile": "https://specs.intelliger.ai/oati/profiles/commerce/v0.1",
+          "extensions": {
+            "commerce": {
+              "offer_id": "offer-1",
+              "currency": "EUR",
+              "quantity": 1,
+              "quoted_unit_price": "1.00",
+              "quoted_total": "0.01",
+              "idempotency_key": "hardening-purchase-1",
+              "terms_digest": "sha256:hardening-terms"
+            }
+          },
+          "issued_at": "2026-07-29T10:00:00Z",
+          "nonce": "hardening-commerce-nonce"
+        },
+        "usage": {
+          "calls": 0,
+          "amount": "0",
+          "currency": "EUR",
+          "quantity": "0",
+          "consumed": false,
+          "idempotency_keys": []
+        },
+        "consumption": {
+          "amount": "0.00",
+          "currency": "EUR",
+          "quantity": "0",
+          "idempotency_key": "different-key"
+        },
+        "commerce": {
+          "merchant_organisation_id": "oati:org:hardening:seller",
+          "service_id": "oati:service:hardening:data",
+          "offer_id": "offer-1",
+          "currency": "EUR",
+          "quantity": 1,
+          "unit_price": "1.00",
+          "total_amount": "1.00",
+          "idempotency_key": "hardening-purchase-1",
+          "terms_digest": "sha256:hardening-terms"
+        }
+      },
+      "expected": {
+        "decision": "deny",
+        "reason_codes": [
+          "COMMERCE_ENVELOPE_CONTEXT_MISMATCH",
+          "CONSUMPTION_CONTEXT_MISMATCH"
+        ]
+      }
+    },
+    {
+      "name": "hardening-rwa-signed-context",
+      "request": {
+        "oati_version": "1.0",
+        "evaluation_time": "2026-07-29T10:00:00Z",
+        "mandate": {
+          "oati_version": "1.0",
+          "id": "oati:mandate:hardening:rwa",
+          "issuer": "oati:issuer:hardening",
+          "subject": "oati:agent:hardening:minter",
+          "purpose": "controlled_mint",
+          "actions": ["asset.mint"],
+          "resources": ["oati:asset:hardening:1"],
+          "profile": "https://specs.intelliger.ai/oati/profiles/rwa/v0.1",
+          "extensions": {
+            "rwa": {
+              "asset_id": "oati:asset:hardening:1",
+              "state_claim_id": "oati:claim:hardening:1",
+              "network": "testnet",
+              "token_contract": "0xhardening",
+              "operation": "mint",
+              "unit": "TOKEN",
+              "max_quantity": "10",
+              "one_time": false,
+              "minimum_approvals": 1,
+              "required_roles": ["approver"]
+            }
+          },
+          "not_before": "2026-07-29T09:00:00Z",
+          "expires_at": "2026-07-29T11:00:00Z",
+          "status": "active"
+        },
+        "envelope": {
+          "oati_version": "1.0",
+          "id": "oati:tx:hardening:rwa",
+          "agent_id": "oati:agent:hardening:minter",
+          "organisation_id": "oati:org:hardening",
+          "mandate_id": "oati:mandate:hardening:rwa",
+          "action": "asset.mint",
+          "resource": "oati:asset:hardening:1",
+          "purpose": "controlled_mint",
+          "profile": "https://specs.intelliger.ai/oati/profiles/rwa/v0.1",
+          "extensions": {
+            "rwa": {
+              "asset_id": "oati:asset:hardening:1",
+              "state_claim_id": "oati:claim:hardening:1",
+              "network": "testnet",
+              "token_contract": "0xhardening",
+              "operation": "mint",
+              "unit": "TOKEN",
+              "quantity": "2"
+            }
+          },
+          "issued_at": "2026-07-29T10:00:00Z",
+          "nonce": "hardening-rwa-nonce"
+        },
+        "usage": {
+          "calls": 0,
+          "quantity": "0",
+          "consumed": false,
+          "idempotency_keys": [],
+          "minted_supply": "5"
+        },
+        "rwa": {
+          "asset_id": "oati:asset:hardening:1",
+          "state_claim_id": "oati:claim:hardening:1",
+          "network": "testnet",
+          "token_contract": "0xhardening",
+          "operation": "mint",
+          "unit": "TOKEN",
+          "quantity": "1",
+          "reserve": "10",
+          "approval_count": 1,
+          "approval_roles": ["approver"],
+          "current_supply": "5",
+          "maximum_supply": "10",
+          "claim_valid_until": "2026-07-29T11:00:00Z"
+        }
+      },
+      "expected": {
+        "decision": "deny",
+        "reason_codes": ["RWA_ENVELOPE_CONTEXT_MISMATCH"]
       }
     }
   ]

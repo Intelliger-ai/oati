@@ -1,0 +1,32 @@
+{
+  "oati_version": "1.0",
+  "evaluation_time": "2026-07-27T12:00:30Z",
+  "mandate": {
+    "oati_version": "1.0",
+    "id": "oati:mandate:example:read-1",
+    "issuer": "oati:issuer:example:enterprise",
+    "subject": "oati:agent:example:buyer",
+    "purpose": "inventory_check",
+    "actions": ["inventory.read"],
+    "resources": ["oati:service:example:inventory"],
+    "not_before": "2026-07-27T12:00:00Z",
+    "expires_at": "2026-07-27T13:00:00Z",
+    "status": "active"
+  },
+  "envelope": {
+    "oati_version": "1.0",
+    "id": "oati:tx:example:read-1",
+    "agent_id": "oati:agent:example:buyer",
+    "organisation_id": "oati:org:example",
+    "mandate_id": "oati:mandate:example:read-1",
+    "action": "inventory.read",
+    "resource": "oati:service:example:inventory",
+    "issued_at": "2026-07-27T12:00:20Z",
+    "nonce": "example-transaction-nonce-0001"
+  },
+  "usage": {
+    "calls": 0,
+    "consumed": false,
+    "idempotency_keys": []
+  }
+}

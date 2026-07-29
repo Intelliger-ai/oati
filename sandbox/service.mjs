@@ -113,9 +113,15 @@ async function issuerService() {
     if (request.method === "GET" && url.pathname === "/bootstrap") return send(response, 200, bootstrap)
     if (request.method === "GET" && url.pathname === "/records") return send(response, 200, { items: [...buyerIssuer.registryRecords(), ...sellerIssuer.registryRecords()] })
     if (request.method === "POST" && url.pathname === "/transactions/commerce") {
+      const idempotencyKey = `sandbox:${crypto.randomUUID()}`
       const envelope = await buyerIssuer.signTransaction(buyerPassport.id, commerceMandate, {
         action: "commerce.purchase", resource: commerceTerms.service_id, purpose: commerceMandate.purpose,
         destination: urls.commerce, counterparty: sellerIssuer.organisationId, protocol: "http",
+        extensions: { commerce: {
+          offer_id: commerceTerms.offer_id, currency: commerceTerms.currency, quantity: 1,
+          quoted_unit_price: "0.05", quoted_total: "0.05", idempotency_key: idempotencyKey,
+          terms_digest: commerceTerms.terms_digest,
+        } },
       })
       return send(response, 201, { envelope, mandate: commerceMandate })
     }
@@ -123,6 +129,8 @@ async function issuerService() {
       const envelope = await buyerIssuer.signTransaction(buyerPassport.id, rwaMandate, {
         action: "rwa.mint", resource: rwaTerms.asset_id, purpose: rwaMandate.purpose,
         destination: urls.rwa, counterparty: sellerIssuer.organisationId, protocol: "http",
+        extensions: { rwa: { asset_id: rwaTerms.asset_id, state_claim_id: rwaTerms.state_claim_id, network: rwaTerms.network,
+          token_contract: rwaTerms.token_contract, operation: rwaTerms.operation, unit: rwaTerms.unit, quantity: "25" } },
       })
       return send(response, 201, { envelope, mandate: rwaMandate })
     }
@@ -202,10 +210,11 @@ async function commerceService() {
     if (mandate?.id !== bootstrap.commerce_mandate.id) throw Object.assign(new Error("unknown Commerce Mandate"), { status: 403 })
     await verifySigned(mandate, bootstrap.buyer.issuer_id, "oati:development:mandate", replay)
     await verifySigned(envelope, bootstrap.buyer.issuer_id, transactionAudience, replay)
+    const signedCommerce = envelope.extensions?.commerce ?? {}
     const commerce = {
-      merchant_organisation_id: commerceTerms.merchant_organisation_id, service_id: commerceTerms.service_id, offer_id: commerceTerms.offer_id,
-      currency: commerceTerms.currency, quantity: 1, unit_price: "0.05", total_amount: "0.05",
-      idempotency_key: envelope.id, terms_digest: commerceTerms.terms_digest,
+      merchant_organisation_id: envelope.counterparty, service_id: envelope.resource, offer_id: signedCommerce.offer_id,
+      currency: signedCommerce.currency, quantity: signedCommerce.quantity, unit_price: signedCommerce.quoted_unit_price,
+      total_amount: signedCommerce.quoted_total, idempotency_key: signedCommerce.idempotency_key, terms_digest: signedCommerce.terms_digest,
     }
     const evaluation = evaluateAuthority({ oati_version: "1.0", evaluation_time: new Date().toISOString(), mandate, envelope, usage, commerce })
     if (evaluation.decision === "allow") usage = evaluation.next_usage
@@ -227,7 +236,7 @@ async function rwaService() {
     if (mandate?.id !== bootstrap.rwa_mandate.id) throw Object.assign(new Error("unknown RWA Mandate"), { status: 403 })
     await verifySigned(mandate, bootstrap.buyer.issuer_id, "oati:development:mandate", replay)
     await verifySigned(envelope, bootstrap.buyer.issuer_id, transactionAudience, replay)
-    const rwa = { ...rwaTerms, quantity: "25", reserve: "1000", approval_count: 2, approval_roles: ["custodian", "auditor"],
+    const rwa = { ...rwaTerms, ...(envelope.extensions?.rwa ?? {}), reserve: "1000", approval_count: 2, approval_roles: ["custodian", "auditor"],
       current_supply: "100", maximum_supply: "1000", claim_valid_until: new Date(Date.now() + 60 * 60 * 1000).toISOString() }
     const evaluation = evaluateAuthority({ oati_version: "1.0", evaluation_time: new Date().toISOString(), mandate, envelope, usage, rwa })
     if (evaluation.decision === "allow") usage = evaluation.next_usage

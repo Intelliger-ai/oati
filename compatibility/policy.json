@@ -1,0 +1,25 @@
+{
+  "policy_version": 1,
+  "core_version": "1.0",
+  "api_major": 1,
+  "predecessor_support_days": 180,
+  "current_conformance_suite": "0.4.0",
+  "full_conformance_baselines": ["0.1.0", "0.2.0"],
+  "immutable_artifacts": {
+    "conformance/suite-v0.1.json": "35f6075c05d988e54888ee154de0c7e4d593cf7aaccfeea9d37a3677a89ec149",
+    "conformance/suite-v0.2.json": "0bed930074c7ad82138c6ccc936d12554ce3e2cdf0fce4778b1ce1360230f81b",
+    "conformance/suite-v0.3.json": "d7dbca4761014ea901ca6e850b4b933b6e49629e3cb279fc1e8183b36ccddeb3",
+    "compatibility/platform-lookup.openapi.yaml": "4b0b67745c5dcd69f1d901a099d876178300d15c765a75b16e542796ea559150"
+  },
+  "conformance_chain": [
+    "conformance/suite-v0.1.json",
+    "conformance/suite-v0.2.json",
+    "conformance/suite-v0.3.json",
+    "conformance/suite-v0.4.json"
+  ],
+  "packages": {
+    "typescript": "0.8.0-dev.0",
+    "python": "0.2.0-dev.0",
+    "cli": "0.3.0-dev"
+  }
+}

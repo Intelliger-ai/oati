@@ -4,7 +4,7 @@ This tutorial verifies a deterministic, signed Transaction Envelope and then dem
 
 ## Prerequisites
 
-- Go 1.24 or a built `oati` CLI
+- Go 1.25.12 or a built `oati` CLI
 - a writable temporary directory
 
 Build the CLI:

@@ -35,7 +35,9 @@ An organisation may host this document at `https://enterprise.example/.well-know
 }
 ```
 
-Use `discoverFederated("enterprise.example", "oati:org:merchant-b")`. The SDK requires HTTPS, checks that the domain claims the requested organisation, rejects expired metadata, and then applies the same proof/status checks to resolver results. A caller must still establish that the domain is authorised for the organisation (for example from an organisation record or an existing business relationship); a well-known file alone is not an identity proof.
+Use `discoverFederated("enterprise.example", "oati:org:merchant-b")` in TypeScript, `discover_federated(...)` in Python, or `DiscoverFederated(ctx, ...)` in Go. The SDK requires HTTPS, checks that the domain claims the requested organisation, rejects expired metadata, and then applies the same proof/status checks to resolver results. A caller must still establish that the domain is authorised for the organisation (for example from an organisation record or an existing business relationship); a well-known file alone is not an identity proof.
+
+All three SDKs return each service or profile as a `{ record, document }` pair. They reject malformed or mismatched embedded documents, expired records, non-active or unverified projections, and services that reference a Profile absent from the same discovery response.
 
 Resolvers implement `GET /discovery?organisation_id=oati:org:...`. Direct `GET /lookup?type=service&id=...` and `type=profile` remain available when an identifier is already known.
 

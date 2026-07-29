@@ -1143,6 +1143,7 @@ export const schemas = {
             },
             "codes": {
               "type": "array",
+              "uniqueItems": true,
               "items": {
                 "type": "string"
               }
@@ -1259,33 +1260,7 @@ export const schemas = {
         "format": "uri"
       },
       "proof": {
-        "$ref": "#/$defs/proof"
-      }
-    },
-    "$defs": {
-      "proof": {
-        "type": "object",
-        "required": [
-          "type",
-          "created",
-          "verification_method",
-          "signature"
-        ],
-        "properties": {
-          "type": {
-            "type": "string"
-          },
-          "created": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "verification_method": {
-            "type": "string"
-          },
-          "signature": {
-            "type": "string"
-          }
-        }
+        "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json"
       }
     }
   },
@@ -1315,7 +1290,8 @@ export const schemas = {
         "pattern": "^oati:mandate:[A-Za-z0-9._:-]+$"
       },
       "issuer": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       },
       "subject": {
         "type": "string",
@@ -1325,7 +1301,8 @@ export const schemas = {
         "type": "string"
       },
       "parent_mandate": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^oati:mandate:[A-Za-z0-9._:-]+$"
       },
       "purpose": {
         "type": "string",
@@ -1370,6 +1347,11 @@ export const schemas = {
       },
       "delegation": {
         "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "allowed",
+          "max_depth"
+        ],
         "properties": {
           "allowed": {
             "type": "boolean"
@@ -1406,7 +1388,7 @@ export const schemas = {
         "additionalProperties": true
       },
       "proof": {
-        "type": "object"
+        "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json"
       }
     }
   },
@@ -1436,19 +1418,24 @@ export const schemas = {
         "pattern": "^oati:tx:[A-Za-z0-9._:-]+$"
       },
       "agent_id": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^oati:agent:[A-Za-z0-9._:-]+$"
       },
       "organisation_id": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^oati:org:[A-Za-z0-9._:-]+$"
       },
       "mandate_id": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^oati:mandate:[A-Za-z0-9._:-]+$"
       },
       "action": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       },
       "resource": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       },
       "purpose": {
         "type": "string"
@@ -1490,7 +1477,7 @@ export const schemas = {
         "additionalProperties": true
       },
       "proof": {
-        "type": "object"
+        "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json"
       }
     }
   },
@@ -1560,7 +1547,7 @@ export const schemas = {
         "minLength": 1
       },
       "proof": {
-        "type": "object"
+        "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json"
       }
     }
   },
@@ -1592,16 +1579,20 @@ export const schemas = {
         "pattern": "^oati:receipt:[A-Za-z0-9._:-]+$"
       },
       "transaction_id": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^oati:tx:[A-Za-z0-9._:-]+$"
       },
       "agent_id": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^oati:agent:[A-Za-z0-9._:-]+$"
       },
       "organisation_id": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^oati:org:[A-Za-z0-9._:-]+$"
       },
       "mandate_id": {
-        "type": "string"
+        "type": "string",
+        "pattern": "^oati:mandate:[A-Za-z0-9._:-]+$"
       },
       "decision": {
         "enum": [
@@ -1637,7 +1628,8 @@ export const schemas = {
         "format": "date-time"
       },
       "issuer": {
-        "type": "string"
+        "type": "string",
+        "minLength": 1
       },
       "profile": {
         "type": "string",
@@ -1648,7 +1640,7 @@ export const schemas = {
         "additionalProperties": true
       },
       "proof": {
-        "type": "object"
+        "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json"
       }
     }
   },
@@ -1815,7 +1807,7 @@ export const schemas = {
         "type": "string"
       },
       "proof": {
-        "type": "object"
+        "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json"
       }
     }
   },
@@ -1957,10 +1949,12 @@ export const schemas = {
                     "minimum": 1
                   },
                   "unit_price": {
-                    "type": "string"
+                    "type": "string",
+                    "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
                   },
                   "total_amount": {
-                    "type": "string"
+                    "type": "string",
+                    "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
                   },
                   "billing_reference": {
                     "type": "string"
@@ -2115,7 +2109,7 @@ export const schemas = {
         "type": "string"
       },
       "proof": {
-        "type": "object"
+        "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json"
       }
     }
   },
@@ -2213,7 +2207,7 @@ export const schemas = {
         }
       },
       "proof": {
-        "type": "object"
+        "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json"
       }
     }
   },
@@ -2342,7 +2336,8 @@ export const schemas = {
                   "quantity",
                   "unit",
                   "chain_transaction_hash",
-                  "approval_count"
+                  "approval_count",
+                  "resulting_supply"
                 ],
                 "properties": {
                   "asset_id": {
@@ -2367,7 +2362,8 @@ export const schemas = {
                     "type": "string"
                   },
                   "quantity": {
-                    "type": "string"
+                    "type": "string",
+                    "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
                   },
                   "unit": {
                     "type": "string"
@@ -2380,7 +2376,8 @@ export const schemas = {
                     "minimum": 0
                   },
                   "resulting_supply": {
-                    "type": "string"
+                    "type": "string",
+                    "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$"
                   }
                 }
               }

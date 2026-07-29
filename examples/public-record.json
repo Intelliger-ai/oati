@@ -1,0 +1,14 @@
+{
+  "type": "agent",
+  "id": "oati:agent:example:buyer",
+  "display_name": "Example buyer agent",
+  "status": "active",
+  "issuer": "oati:issuer:example:enterprise",
+  "organisation_id": "oati:org:example",
+  "issued_at": "2026-07-27T00:00:00Z",
+  "expires_at": "2027-07-27T00:00:00Z",
+  "proof_status": "verified",
+  "public_attributes": {
+    "protocol": "https"
+  }
+}

@@ -8,10 +8,10 @@
   "properties": {
     "oati_version": { "const": "1.0" },
     "id": { "type": "string", "pattern": "^oati:receipt:[A-Za-z0-9._:-]+$" },
-    "transaction_id": { "type": "string" },
-    "agent_id": { "type": "string" },
-    "organisation_id": { "type": "string" },
-    "mandate_id": { "type": "string" },
+    "transaction_id": { "type": "string", "pattern": "^oati:tx:[A-Za-z0-9._:-]+$" },
+    "agent_id": { "type": "string", "pattern": "^oati:agent:[A-Za-z0-9._:-]+$" },
+    "organisation_id": { "type": "string", "pattern": "^oati:org:[A-Za-z0-9._:-]+$" },
+    "mandate_id": { "type": "string", "pattern": "^oati:mandate:[A-Za-z0-9._:-]+$" },
     "decision": { "enum": ["allow", "deny", "transform", "approval_required"] },
     "outcome": { "enum": ["succeeded", "failed", "denied", "pending", "unknown"] },
     "policy_digest": { "type": "string" },
@@ -19,9 +19,9 @@
     "response_digest": { "type": "string" },
     "commercial_profile": { "type": "string" },
     "occurred_at": { "type": "string", "format": "date-time" },
-    "issuer": { "type": "string" },
+    "issuer": { "type": "string", "minLength": 1 },
     "profile": { "type": "string", "format": "uri" },
     "extensions": { "type": "object", "additionalProperties": true },
-    "proof": { "type": "object" }
+    "proof": { "$ref": "https://schemas.intelliger.ai/oati/v1/proof.schema.json" }
   }
 }

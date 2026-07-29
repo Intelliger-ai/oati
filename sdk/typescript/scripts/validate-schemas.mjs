@@ -17,7 +17,16 @@ for (const schema of schemas) ajv.getSchema(schema.$id)
 
 const repositoryRoot = path.resolve(scriptDirectory, "../../..")
 const examples = [
+  ["examples/proof.json", "https://schemas.intelliger.ai/oati/v1/proof.schema.json"],
+  ["examples/issuer.json", "https://schemas.intelliger.ai/oati/v1/issuer.schema.json"],
+  ["examples/verification-key.json", "https://schemas.intelliger.ai/oati/v1/verification-key.schema.json"],
+  ["examples/revocation.json", "https://schemas.intelliger.ai/oati/v1/revocation.schema.json"],
   ["examples/passport.json", "https://schemas.intelliger.ai/oati/v1/passport.schema.json"],
+  ["examples/mandate.json", "https://schemas.intelliger.ai/oati/v1/mandate.schema.json"],
+  ["examples/receipt.json", "https://schemas.intelliger.ai/oati/v1/receipt.schema.json"],
+  ["examples/evaluation-request.json", "https://schemas.intelliger.ai/oati/v1/evaluation-request.schema.json"],
+  ["examples/evaluation-result.json", "https://schemas.intelliger.ai/oati/v1/evaluation-result.schema.json"],
+  ["examples/public-record.json", "https://schemas.intelliger.ai/oati/v1/public-record.schema.json"],
   ["examples/commerce/merchant-service-profile.json", "https://schemas.intelliger.ai/oati/profiles/commerce/v0.1/merchant-service-profile.schema.json"],
   ["examples/commerce/purchase-mandate.json", "https://schemas.intelliger.ai/oati/profiles/commerce/v0.1/purchase-mandate.schema.json"],
   ["examples/commerce/transaction-envelope.json", "https://schemas.intelliger.ai/oati/v1/transaction-envelope.schema.json"],

@@ -52,6 +52,14 @@ Use resolverUrls.
 
 ***
 
+### maxResponseBytes?
+
+> `optional` **maxResponseBytes?**: `number`
+
+Maximum resolver response body accepted before failing closed. Defaults to 2 MiB.
+
+***
+
 ### resolverUrls?
 
 > `optional` **resolverUrls?**: readonly `string`[]

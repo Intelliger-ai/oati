@@ -6,13 +6,18 @@ sys.path.insert(0,str(Path(__file__).parent/"src"))
 from oati import ReplayCache,canonical_json,evaluate_authority,project_public_record,validate_schema,verify_document
 
 def main():
-    parser=argparse.ArgumentParser();parser.add_argument("--suite",default="../../conformance/suite-v0.3.json");parser.add_argument("--output");parser.add_argument("--implementation-version",default="0.1.0-dev.0");args=parser.parse_args()
-    suite_path=(Path(__file__).parent/args.suite).resolve();base=suite_path.parent;suite=expand_suite(load(suite_path),suite_path,set());results=[]
+    parser=argparse.ArgumentParser();parser.add_argument("--suite",default="../../conformance/suite-v0.4.json");parser.add_argument("--output");parser.add_argument("--implementation-version",default="0.2.0-dev.0");args=parser.parse_args()
+    suite_path=(Path(__file__).parent/args.suite).resolve();base=suite_path.parent;manifest=load(suite_path);manifest_codes=validate_schema("conformanceSuite",manifest)
+    if manifest_codes:raise ValueError("invalid conformance suite: "+",".join(manifest_codes))
+    suite=expand_suite(manifest,suite_path,set());results=[]
     for case in suite["cases"]:
         try: outcome,codes=execute(case,base); expected=case["expected"];status="pass" if outcome==expected["outcome"] and sorted(set(codes))==sorted(expected["codes"]) else "fail"
         except Exception as error: outcome,codes,status="fail",["RUNNER_ERROR",str(error)],"fail"
         results.append({"id":case["id"],"category":case["category"],"status":status,"expected_outcome":case["expected"]["outcome"],"observed_outcome":outcome,"codes":sorted(set(codes))})
-    passed=sum(item["status"]=="pass" for item in results);report={"report_version":"1.0","suite_version":suite["suite_version"],"standard_version":suite["standard_version"],"implementation":{"name":"intelliger-oati","version":args.implementation_version,"language":"python"},"summary":{"total":len(results),"passed":passed,"failed":len(results)-passed},"results":results};rendered=json.dumps(report,indent=2)+"\n"
+    passed=sum(item["status"]=="pass" for item in results);report={"report_version":"1.0","suite_version":suite["suite_version"],"standard_version":suite["standard_version"],"implementation":{"name":"intelliger-oati","version":args.implementation_version,"language":"python"},"summary":{"total":len(results),"passed":passed,"failed":len(results)-passed},"results":results}
+    report_codes=validate_schema("conformanceReport",report)
+    if report_codes:raise ValueError("invalid conformance report: "+",".join(report_codes))
+    rendered=json.dumps(report,indent=2)+"\n"
     if args.output:Path(args.output).write_text(rendered)
     else:print(rendered,end="")
     raise SystemExit(1 if passed<len(results) else 0)
@@ -59,7 +64,9 @@ def expand_suite(suite,path,visited):
     if path in visited:raise ValueError(f"cyclic conformance suite inheritance at {path}")
     visited.add(path)
     if "extends" not in suite:return suite
-    parent_path=path.parent/suite["extends"];parent=expand_suite(load(parent_path),parent_path,visited)
+    parent_path=path.parent/suite["extends"];parent_manifest=load(parent_path);codes=validate_schema("conformanceSuite",parent_manifest)
+    if codes:raise ValueError("invalid inherited conformance suite: "+",".join(codes))
+    parent=expand_suite(parent_manifest,parent_path,visited)
     if parent["standard_version"]!=suite["standard_version"]:raise ValueError("inherited suite standard version mismatch")
     ids={case["id"] for case in parent["cases"]}
     if any(case["id"] in ids for case in suite["cases"]):raise ValueError("duplicate inherited conformance case")

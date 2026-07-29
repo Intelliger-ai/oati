@@ -73,7 +73,7 @@ cd oati
 
 No Intelliger account, infrastructure, or credentials are required. See the [sandbox guide](sandbox/README.md).
 
-For the standalone CLI, the requirement is Go 1.24+.
+For the standalone CLI, the requirement is Go 1.25.12+.
 
 ```bash
 git clone git@github.com:Intelliger-ai/oati.git

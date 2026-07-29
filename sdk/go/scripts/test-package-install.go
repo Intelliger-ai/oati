@@ -29,6 +29,7 @@ func main() {
 func main() {
 	sdkRoot, err := os.Getwd()
 	must(err)
+	requireApacheLicense(filepath.Join(sdkRoot, "LICENSE"))
 	root, err := os.MkdirTemp("", "oati-go-install-")
 	must(err)
 	defer os.RemoveAll(root)
@@ -37,13 +38,16 @@ func main() {
 	module := fmt.Sprintf("module example.com/oati-fresh-consumer\n\ngo 1.25.12\n\nrequire github.com/Intelliger-ai/oati/sdk/go v0.0.0\n\nreplace github.com/Intelliger-ai/oati/sdk/go => %s\n", filepath.ToSlash(sdkRoot))
 	must(os.WriteFile(filepath.Join(consumerRoot, "go.mod"), []byte(module), 0o644))
 	must(os.WriteFile(filepath.Join(consumerRoot, "main.go"), []byte(consumer), 0o644))
-	goEnvironment := append(os.Environ(), "GOCACHE="+filepath.Join(root, "go-cache"), "GOMODCACHE="+filepath.Join(root, "go-mod-cache"))
+	// Disable the repository workspace so both checks prove that each published
+	// module is independently consumable from its own go.mod.
+	goEnvironment := append(os.Environ(), "GOWORK=off", "GOCACHE="+filepath.Join(root, "go-cache"), "GOMODCACHE="+filepath.Join(root, "go-mod-cache"))
 	run(consumerRoot, goEnvironment, "go", "mod", "tidy")
 	run(consumerRoot, goEnvironment, "go", "run", ".")
 
 	binRoot := filepath.Join(root, "bin")
 	must(os.Mkdir(binRoot, 0o755))
 	cliRoot := filepath.Clean(filepath.Join(sdkRoot, "..", "..", "cli"))
+	requireApacheLicense(filepath.Join(cliRoot, "LICENSE"))
 	run(cliRoot, append(goEnvironment, "GOBIN="+binRoot), "go", "install", "./cmd/oati")
 	binary := filepath.Join(binRoot, "oati")
 	if runtime.GOOS == "windows" {
@@ -55,6 +59,14 @@ func main() {
 		panic("installed CLI did not report its version")
 	}
 	fmt.Print(string(output))
+}
+
+func requireApacheLicense(path string) {
+	contents, err := os.ReadFile(path)
+	must(err)
+	if !strings.Contains(string(contents), "Apache License") || !strings.Contains(string(contents), "Version 2.0, January 2004") {
+		panic(path + " does not contain Apache License 2.0")
+	}
 }
 
 func run(directory string, environment []string, command string, arguments ...string) {

@@ -1,0 +1,11 @@
+{
+  "one": 1.0,
+  "negative_zero": -0.0,
+  "small_fixed": 0.000001,
+  "small_scientific": 1e-7,
+  "large_fixed": 1e20,
+  "large_scientific": 1e21,
+  "rounded_binary64": 333333333.33333329,
+  "controls": "\b\t\n\f\r\u0000",
+  "unicode": "€ 😀"
+}

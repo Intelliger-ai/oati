@@ -98,7 +98,16 @@ func TestParityAllPublishedExamplesValidate(t *testing.T) {
 		schema string
 		path   string
 	}{
+		{"proof", "../../examples/proof.json"},
+		{"issuer", "../../examples/issuer.json"},
+		{"verificationKey", "../../examples/verification-key.json"},
+		{"revocation", "../../examples/revocation.json"},
 		{"passport", "../../examples/passport.json"},
+		{"mandate", "../../examples/mandate.json"},
+		{"receipt", "../../examples/receipt.json"},
+		{"evaluationRequest", "../../examples/evaluation-request.json"},
+		{"evaluationResult", "../../examples/evaluation-result.json"},
+		{"publicRecord", "../../examples/public-record.json"},
 		{"envelope", "../../examples/commerce/transaction-envelope.json"},
 		{"decision", "../../examples/decision.json"},
 		{"wellKnown", "../../examples/well-known-oati.json"},
@@ -201,22 +210,36 @@ func TestParityLookupFailoverRateLimitStateAndDiscovery(t *testing.T) {
 		t.Fatalf("failover=%#v calls=%v err=%v", result, calls, err)
 	}
 	invalidTransport := roundTripFunc(func(request *http.Request) (*http.Response, error) {
-		body := `{"type":"key","id":"oati:key:test","status":"active","issuer":"oati:issuer:test","proof_status":"invalid","public_attributes":{}}`
+		body := `{"type":"key","id":"oati:key:test","status":"active","issuer":"oati:issuer:test","issued_at":"2026-01-01T00:00:00Z","expires_at":"2027-01-01T00:00:00Z","proof_status":"invalid","public_attributes":{"controller":"oati:issuer:test","algorithm":"EdDSA","public_key_jwk":"{}"}}`
 		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{}, Request: request}, nil
 	})
 	invalid := NewResolverClient("https://resolver.test/oati/v1")
 	invalid.HTTPClient = &http.Client{Transport: invalidTransport}
-	if state := invalid.LookupState(t.Context(), "key", "oati:key:test"); state.State != "invalid-proof" {
+	if state := invalid.LookupState(t.Context(), "key", "oati:key:test"); state.State != "invalid_proof" {
 		t.Fatalf("state=%#v", state)
 	}
 	discoveryTransport := roundTripFunc(func(request *http.Request) (*http.Response, error) {
-		body := `{"organisation_id":"oati:org:test","services":[{"type":"service","id":"oati:service:test:api","status":"active","issuer":"oati:issuer:test","organisation_id":"oati:org:test","proof_status":"verified","public_attributes":{"document":"{}"}}],"profiles":[]}`
-		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{}, Request: request}, nil
+		body, _ := os.ReadFile("../../conformance/discovery/organisation-valid.json")
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(string(body))), Header: http.Header{}, Request: request}, nil
 	})
 	discoveryClient := NewResolverClient("https://resolver.test/oati/v1")
 	discoveryClient.HTTPClient = &http.Client{Transport: discoveryTransport}
-	discovery, err := discoveryClient.DiscoverOrganisation(t.Context(), "oati:org:test")
-	if err != nil || len(discovery.Services) != 1 {
+	discovery, err := discoveryClient.DiscoverOrganisation(t.Context(), "oati:org:merchant-b")
+	if err != nil || len(discovery.Services) != 1 || discovery.Services[0].Document["id"] != "oati:service:merchant-b:checkout" {
 		t.Fatalf("discovery=%#v err=%v", discovery, err)
+	}
+	federatedTransport := roundTripFunc(func(request *http.Request) (*http.Response, error) {
+		if request.URL.Path == "/.well-known/oati" {
+			body := `{"oati_version":"1.0","organisations":["oati:org:merchant-b"],"resolvers":["https://resolver.test/oati/v1"]}`
+			return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(body)), Header: http.Header{}, Request: request}, nil
+		}
+		body, _ := os.ReadFile("../../conformance/discovery/organisation-valid.json")
+		return &http.Response{StatusCode: 200, Body: io.NopCloser(strings.NewReader(string(body))), Header: http.Header{}, Request: request}, nil
+	})
+	federatedClient := NewResolverClient()
+	federatedClient.HTTPClient = &http.Client{Transport: federatedTransport}
+	federated, err := federatedClient.DiscoverFederated(t.Context(), "merchant.example", "oati:org:merchant-b")
+	if err != nil || len(federated.Profiles) != 1 || federated.Profiles[0].Document["id"] != "oati:profile:merchant-b:commerce-1" {
+		t.Fatalf("federated=%#v err=%v", federated, err)
 	}
 }

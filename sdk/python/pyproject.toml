@@ -5,13 +5,34 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "intelliger-oati"
 version = "0.2.0.dev0"
-description = "Dependency-free Python SDK for the Open Agent Trust Infrastructure"
+description = "Python SDK for the Open Agent Trust Infrastructure"
+readme = "README.md"
 requires-python = ">=3.11"
 license = "Apache-2.0"
 license-files = ["LICENSE"]
+authors = [{ name = "Intelliger" }]
+keywords = ["agents", "authorization", "identity", "oati", "trust"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Typing :: Typed",
+]
+dependencies = ["cryptography>=44"]
+
+[project.urls]
+Homepage = "https://intelliger.ai/oati"
+Documentation = "https://github.com/Intelliger-ai/oati/tree/main/sdk/python#readme"
+Repository = "https://github.com/Intelliger-ai/oati"
+Issues = "https://github.com/Intelliger-ai/oati/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.package-data]
-oati = ["_schema_bundle.json"]
+oati = ["_schema_bundle.json", "py.typed"]

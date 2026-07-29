@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"crypto/ecdsa"
 	"crypto/ed25519"
 	"crypto/elliptic"
@@ -208,7 +209,12 @@ func runVerify(args []string, stdout, stderr io.Writer) error {
 
 func verifyObject(value map[string]any, bundle trustBundle, audience string, now time.Time, maxAge, skew time.Duration) verificationReport {
 	report := verificationReport{Issues: []verificationIssue{}}
-	p, err := parseProof(value["proof"])
+	rawProof, present := value["proof"]
+	if !present || rawProof == nil {
+		addIssue(&report, "PROOF_MISSING", "OATI proof is required")
+		return report
+	}
+	p, err := parseProof(rawProof)
 	if err != nil {
 		addIssue(&report, "PROOF_MALFORMED", err.Error())
 		return report
@@ -244,6 +250,12 @@ func verifyObject(value map[string]any, bundle trustBundle, audience string, now
 	if key.ID != p.VerificationMethod || key.Algorithm != p.Algorithm || key.ProofStatus != "" && key.ProofStatus != "verified" {
 		addIssue(&report, "KEY_INVALID", "resolved key metadata does not match proof")
 	}
+	if key.Algorithm == "EdDSA" {
+		public, decodeErr := base64.RawURLEncoding.DecodeString(key.PublicKeyJWK.X)
+		if decodeErr != nil || !validEd25519PublicKey(public) {
+			addIssue(&report, "KEY_INVALID", "Ed25519 public key is invalid or has small order")
+		}
+	}
 	if key.Status != "active" && key.Status != "retired" && key.Status != "revoked" {
 		addIssue(&report, "KEY_INVALID", "verification key has an unsupported status")
 	}
@@ -260,8 +272,10 @@ func verifyObject(value map[string]any, bundle trustBundle, audience string, now
 	if claimed != "" && claimed != key.Controller && claimed != key.Issuer {
 		addIssue(&report, "KEY_INVALID", "key is not bound to the document signer")
 	}
-	if err := verifySignature(value, p, key.PublicKeyJWK); err != nil {
-		addIssue(&report, "SIGNATURE_INVALID", err.Error())
+	if !hasIssue(report, "KEY_INVALID") {
+		if err := verifySignature(value, p, key.PublicKeyJWK); err != nil {
+			addIssue(&report, "SIGNATURE_INVALID", err.Error())
+		}
 	}
 	report.Verified = len(report.Issues) == 0
 	return report
@@ -337,7 +351,7 @@ func verifyBytes(algorithm string, key jwk, message, signature []byte) error {
 		if err != nil {
 			return fmt.Errorf("public Ed25519 JWK: %w", err)
 		}
-		if !ed25519.Verify(public, message, signature) {
+		if !validEd25519PublicKey(public) || !validEd25519PublicKey(signature[:min(32, len(signature))]) || !ed25519.Verify(public, message, signature) {
 			return errors.New("detached JWS signature is invalid")
 		}
 	case "ES256":
@@ -360,6 +374,74 @@ func verifyBytes(algorithm string, key jwk, message, signature []byte) error {
 	}
 	return nil
 }
+
+type edwardsPoint struct{ x, y *big.Int }
+
+func validEd25519PublicKey(encoded []byte) bool {
+	if len(encoded) != 32 {
+		return false
+	}
+	copyBytes := append([]byte(nil), encoded...)
+	sign := copyBytes[31] >> 7
+	copyBytes[31] &= 0x7f
+	p := new(big.Int).Sub(new(big.Int).Lsh(big.NewInt(1), 255), big.NewInt(19))
+	y := littleEndianInteger(copyBytes)
+	if y.Cmp(p) >= 0 {
+		return false
+	}
+	d := modInt(new(big.Int).Mul(big.NewInt(-121665), new(big.Int).ModInverse(big.NewInt(121666), p)), p)
+	y2 := modInt(new(big.Int).Mul(y, y), p)
+	numerator := modInt(new(big.Int).Sub(y2, big.NewInt(1)), p)
+	denominator := modInt(new(big.Int).Add(new(big.Int).Mul(d, y2), big.NewInt(1)), p)
+	inverse := new(big.Int).ModInverse(denominator, p)
+	if inverse == nil {
+		return false
+	}
+	x2 := modInt(new(big.Int).Mul(numerator, inverse), p)
+	exponent := new(big.Int).Rsh(new(big.Int).Add(p, big.NewInt(3)), 3)
+	x := new(big.Int).Exp(x2, exponent, p)
+	if modInt(new(big.Int).Sub(new(big.Int).Mul(x, x), x2), p).Sign() != 0 {
+		i := new(big.Int).Exp(big.NewInt(2), new(big.Int).Rsh(new(big.Int).Sub(p, big.NewInt(1)), 2), p)
+		x = modInt(new(big.Int).Mul(x, i), p)
+	}
+	if modInt(new(big.Int).Sub(new(big.Int).Mul(x, x), x2), p).Sign() != 0 {
+		return false
+	}
+	if byte(x.Bit(0)) != sign {
+		x.Sub(p, x)
+	}
+	if x.Sign() == 0 && sign == 1 {
+		return false
+	}
+	point := edwardsPoint{new(big.Int).Set(x), new(big.Int).Set(y)}
+	for index := 0; index < 3; index++ {
+		var ok bool
+		point, ok = addEdwards(point, point, d, p)
+		if !ok {
+			return false
+		}
+	}
+	return point.x.Sign() != 0 || point.y.Cmp(big.NewInt(1)) != 0
+}
+func addEdwards(a, b edwardsPoint, d, p *big.Int) (edwardsPoint, bool) {
+	factor := modInt(new(big.Int).Mul(d, new(big.Int).Mul(new(big.Int).Mul(a.x, b.x), new(big.Int).Mul(a.y, b.y))), p)
+	denX := new(big.Int).ModInverse(modInt(new(big.Int).Add(big.NewInt(1), factor), p), p)
+	denY := new(big.Int).ModInverse(modInt(new(big.Int).Sub(big.NewInt(1), factor), p), p)
+	if denX == nil || denY == nil {
+		return edwardsPoint{}, false
+	}
+	x := modInt(new(big.Int).Mul(new(big.Int).Add(new(big.Int).Mul(a.x, b.y), new(big.Int).Mul(a.y, b.x)), denX), p)
+	y := modInt(new(big.Int).Mul(new(big.Int).Add(new(big.Int).Mul(a.y, b.y), new(big.Int).Mul(a.x, b.x)), denY), p)
+	return edwardsPoint{x, y}, true
+}
+func littleEndianInteger(value []byte) *big.Int {
+	reversed := append([]byte(nil), value...)
+	for left, right := 0, len(reversed)-1; left < right; left, right = left+1, right-1 {
+		reversed[left], reversed[right] = reversed[right], reversed[left]
+	}
+	return new(big.Int).SetBytes(reversed)
+}
+func modInt(value, modulus *big.Int) *big.Int { return new(big.Int).Mod(value, modulus) }
 
 func p256Private(key jwk) (*ecdsa.PrivateKey, error) {
 	d, err := decodeExact(key.D, 32)
@@ -434,10 +516,25 @@ func parseProof(value any) (proof, error) {
 	}
 	encoded, _ := json.Marshal(raw)
 	var p proof
-	if json.Unmarshal(encoded, &p) != nil || p.Type != proofType || p.Cryptosuite != cryptosuite(p.Algorithm) || p.Created == "" || p.Expires == "" || p.VerificationMethod == "" || p.ProofPurpose != "assertionMethod" || len(p.Nonce) < 16 || p.Signature == "" {
+	if json.Unmarshal(encoded, &p) != nil || p.Type != proofType || p.Cryptosuite != cryptosuite(p.Algorithm) || p.Created == "" || p.Expires == "" || p.VerificationMethod == "" || p.ProofPurpose != "assertionMethod" || len(p.Nonce) < 16 || p.Signature == "" || !validAudience(p.Audience) {
 		return proof{}, errors.New("proof does not conform to the OATI JWS profile")
 	}
 	return p, nil
+}
+func validAudience(value any) bool {
+	if single, ok := value.(string); ok {
+		return single != ""
+	}
+	items, ok := value.([]any)
+	if !ok || len(items) == 0 {
+		return false
+	}
+	for _, item := range items {
+		if text, ok := item.(string); !ok || text == "" {
+			return false
+		}
+	}
+	return true
 }
 func audienceContains(value any, expected string) bool {
 	if single, ok := value.(string); ok {
@@ -465,7 +562,18 @@ func readJSONFile(path string, target any) error {
 		return err
 	}
 	defer file.Close()
-	return json.NewDecoder(io.LimitReader(file, 8<<20)).Decode(target)
+	encoded, err := readLimited(file, 8<<20)
+	if err != nil {
+		return err
+	}
+	decoder := json.NewDecoder(bytes.NewReader(encoded))
+	if err := decoder.Decode(target); err != nil {
+		return err
+	}
+	if decoder.Decode(&struct{}{}) != io.EOF {
+		return errors.New("input contains more than one JSON value")
+	}
+	return nil
 }
 func decodeExact(value string, size int) ([]byte, error) {
 	decoded, err := base64.RawURLEncoding.DecodeString(value)
@@ -496,6 +604,14 @@ func addIssue(report *verificationReport, code, message string) {
 		}
 	}
 	report.Issues = append(report.Issues, verificationIssue{Code: code, Message: message})
+}
+func hasIssue(report verificationReport, code string) bool {
+	for _, existing := range report.Issues {
+		if existing.Code == code {
+			return true
+		}
+	}
+	return false
 }
 func parseOptionalTime(value string) (time.Time, bool) {
 	if value == "" {
@@ -528,20 +644,29 @@ func checkKeyLifecycle(key verificationKey, created, now time.Time, skew time.Du
 	if err != nil || created.Before(from.Add(-skew)) {
 		addIssue(report, "KEY_INVALID", "key was not valid when proof was created")
 	}
-	if until, ok := parseOptionalTime(key.ValidUntil); ok && !created.Before(until.Add(skew)) {
-		addIssue(report, "KEY_INVALID", "key was not valid when proof was created")
+	if key.ValidUntil != "" {
+		until, ok := parseOptionalTime(key.ValidUntil)
+		if !ok || !created.Before(until.Add(skew)) {
+			addIssue(report, "KEY_INVALID", "key was not valid when proof was created")
+		}
 	}
 	if key.Status == "revoked" {
 		addIssue(report, "KEY_REVOKED", "verification key is revoked")
 	}
-	if revoked, ok := parseOptionalTime(key.RevokedAt); ok && !revoked.After(now) {
-		addIssue(report, "KEY_REVOKED", "verification key is revoked")
+	if key.RevokedAt != "" {
+		revoked, ok := parseOptionalTime(key.RevokedAt)
+		if !ok {
+			addIssue(report, "KEY_INVALID", "verification key has an invalid revocation timestamp")
+		} else if !revoked.After(now) {
+			addIssue(report, "KEY_REVOKED", "verification key is revoked")
+		}
 	}
 }
 func validateIssuerChain(start string, bundle trustBundle, now time.Time, skew time.Duration, report *verificationReport) string {
 	current := start
 	visited := map[string]bool{}
 	for depth := 0; depth <= 8; depth++ {
+		checkRevocationTarget(current, "ISSUER_REVOKED", bundle.Revocations, now, report)
 		if slices.Contains(bundle.TrustAnchors, current) {
 			return current
 		}
@@ -563,13 +688,26 @@ func validateIssuerChain(start string, bundle trustBundle, now time.Time, skew t
 			addIssue(report, "ISSUER_REVOKED", "issuer is not active")
 			return ""
 		}
-		if from, ok := parseOptionalTime(found.ValidFrom); ok && from.After(now.Add(skew)) {
-			addIssue(report, "ISSUER_REVOKED", "issuer is outside validity period")
-			return ""
+		if found.RevokedAt != "" {
+			revoked, ok := parseOptionalTime(found.RevokedAt)
+			if !ok || !revoked.After(now) {
+				addIssue(report, "ISSUER_REVOKED", "issuer has invalid or effective revocation metadata")
+				return ""
+			}
 		}
-		if until, ok := parseOptionalTime(found.ValidUntil); ok && !until.After(now.Add(-skew)) {
-			addIssue(report, "ISSUER_REVOKED", "issuer is outside validity period")
-			return ""
+		if found.ValidFrom != "" {
+			from, ok := parseOptionalTime(found.ValidFrom)
+			if !ok || from.After(now.Add(skew)) {
+				addIssue(report, "ISSUER_REVOKED", "issuer is outside validity period")
+				return ""
+			}
+		}
+		if found.ValidUntil != "" {
+			until, ok := parseOptionalTime(found.ValidUntil)
+			if !ok || !until.After(now.Add(-skew)) {
+				addIssue(report, "ISSUER_REVOKED", "issuer is outside validity period")
+				return ""
+			}
 		}
 		if found.Parent == "" {
 			break
@@ -582,16 +720,41 @@ func validateIssuerChain(start string, bundle trustBundle, now time.Time, skew t
 func checkRevocations(value map[string]any, key verificationKey, statuses []revocationStatus, now time.Time, report *verificationReport) {
 	targets := []struct{ value, code string }{{key.ID, "KEY_REVOKED"}, {key.Issuer, "ISSUER_REVOKED"}, {stringValue(value, "id"), "DOCUMENT_REVOKED"}}
 	for _, target := range targets {
-		for _, status := range statuses {
-			if status.Target != target.value || status.Status == "good" {
-				continue
-			}
-			effective, ok := parseOptionalTime(status.EffectiveAt)
-			if !ok || !effective.After(now) {
-				addIssue(report, target.code, target.value+" is "+status.Status)
-			}
+		checkRevocationTarget(target.value, target.code, statuses, now, report)
+	}
+}
+func checkRevocationTarget(target, code string, statuses []revocationStatus, now time.Time, report *verificationReport) {
+	if target == "" {
+		return
+	}
+	matches := []revocationStatus{}
+	for _, status := range statuses {
+		if status.Target == target {
+			matches = append(matches, status)
 		}
 	}
+	if len(matches) > 1 {
+		addIssue(report, "REVOCATION_UNAVAILABLE", "revocation status is ambiguous for "+target)
+		return
+	}
+	if len(matches) == 0 || matches[0].Status == "good" {
+		return
+	}
+	if matches[0].Status != "revoked" && matches[0].Status != "suspended" {
+		addIssue(report, "REVOCATION_UNAVAILABLE", "revocation status is invalid for "+target)
+		return
+	}
+	if matches[0].EffectiveAt != "" {
+		effective, ok := parseOptionalTime(matches[0].EffectiveAt)
+		if !ok {
+			addIssue(report, "REVOCATION_UNAVAILABLE", "revocation effective time is invalid for "+target)
+			return
+		}
+		if effective.After(now) {
+			return
+		}
+	}
+	addIssue(report, code, target+" is "+matches[0].Status)
 }
 
 func consumeReplay(path, key, expires string, now time.Time) (bool, error) {
