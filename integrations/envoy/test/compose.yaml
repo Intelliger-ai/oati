@@ -49,6 +49,13 @@ services:
     depends_on: { lookup: { condition: service_healthy } }
     healthcheck: { <<: *health, test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/health"] }
 
+  evidence:
+    <<: *support
+    command: ["evidence"]
+    environment: { PORT: "8083" }
+    depends_on: { lookup: { condition: service_healthy } }
+    healthcheck: { <<: *health, test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8083/readyz"] }
+
   oati-authz:
     image: oati-envoy-authorizer:integration
     build:
@@ -60,7 +67,7 @@ services:
       OATI_GATEWAY_EXPECTED_AUDIENCE: "http://envoy:8080"
       OATI_GATEWAY_RECEIPT_ISSUER: "oati:issuer:integration:gateway"
       OATI_GATEWAY_RECEIPT_VERIFICATION_METHOD: "oati:key:integration:gateway-1"
-      OATI_GATEWAY_TRUST_ANCHORS: "oati:issuer:integration:buyer"
+      OATI_GATEWAY_TRUST_ANCHORS: "oati:issuer:integration:root"
       OATI_LOOKUP_RESOLVER_URLS: "http://lookup:8080/oati/v1"
       OATI_GATEWAY_LOOKUP_CACHE_MS: "0"
       VALKEY_URL: "redis://valkey:6379/0"
@@ -72,15 +79,19 @@ services:
       OATI_GATEWAY_TLS_CERT_FILE: "/etc/oati/gateway-tls/authorizer.crt"
       OATI_GATEWAY_TLS_KEY_FILE: "/etc/oati/gateway-tls/authorizer.key"
       OATI_GATEWAY_TLS_CLIENT_CA_FILE: "/etc/oati/gateway-tls/ca.crt"
+      OATI_GATEWAY_EVIDENCE_URL: "http://evidence:8083"
+      OATI_GATEWAY_EVIDENCE_TOKEN_FILE: "/run/secrets/evidence-token"
     volumes:
       - gateway-tls:/etc/oati/gateway-tls:ro
       - ./transit-token.txt:/run/secrets/transit-token:ro
+      - ./evidence-token.txt:/run/secrets/evidence-token:ro
     networks: [integration]
     depends_on:
       certgen: { condition: service_completed_successfully }
       valkey: { condition: service_healthy }
       lookup: { condition: service_healthy }
       transit-fixture: { condition: service_healthy }
+      evidence: { condition: service_healthy }
     healthcheck:
       <<: *health
       test:
@@ -113,6 +124,7 @@ services:
     environment:
       GATEWAY_ORIGIN: "http://envoy:8080"
       LOOKUP_URL: "http://lookup:8080/oati/v1"
+      EVIDENCE_URL: "http://evidence:8083"
     depends_on: { envoy: { condition: service_started } }
 
 volumes:

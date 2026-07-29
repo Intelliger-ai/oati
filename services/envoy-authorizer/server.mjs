@@ -7,10 +7,13 @@ import tls from "node:tls"
 import { pathToFileURL } from "node:url"
 import {
   LookupTrustResolver,
+  MemoryReplayCache,
   OatiLookupClient,
   canonicalJson,
   createOatiMiddleware,
+  extractOatiHeaders,
   signDocumentWithSigner,
+  verifyDocument,
 } from "../../sdk/typescript/dist/index.js"
 
 const ALLOWED_RESPONSE_HEADERS = new Set([
@@ -19,7 +22,7 @@ const ALLOWED_RESPONSE_HEADERS = new Set([
 ])
 
 export function createApplication(config = configuration()) {
-  config = { ...config, invalidationToken: configuredInvalidationToken(config) }
+  config = { ...config, invalidationToken: configuredInvalidationToken(config), evidenceToken: configuredEvidenceToken(config) }
   const valkey = config.valkey ?? new ValkeyClient(config.valkeyUrl, config.valkeyPasswordFile, config.valkeyTlsCAFile, config.valkeyTlsServerName)
   const replayCache = config.replayCache ?? new ValkeyReplayCache(valkey, config.replayPrefix)
   const usageStore = config.usageStore ?? new ValkeyUsageStore(valkey, config.usagePrefix)
@@ -31,11 +34,12 @@ export function createApplication(config = configuration()) {
   const signer = config.signer ?? new TransitSigner(config)
   const middleware = createOatiMiddleware({
     receiptIssuer: config.receiptIssuer,
-    verificationPolicy: () => ({
-      resolver, trustAnchors: config.trustAnchors, expectedAudience: config.expectedAudience, replayCache,
-      clockSkewMs: config.clockSkewMs, maxProofAgeMs: config.maxProofAgeMs, maxTrustDepth: config.maxTrustDepth,
-    }),
+    verificationPolicy: (kind, request) => gatewayVerificationPolicy(kind, request, { config, lookup, resolver, replayCache }),
     usageStore,
+    evaluationExtensions: (_request, extracted) => ({
+      ...(extracted.envelope.extensions?.commerce ? { commerce: commerceEvaluationContext(extracted.envelope.extensions.commerce) } : {}),
+      ...(extracted.envelope.extensions?.rwa ? { rwa: extracted.envelope.extensions.rwa } : {}),
+    }),
     maxHeaderBytes: config.maxHeaderBytes,
     maxBodyBytes: config.maxBodyBytes,
     requireRequestDigest: true,
@@ -45,7 +49,10 @@ export function createApplication(config = configuration()) {
       nonce: crypto.randomBytes(18).toString("base64url"), created: new Date(), expires: new Date(Date.now() + config.receiptProofLifetimeMs),
       sign: (input) => signer.signAndVerify(input),
     }),
-    emitReceipt: async (receipt) => valkey.command("XADD", config.receiptStream, "*", "receipt", canonicalJson(receipt)),
+    emitReceipt: async (receipt) => {
+      await valkey.command("XADD", config.receiptStream, "*", "receipt", canonicalJson(receipt))
+      if (config.evidenceUrl) await persistEvidence(config, receipt)
+    },
   })
 
   return async function application(request, response) {
@@ -55,6 +62,7 @@ export function createApplication(config = configuration()) {
         await valkey.command("PING")
         await signer.ready()
         await lookupReady(config)
+        if (config.evidenceUrl) await evidenceReady(config)
         return json(response, 200, { status: "ready" })
       } catch {
         return json(response, 503, { status: "not_ready" })
@@ -99,6 +107,74 @@ export function createApplication(config = configuration()) {
   }
 }
 
+function commerceEvaluationContext(value) {
+  return {
+    merchant_organisation_id: value.merchant_organisation_id, service_id: value.service_id, offer_id: value.offer_id,
+    currency: value.currency, quantity: value.quantity, unit_price: value.quoted_unit_price,
+    total_amount: value.quoted_total, idempotency_key: value.idempotency_key, terms_digest: value.terms_digest,
+  }
+}
+
+async function gatewayVerificationPolicy(kind, request, dependencies) {
+  const { config, lookup, resolver, replayCache } = dependencies
+  const extracted = extractOatiHeaders(request, config.maxHeaderBytes)
+  const base = {
+    resolver, trustAnchors: config.trustAnchors, replayCache,
+    clockSkewMs: config.clockSkewMs, maxProofAgeMs: config.maxProofAgeMs, maxTrustDepth: config.maxTrustDepth,
+  }
+  if (kind === "mandate" || kind === "parent_mandate") {
+    const document = kind === "mandate" ? extracted.mandate : extracted.parentMandate
+    if (!document) return { ...base, expectedAudience: config.mandateAudience }
+    const record = await boundPublicDocument(lookup, "mandate", document.id, document)
+    return { ...base, expectedAudience: config.mandateAudience, resolver: lifecycleResolver(resolver, document.id, record) }
+  }
+
+  const passportRecord = await boundPublicDocument(lookup, "passport", extracted.envelope.agent_id)
+  const passport = JSON.parse(passportRecord.public_attributes.signed_document)
+  const passportPolicy = {
+    ...base, expectedAudience: config.passportAudience, replayCache: new MemoryReplayCache(),
+    maxProofAgeMs: Number.MAX_SAFE_INTEGER, resolver: lifecycleResolver(resolver, passport.id, passportRecord),
+  }
+  const verifiedPassport = await verifyDocument(passport, passportPolicy)
+  const method = passport.verification_methods?.find((candidate) => candidate.id === extracted.envelope.proof?.verification_method)
+  const runtimeRecord = method ? await lookup.lookup("key", method.id) : undefined
+  const runtimeMatches = runtimeRecord?.status === "active" && runtimeRecord.proof_status === "verified"
+    && runtimeRecord.issuer === passport.issuer && runtimeRecord.public_attributes.controller === passport.id
+    && canonicalJson(JSON.parse(runtimeRecord.public_attributes.public_key_jwk)) === canonicalJson(method.public_key_jwk)
+  return {
+    ...base, expectedAudience: config.expectedAudience,
+    resolver: verifiedPassport.verified && method?.controller === passport.id && runtimeMatches
+      ? resolver
+      : unavailableRuntimeResolver(resolver, extracted.envelope.proof?.verification_method),
+  }
+}
+
+async function boundPublicDocument(lookup, kind, id, presented) {
+  const record = await lookup.lookup(kind, id)
+  if (record.proof_status !== "verified" || typeof record.public_attributes.signed_document !== "string") throw new Error(`${kind} public projection is not verified`)
+  const signed = JSON.parse(record.public_attributes.signed_document)
+  if (presented && canonicalJson(signed) !== canonicalJson(presented)) throw new Error(`${kind} does not match its public projection`)
+  return record
+}
+
+function lifecycleResolver(upstream, documentID, record) {
+  return {
+    resolveKey: (id) => upstream.resolveKey(id),
+    resolveIssuer: (id) => upstream.resolveIssuer(id),
+    resolveRevocation: async (target) => target === documentID && record.status !== "active"
+      ? { target, status: record.status === "suspended" ? "suspended" : "revoked", effectiveAt: record.issued_at }
+      : upstream.resolveRevocation(target),
+  }
+}
+
+function unavailableRuntimeResolver(upstream, runtimeKeyID) {
+  return {
+    resolveKey: (id) => id === runtimeKeyID ? null : upstream.resolveKey(id),
+    resolveIssuer: (id) => upstream.resolveIssuer(id),
+    resolveRevocation: (target) => upstream.resolveRevocation(target),
+  }
+}
+
 export function configuration(environment = process.env) {
   const required = (name) => { const value = environment[name]?.trim(); if (!value) throw new Error(`${name} is required`); return value }
   const integer = (name, fallback, minimum, maximum) => {
@@ -110,6 +186,8 @@ export function configuration(environment = process.env) {
   const config = {
     port: integer("PORT", 9001, 1, 65535), externalOrigin: normalizedOrigin(required("OATI_GATEWAY_EXTERNAL_ORIGIN"), production),
     expectedAudience: required("OATI_GATEWAY_EXPECTED_AUDIENCE"), receiptIssuer: required("OATI_GATEWAY_RECEIPT_ISSUER"),
+    mandateAudience: environment.OATI_GATEWAY_MANDATE_AUDIENCE ?? "oati:production:mandate",
+    passportAudience: environment.OATI_GATEWAY_PASSPORT_AUDIENCE ?? "oati:production:passport",
     receiptVerificationMethod: required("OATI_GATEWAY_RECEIPT_VERIFICATION_METHOD"),
     trustAnchors: required("OATI_GATEWAY_TRUST_ANCHORS").split(",").map((value) => value.trim()).filter(Boolean),
     resolverUrls: required("OATI_LOOKUP_RESOLVER_URLS").split(",").map((value) => value.trim()).filter(Boolean),
@@ -125,6 +203,9 @@ export function configuration(environment = process.env) {
     transitKeyName: required("OATI_GATEWAY_TRANSIT_KEY_NAME"), transitKeyVersion: integer("OATI_GATEWAY_TRANSIT_KEY_VERSION", undefined, 1, 2_147_483_647),
     transitTokenFile: required("OATI_TRANSIT_TOKEN_FILE"),
     invalidationTokenFile: environment.OATI_GATEWAY_INVALIDATION_TOKEN_FILE,
+    evidenceUrl: optionalServiceUrl(environment.OATI_GATEWAY_EVIDENCE_URL, production, "OATI_GATEWAY_EVIDENCE_URL"),
+    evidenceTokenFile: environment.OATI_GATEWAY_EVIDENCE_TOKEN_FILE,
+    evidenceTimeoutMs: integer("OATI_GATEWAY_EVIDENCE_TIMEOUT_MS", 1500, 100, 10_000),
     transitTimeoutMs: integer("OATI_GATEWAY_TRANSIT_TIMEOUT_MS", 1500, 100, 10_000),
     tlsCertFile: environment.OATI_GATEWAY_TLS_CERT_FILE, tlsKeyFile: environment.OATI_GATEWAY_TLS_KEY_FILE, tlsClientCAFile: environment.OATI_GATEWAY_TLS_CLIENT_CA_FILE,
     production,
@@ -132,12 +213,35 @@ export function configuration(environment = process.env) {
   if (config.trustAnchors.length === 0 || config.resolverUrls.length === 0) throw new Error("at least one trust anchor and resolver URL are required")
   if (production && (!config.tlsCertFile || !config.tlsKeyFile || !config.tlsClientCAFile)) throw new Error("production authorizer requires mTLS certificate, key, and client CA")
   if (production && !config.invalidationTokenFile) throw new Error("production authorizer requires an invalidation bearer token file")
+  if (production && (!config.evidenceUrl || !config.evidenceTokenFile)) throw new Error("production authorizer requires the evidence service URL and bearer token file")
   if (production && config.resolverUrls.some((value) => new URL(value).protocol !== "https:")) throw new Error("production lookup resolvers must use HTTPS")
   if (production && new URL(config.transitAddr).protocol !== "https:") throw new Error("production Transit endpoint must use HTTPS")
   const valkey = new URL(config.valkeyUrl)
   if (production && valkey.protocol !== "rediss:") throw new Error("production authorizer requires TLS-protected Valkey (rediss)")
   if (production && (!valkey.username || (!valkey.password && !config.valkeyPasswordFile))) throw new Error("production authorizer requires a Valkey ACL username and password file")
   return config
+}
+
+function optionalServiceUrl(value, production, name) {
+  if (!value?.trim()) return undefined
+  const url = new URL(value.trim())
+  if (url.username || url.password || url.search || url.hash || url.pathname !== "/") throw new Error(`${name} must be an origin without path, credentials, query, or fragment`)
+  if (production && !["https:", "http:"].includes(url.protocol)) throw new Error(`${name} must use HTTP or HTTPS`)
+  return url.toString().replace(/\/$/, "")
+}
+
+async function persistEvidence(config, receipt) {
+  const response = await fetch(`${config.evidenceUrl}/evidence/v1/receipts`, {
+    method: "POST", signal: AbortSignal.timeout(config.evidenceTimeoutMs),
+    headers: { "Authorization": `Bearer ${config.evidenceToken}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ receipt }),
+  })
+  if (response.status !== 201) throw new Error(`evidence service returned ${response.status}`)
+}
+
+async function evidenceReady(config) {
+  const response = await fetch(`${config.evidenceUrl}/readyz`, { signal: AbortSignal.timeout(config.evidenceTimeoutMs) })
+  if (!response.ok) throw new Error("evidence service unavailable")
 }
 
 function cacheInvalidationAuthorized(request, config) {
@@ -152,6 +256,13 @@ function configuredInvalidationToken(config) {
   const token = config.invalidationToken ?? (config.invalidationTokenFile ? fs.readFileSync(config.invalidationTokenFile, "utf8").trim() : undefined)
   if (token !== undefined && token.length < 32) throw new Error("gateway invalidation bearer token must contain at least 32 characters")
   if (config.production && token === undefined) throw new Error("production authorizer requires an invalidation bearer token")
+  return token
+}
+
+function configuredEvidenceToken(config) {
+  if (!config.evidenceUrl) return undefined
+  const token = config.evidenceToken ?? (config.evidenceTokenFile ? fs.readFileSync(config.evidenceTokenFile, "utf8").trim() : undefined)
+  if (typeof token !== "string" || token.length < 32) throw new Error("evidence bearer token must contain at least 32 characters")
   return token
 }
 

@@ -9,7 +9,7 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-docker compose -f "$COMPOSE_FILE" up -d --build --wait certgen valkey lookup transit-fixture application oati-authz envoy
+docker compose -f "$COMPOSE_FILE" up -d --build --wait certgen valkey lookup transit-fixture application evidence oati-authz envoy
 docker compose -f "$COMPOSE_FILE" run --rm --no-deps runner
 
 RECEIPTS=$(docker compose -f "$COMPOSE_FILE" exec -T valkey valkey-cli --raw XLEN oati:gateway:receipts)
@@ -21,4 +21,7 @@ if [ "$RECEIPTS" -lt 3 ] || [ "$REPLAY_KEYS" -lt 2 ] || [ "$USAGE_KEYS" -lt 1 ];
   exit 1
 fi
 
-printf '%s\n' "Envoy integration passed: receipts=$RECEIPTS replay_keys=$REPLAY_KEYS usage_keys=$USAGE_KEYS"
+docker compose -f "$COMPOSE_FILE" stop valkey >/dev/null
+docker compose -f "$COMPOSE_FILE" run --rm --no-deps runner valkey-outage
+
+printf '%s\n' "Envoy integration passed: receipts=$RECEIPTS replay_keys=$REPLAY_KEYS usage_keys=$USAGE_KEYS valkey_outage=503"

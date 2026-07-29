@@ -59,6 +59,8 @@ test("production requires an authenticated Valkey ACL identity", () => {
     OATI_GATEWAY_TLS_KEY_FILE: "/tls/server.key",
     OATI_GATEWAY_TLS_CLIENT_CA_FILE: "/tls/ca.crt",
     OATI_GATEWAY_INVALIDATION_TOKEN_FILE: "/run/secrets/invalidation-token",
+    OATI_GATEWAY_EVIDENCE_URL: "http://evidence-service:8083",
+    OATI_GATEWAY_EVIDENCE_TOKEN_FILE: "/run/secrets/evidence-token",
   }), /Valkey ACL username/)
 })
 
@@ -71,6 +73,8 @@ test("production rejects plaintext trust dependencies", () => {
     OATI_GATEWAY_TLS_KEY_FILE: "/tls/server.key",
     OATI_GATEWAY_TLS_CLIENT_CA_FILE: "/tls/ca.crt",
     OATI_GATEWAY_INVALIDATION_TOKEN_FILE: "/run/secrets/invalidation-token",
+    OATI_GATEWAY_EVIDENCE_URL: "http://evidence-service:8083",
+    OATI_GATEWAY_EVIDENCE_TOKEN_FILE: "/run/secrets/evidence-token",
   }
   assert.throws(() => configuration({ ...production, OATI_LOOKUP_RESOLVER_URLS: "http://lookup-api:8080/oati/v1" }), /lookup resolvers must use HTTPS/)
   assert.throws(() => configuration({ ...production, OATI_TRANSIT_ADDR: "http://openbao:8200" }), /Transit endpoint must use HTTPS/)
@@ -135,20 +139,32 @@ test("authorizer bounds bodies and reports dependency outages without invoking p
 
 test("HTTP authorizer verifies authority, returns a pending Receipt, and rejects replay", async (context) => {
   const pair = await crypto.webcrypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"])
+  const issuerPair = await crypto.webcrypto.subtle.generateKey({ name: "Ed25519" }, true, ["sign", "verify"])
   const publicKeyJwk = await crypto.webcrypto.subtle.exportKey("jwk", pair.publicKey)
+  const issuerPublicJwk = await crypto.webcrypto.subtle.exportKey("jwk", issuerPair.publicKey)
   const now = new Date()
   const created = new Date(now.getTime() - 10_000)
   const expires = new Date(now.getTime() + 300_000)
   let nonce = 0
-  const sign = (document) => signDocument(document, {
+  const sign = (document, privateKey, verificationMethod, audience) => signDocument(document, {
     algorithm: "EdDSA",
-    verificationMethod: "oati:key:test:gateway-1",
-    privateKey: pair.privateKey,
-    audience: valid.OATI_GATEWAY_EXPECTED_AUDIENCE,
+    verificationMethod,
+    privateKey,
+    audience,
     nonce: `gateway-test-nonce-${String(++nonce).padStart(8, "0")}`,
     created,
     expires,
   })
+  const passport = await sign({
+    oati_version: "1.0",
+    id: "oati:agent:test:buyer",
+    organisation_id: "oati:org:test",
+    issuer: "oati:org:test",
+    status: "active",
+    verification_methods: [{ id: "oati:key:test:gateway-1", type: "JsonWebKey2020", controller: "oati:agent:test:buyer", public_key_jwk: publicKeyJwk }],
+    issued_at: created.toISOString(),
+    expires_at: expires.toISOString(),
+  }, issuerPair.privateKey, "oati:key:test:issuer-1", "oati:production:passport")
   const mandate = await sign({
     oati_version: "1.0",
     id: "oati:mandate:test:gateway-1",
@@ -160,7 +176,7 @@ test("HTTP authorizer verifies authority, returns a pending Receipt, and rejects
     not_before: created.toISOString(),
     expires_at: expires.toISOString(),
     status: "active",
-  })
+  }, issuerPair.privateKey, "oati:key:test:issuer-1", "oati:production:mandate")
   const target = "https://api.customer.example/weather?city=Berlin"
   const requestDigest = await httpRequestDigest(new Request(target))
   const envelope = await sign({
@@ -176,8 +192,17 @@ test("HTTP authorizer verifies authority, returns a pending Receipt, and rejects
     request_digest: requestDigest,
     issued_at: now.toISOString(),
     nonce: "gateway-envelope-object-0001",
-  })
+  }, pair.privateKey, "oati:key:test:gateway-1", valid.OATI_GATEWAY_EXPECTED_AUDIENCE)
   const resolver = new StaticTrustResolver([{
+    id: "oati:key:test:issuer-1",
+    controller: "oati:org:test",
+    issuer: "oati:org:test",
+    algorithm: "EdDSA",
+    publicKeyJwk: issuerPublicJwk,
+    status: "active",
+    validFrom: created.toISOString(),
+    validUntil: expires.toISOString(),
+  }, {
     id: "oati:key:test:gateway-1",
     controller: "oati:agent:test:buyer",
     issuer: "oati:org:test",
@@ -187,10 +212,16 @@ test("HTTP authorizer verifies authority, returns a pending Receipt, and rejects
     validFrom: created.toISOString(),
     validUntil: expires.toISOString(),
   }], [])
+  const records = new Map([
+    [`mandate:${mandate.id}`, { type: "mandate", id: mandate.id, status: "active", issuer: "oati:org:test", issued_at: created.toISOString(), proof_status: "verified", public_attributes: { signed_document: JSON.stringify(mandate) } }],
+    [`passport:${passport.id}`, { type: "passport", id: passport.id, status: "active", issuer: "oati:org:test", issued_at: created.toISOString(), proof_status: "verified", public_attributes: { signed_document: JSON.stringify(passport) } }],
+    ["key:oati:key:test:gateway-1", { type: "key", id: "oati:key:test:gateway-1", status: "active", issuer: "oati:org:test", issued_at: created.toISOString(), expires_at: expires.toISOString(), proof_status: "verified", public_attributes: { controller: passport.id, algorithm: "EdDSA", public_key_jwk: JSON.stringify(publicKeyJwk) } }],
+  ])
   const config = {
     ...configuration(valid),
     trustAnchors: ["oati:org:test"],
     resolver,
+    lookup: { lookup: async (kind, id) => { const record = records.get(`${kind}:${id}`); if (!record) throw new Error("not found"); return record } },
     replayCache: new MemoryReplayCache(),
     usageStore: { load: async () => ({}), compareAndSet: async () => true },
     valkey: { command: async () => "1-0" },

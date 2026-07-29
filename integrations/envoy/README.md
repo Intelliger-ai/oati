@@ -6,7 +6,7 @@ The configuration sets `failure_mode_allow: false`, buffers at most 1 MiB with p
 
 `opa/oati.rego` is an optional defense-in-depth policy for deployments that route the normalized `toOpaInput()` document to OPA. It never grants access on malformed or absent OATI input and requires the deterministic OATI decision to be `allow`.
 
-The authorizer uses Valkey `SET NX PX` for replay and a Lua compare-and-set for Mandate usage, resolves issuer/key/revocation state through configured public resolver URLs, signs Receipts through Transit, verifies Transit’s response, and appends every generated Receipt to an AOF-backed Valkey handoff stream. Dependency errors deny or return 503; trust cache freshness is explicitly bounded by deployment configuration. Only an evidence consumer may trim the stream after a durable commit.
+The authorizer uses Valkey `SET NX PX` for replay and a Lua compare-and-set for Mandate usage, resolves issuer/key/revocation state through configured public resolver URLs, signs Receipts through Transit, verifies Transit’s response, appends every generated Receipt to an AOF-backed Valkey recovery stream, and commits it to the private evidence API before allowing the request. Dependency errors deny or return 503; trust cache freshness is explicitly bounded by deployment configuration. Only an evidence consumer may trim the stream after a durable commit.
 
 Validate customer configuration with the exact Envoy image before rollout:
 
@@ -22,7 +22,7 @@ Run the public end-to-end integration from the repository root:
 ./integrations/envoy/test/integration.sh
 ```
 
-The test builds the real authorizer image and starts Envoy 1.33, Valkey, a contract-compatible lookup resolver, an mTLS certificate generator, a protected upstream, and a test-only Transit protocol signer. It proves that:
+The test builds the real authorizer image and starts Envoy 1.33, Valkey, a contract-compatible lookup resolver, an mTLS certificate generator, a protected upstream, a bilateral evidence fixture, and a test-only Transit protocol signer. It proves that:
 
 - Envoy and the authorizer mutually authenticate and the published YAML is accepted by the pinned Envoy image;
 - lookup-resolved issuer/key trust permits a valid request;
@@ -30,7 +30,10 @@ The test builds the real authorizer image and starts Envoy 1.33, Valkey, a contr
 - the authorizer emits a Transit-signed Receipt that verifies through lookup;
 - Valkey rejects an exact replay and persists the Mandate usage transition;
 - a fresh request exceeding `max_calls` is denied; and
-- a lookup outage fails closed.
+- a new issuer key succeeds while a retired issuer key fails;
+- a revoked Mandate fails;
+- lookup and Valkey outages fail closed; and
+- both named organisations retrieve the immutable Receipt while an outsider cannot.
 
 The script removes all containers, networks, and generated TLS material on exit. The lookup, key, and Transit fixtures contain only the repository's public conformance test key and are never suitable for deployment.
 

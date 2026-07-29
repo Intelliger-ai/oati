@@ -224,7 +224,11 @@ async function issueReceipt(options: OatiMiddlewareOptions, context: OatiMiddlew
     issuer: options.receiptIssuer, policy_digest: options.policyDigest ?? "sha256:oati-reference-evaluator-v1",
     ...(context.envelope.request_digest ? { request_digest: context.envelope.request_digest } : {}),
     ...(context.envelope.commercial_profile ? { commercial_profile: context.envelope.commercial_profile } : {}),
-    extensions: { correlation_id: context.correlationId, reason_codes: context.evaluation.reason_codes },
+    extensions: {
+      correlation_id: context.correlationId,
+      reason_codes: context.evaluation.reason_codes,
+      ...(context.envelope.counterparty ? { counterparty_organisation_id: context.envelope.counterparty } : {}),
+    },
   }
   const receipt = await options.signReceipt(draft, context)
   assertSchema<ActionReceipt>("receipt", receipt)
