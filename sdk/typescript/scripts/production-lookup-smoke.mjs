@@ -3,6 +3,7 @@ import { resolve } from "node:path"
 import { connect as connectTls } from "node:tls"
 import { fileURLToPath, pathToFileURL } from "node:url"
 import {
+  canonicalJson,
   LookupTrustResolver,
   MemoryReplayCache,
   OATI_RECORD_TYPES,
@@ -57,6 +58,11 @@ export async function runProductionLookupSmoke({ manifest, fetcher = globalThis.
       require(validateSchema("publicRecord", value).valid, `public record schema failed: ${validateSchema("publicRecord", value).issues.map((item) => item.code).join(",")}`)
       privacyProjection(value)
       require(typeof value.public_attributes.signed_document === "string", "signed_document is missing")
+      if (expected.type === "service" || expected.type === "profile") {
+        require(typeof value.public_attributes.document === "string", "discovery document is missing")
+        require(canonicalJson(JSON.parse(value.public_attributes.signed_document)) === canonicalJson(JSON.parse(value.public_attributes.document)),
+          "discovery document differs from the signed document")
+      }
       records.set(expected.type, { expected, value, etag: response.headers.get("etag") })
       require(expected.statuses.includes(value.status), `status ${value.status} is outside ${expected.statuses.join(",")}`)
       if (expected.require_future_expiry) require(typeof value.expires_at === "string" && Date.parse(value.expires_at) > now.getTime(), `record expired at ${value.expires_at ?? "(missing)"}`)

@@ -26,7 +26,8 @@ function discoveryDocument(type, id) {
 }
 
 function record(type, id) {
-  const publicAttributes = { signed_document: JSON.stringify({ id, proof: {} }) }
+  const signedDocument = type === "service" || type === "profile" ? discoveryDocument(type, id) : { id, proof: {} }
+  const publicAttributes = { signed_document: JSON.stringify(signedDocument) }
   if (type === "key") Object.assign(publicAttributes, { controller: issuer, algorithm: "EdDSA", public_key_jwk: JSON.stringify({ kty: "OKP", crv: "Ed25519", x: "AA" }) })
   if (type === "revocation") Object.assign(publicAttributes, { target: issuer, revocation_status: "good" })
   if (type === "service" || type === "profile") publicAttributes.document = JSON.stringify(discoveryDocument(type, id))
@@ -96,4 +97,19 @@ test("hosted smoke records a missing request ID as a contract failure", async ()
   const report = await runProductionLookupSmoke({ manifest, fetcher: withoutRequestId, now, inspectTls: async () => ({ protocol: "TLSv1.3", valid_until: future }), verifySignedDocument: async () => ({ verified: true, issues: [] }) })
   assert.ok(report.summary.failed > 0)
   assert.match(report.checks.find((item) => item.name === "status.operational").error, /X-Request-ID/)
+})
+
+test("hosted smoke rejects unsigned discovery-document substitution", async () => {
+  const substituted = structuredClone(records.get("service\0oati:service:smoke:lookup"))
+  substituted.public_attributes.document = JSON.stringify({ ...discoveryDocument("service", substituted.id), display_name: "Substituted endpoint" })
+  const divergentRecords = new Map(records)
+  divergentRecords.set(`service\0${substituted.id}`, substituted)
+  const divergentFetcher = async (input, init = {}) => {
+    const url = new URL(input)
+    if (url.pathname.endsWith("/lookup") && url.searchParams.get("type") === "service") return json(divergentRecords.get(`service\0${url.searchParams.get("id")}`), 200, true)
+    if (url.pathname.endsWith("/discovery")) return json({ organisation_id: organisationId, services: [substituted], profiles: [records.get("profile\0oati:profile:smoke:commerce-v1")] })
+    return fetcher(input, init)
+  }
+  const report = await runProductionLookupSmoke({ manifest, fetcher: divergentFetcher, now, inspectTls: async () => ({ protocol: "TLSv1.3", valid_until: future }), verifySignedDocument: async () => ({ verified: true, issues: [] }) })
+  assert.match(report.checks.find((item) => item.name === "lookup.service").error, /differs from the signed document/)
 })
