@@ -19,7 +19,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@v6.0.9
         with: { version: 10.14.0 }
       - uses: actions/setup-node@v7
         with:
@@ -43,7 +43,7 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@v6.0.9
         with: { version: 10.14.0 }
       - uses: actions/setup-node@v7
         with:
@@ -118,7 +118,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@v6.0.9
         with: { version: 10.14.0 }
       - uses: actions/setup-node@v7
         with:
@@ -135,7 +135,7 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v7
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@v6.0.9
         with: { version: 10.14.0 }
       - uses: actions/setup-node@v7
         with: { node-version: 24 }
